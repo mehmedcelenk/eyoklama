@@ -330,8 +330,102 @@ async function refresh(){
   const data=await rpc("app_bootstrap",{p_token:token});app={...app,...data};attendanceCache={};
 }
 
+const TODAY_PERMISSIONS_KEY="eyoklama_v3_today_permissions";
+function getTodayPermissions(){
+  try{
+    const raw=JSON.parse(localStorage.getItem(TODAY_PERMISSIONS_KEY)||"{}");
+    return raw[todayKey()]||{};
+  }catch{return {}}
+}
+function saveTodayPermissions(permMap){
+  try{
+    const raw={[todayKey()]:permMap};
+    localStorage.setItem(TODAY_PERMISSIONS_KEY,JSON.stringify(raw));
+  }catch{}
+}
+
+let tempPrePermissions={};
+
+function openPrePermissionModal(){
+  tempPrePermissions={...getTodayPermissions()};
+  const modal=$("prePermissionModal");
+  if(modal)modal.classList.remove("hidden");
+  const input=$("prePermissionSearch");
+  if(input)input.value="";
+  renderPrePermissionList();
+}
+
+function closePrePermissionModal(){
+  const modal=$("prePermissionModal");
+  if(modal)modal.classList.add("hidden");
+}
+
+function renderPrePermissionList(){
+  const q=($("prePermissionSearch")?.value||"").trim().toLowerCase();
+  const allStudents=[];
+  app.lists.forEach(l=>{
+    l.students.forEach(s=>{
+      const name=fullName(s);
+      if(!q||name.toLowerCase().includes(q)||l.name.toLowerCase().includes(q)){
+        allStudents.push({...s,name,listName:l.name});
+      }
+    });
+  });
+
+  allStudents.sort((a,b)=>a.name.localeCompare(b.name,"tr"));
+
+  const listEl=$("prePermissionList");
+  if(!listEl)return;
+
+  if(!allStudents.length){
+    listEl.innerHTML=`<div class="muted tiny" style="text-align:center;padding:24px">Öğrenci bulunamadı.</div>`;
+    return;
+  }
+
+  listEl.innerHTML=allStudents.map(s=>{
+    const isChecked=!!tempPrePermissions[s.id];
+    return `<div class="student-select-item ${isChecked?"checked":""}" onclick="togglePrePermission('${s.id}')">
+      <div class="student-meta">
+        <strong>${escapeHtml(s.name)}</strong>
+        <span class="student-class">${escapeHtml(s.listName)}</span>
+      </div>
+      <span class="check-badge">${isChecked?"± İzinli":"Seç"}</span>
+    </div>`;
+  }).join("");
+}
+
+function filterPrePermissionList(){
+  renderPrePermissionList();
+}
+
+function togglePrePermission(studentId){
+  if(tempPrePermissions[studentId]){
+    delete tempPrePermissions[studentId];
+  }else{
+    tempPrePermissions[studentId]=true;
+  }
+  renderPrePermissionList();
+}
+
+function savePrePermissions(){
+  saveTodayPermissions(tempPrePermissions);
+  closePrePermissionModal();
+  renderLists();
+  toast("Günün izinlileri kaydedildi.");
+}
+
 function renderLists(){
-  $("listsPage").innerHTML=`<h1 class="page-title">YOKLAMALAR</h1><div class="grid">${app.lists.map(l=>`<article id="listCard-${l.id}" class="list-card">
+  const todayPerms=getTodayPermissions();
+  const permCount=Object.keys(todayPerms).length;
+  const permBadge=permCount>0?`<span class="badge-count">${permCount}</span>`:"";
+
+  $("listsPage").innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+    <h1 class="page-title" style="margin:0">YOKLAMALAR</h1>
+    <button type="button" class="btn secondary small" onclick="openPrePermissionModal()" title="Günün İzinlilerini Seç">
+      ± İzinli Ekle ${permBadge}
+    </button>
+  </div>
+  <div class="grid">${app.lists.map(l=>`<article id="listCard-${l.id}" class="list-card">
     <div><h3>${escapeHtml(l.name)}</h3><div class="muted tiny">${l.students.length} öğrenci · Bugün ${todayAttendanceCount(l.id)}</div></div>
     <div class="list-actions">
       <button class="icon-btn ghost list-action" onclick="downloadAllClassPdf('${l.id}')" aria-label="Yoklamaları yazdır / indir" title="Yazdır / PDF">
@@ -346,13 +440,29 @@ function renderLists(){
 async function startAttendance(listId){
   const list=app.lists.find(x=>x.id===listId); if(!list)return;
   try{
-    const lock=await rpc("begin_attendance",{p_token:token,p_list_id:listId});
-    if(!lock?.ok){toast(lock?.error||"Bu sınıfta yoklama zaten alınıyor.");return}
+    let lock=await rpc("begin_attendance",{p_token:token,p_list_id:listId});
+    if(!lock?.ok){
+      if(confirm(`${lock?.error||"Bu sınıfta yoklama zaten alınıyor."}\n\nEski kilidi kaldırıp yoklamaya devam etmek ister misiniz?`)){
+        try{ await rpc("release_attendance",{p_token:token,p_list_id:listId}); }catch{}
+        lock=await rpc("begin_attendance",{p_token:token,p_list_id:listId});
+      }
+      if(!lock?.ok){toast(lock?.error||"Bu sınıfta yoklama zaten alınıyor.");return}
+    }
   }catch(e){toast(e.message);return}
 
+  const todayPerms=getTodayPermissions();
   const sortedStudents=[...list.students].sort((a,b)=>fullName(a).localeCompare(fullName(b),"tr"));
-  const statuses={}; sortedStudents.forEach(s=>statuses[s.id]="absent");
-  active={mode:"new",listId:list.id,listName:list.name,students:sortedStudents,statuses};
+  const statuses={};
+  const preExcused={};
+  sortedStudents.forEach(s=>{
+    if(todayPerms[s.id]){
+      statuses[s.id]="excused";
+      preExcused[s.id]=true;
+    }else{
+      statuses[s.id]="absent";
+    }
+  });
+  active={mode:"new",listId:list.id,listName:list.name,students:sortedStudents,statuses,preExcused};
   startAttendanceHeartbeat(list.id);
   renderAttendance();
 }
@@ -404,16 +514,23 @@ function renderAttendance(){
 }
 function renderStudent(s){
   const st=active.statuses[s.id]||"absent";
+  const isLocked=!!active?.preExcused?.[s.id];
   const stateLabel=st==="present"?"+":st==="excused"?"±":"-";
-  return `<div class="student-card" onclick="handleStudentTap(event,'${s.id}')">
+  const lockedClass=isLocked?"locked":"";
+  const lockTag=isLocked?`<span style="font-size:0.68rem;color:#d97706;margin-left:4px" title="İdare İzni (Kilitli)">🔒</span>`:"";
+  return `<div class="student-card ${lockedClass}" onclick="handleStudentTap(event,'${s.id}')">
     <span class="student-bullet" aria-hidden="true">•</span>
-    <span class="student-name">${escapeHtml(fullName(s))}</span>
-    <span class="attendance-tag ${st}">${stateLabel}</span>
+    <span class="student-name">${escapeHtml(fullName(s))}${lockTag}</span>
+    <span class="attendance-tag ${st} ${lockedClass}">${stateLabel}</span>
   </div>`;
 }
 function handleStudentTap(ev,id){
   ev.preventDefault();
   ev.stopPropagation();
+  if(active?.preExcused?.[id]){
+    toast("Bu öğrenci idare tarafından önceden İzinli (±) olarak kilitlendi.");
+    return;
+  }
   const cur=active.statuses[id]||"absent";
   active.statuses[id]=cur==="absent"?"present":cur==="present"?"excused":"absent";
   renderAttendance();
@@ -1548,7 +1665,7 @@ async function changeAdminPassword(){
 }
 
 if(typeof window !== "undefined"){
-  Object.assign(window,{startAttendance,handleStudentTap,cancelAttendance,saveNewAttendance,renderHistory,toggleArchiveView,toggleHistoryGroup,cycleHistorySession,copyHistoryGroup,copySingleAttendance,copyHistoryAll,stageHistoryStatus,archiveHistoryAttendance,copyPin,regeneratePin,togglePinReveal,changeAdminPassword,addManualStudent,removeImportedStudent,setStudentMode,revealPassword,saveHistoryChanges,undoHistoryChange,confirmSavedUndo,downloadHistoryPdf,downloadSingleAttendancePdf,downloadBackup,toggleHistoryEdit,startRenameList,cancelClassRename,confirmRenameList,deleteList,downloadDayPdf,downloadAllClassPdf});
+  Object.assign(window,{startAttendance,handleStudentTap,cancelAttendance,saveNewAttendance,renderHistory,toggleArchiveView,toggleHistoryGroup,cycleHistorySession,copyHistoryGroup,copySingleAttendance,copyHistoryAll,stageHistoryStatus,archiveHistoryAttendance,copyPin,regeneratePin,togglePinReveal,changeAdminPassword,addManualStudent,removeImportedStudent,setStudentMode,revealPassword,saveHistoryChanges,undoHistoryChange,confirmSavedUndo,downloadHistoryPdf,downloadSingleAttendancePdf,downloadBackup,toggleHistoryEdit,startRenameList,cancelClassRename,confirmRenameList,deleteList,downloadDayPdf,downloadAllClassPdf,openPrePermissionModal,closePrePermissionModal,renderPrePermissionList,filterPrePermissionList,togglePrePermission,savePrePermissions});
 
   if("serviceWorker" in navigator){
     window.addEventListener("load",()=>{
