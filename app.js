@@ -407,11 +407,35 @@ function togglePrePermission(studentId){
   renderPrePermissionList();
 }
 
-function savePrePermissions(){
+async function savePrePermissions(){
   saveTodayPermissions(tempPrePermissions);
   closePrePermissionModal();
   renderLists();
   toast("Günün izinlileri kaydedildi.");
+
+  const d=todayKey();
+  const todayHistory=app.history.filter(h=>!h.archivedAt&&dayKey(h.takenAt)===d);
+  const permMap=tempPrePermissions;
+
+  if(todayHistory.length && Object.keys(permMap).length){
+    for(const h of todayHistory){
+      try{
+        const att=attendanceCache[h.id]||await rpc("get_attendance",{p_token:token,p_attendance_id:h.id});
+        const changes={};
+        att.entries.forEach(e=>{
+          const sId=e.studentId;
+          if(sId && permMap[sId] && e.status!=="excused"){
+            changes[sId]="excused";
+          }
+        });
+        if(Object.keys(changes).length){
+          await rpc("apply_attendance_changes",{p_token:token,p_attendance_id:h.id,p_changes:changes});
+          delete attendanceCache[h.id];
+        }
+      }catch{}
+    }
+    await refresh();
+  }
 }
 
 function renderLists(){
