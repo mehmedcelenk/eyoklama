@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#000000" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="icon-192.svg" />
+  <link rel="apple-touch-icon" href="icon-192.svg" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="eYoklama" />
+  <title>eYoklama V3</title>
+
+  <link rel="stylesheet" href="style.css" />
+
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/pdfmake@0.2.12/build/pdfmake.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/pdfmake@0.2.12/build/vfs_fonts.js"></script>
+  <script defer src="app.js"></script>
+</head>
+
+<body>
+<main class="app">
+  <section id="loginView" class="login-view">
+    <div class="login-head">
+      <div class="login-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      </div>
+      <div><h1>eYoklama</h1><p class="muted" style="margin-bottom:0">Yoklama. Gerektiği kadar.</p></div>
+    </div>
+    <div class="login-panel stack">
+      <div id="continueLogin" class="continue-teacher hidden">
+        <button id="continueTeacherBtn" class="btn">Hoca olarak devam et</button>
+        <button id="differentTeacherBtn" class="btn secondary">Farklı hoca / üst yönetici</button>
+        <div class="login-divider">veya</div>
+      </div>
+
+      <div id="credentialLogin" class="stack">
+        <label>Hoca adı<input id="loginName" type="text" autocomplete="name" maxlength="80" placeholder="Ahmet Hoca"></label>
+        <label>PIN / Parola
+          <div class="password-wrap">
+            <input id="loginPin" type="password" maxlength="64" autocomplete="current-password" placeholder="••••••">
+            <button type="button" class="password-eye" onclick="revealPassword('loginPin')" aria-label="Parolayı göster" title="1 saniye göster">
+              <svg viewBox="0 0 24 24"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="2.5"/></svg>
+            </button>
+          </div>
+        </label>
+        <button id="loginBtn" class="btn">Giriş yap</button>
+      </div>
+
+      <div id="loginMessage" class="notice hidden"></div>
+    </div>
+  </section>
+
+  <section id="appView" class="hidden">
+    <nav id="tabs" class="bottom-nav">
+      <button class="tab active" data-tab="lists" aria-label="Yoklamalar" title="Yoklamalar">
+        <svg viewBox="0 0 24 24"><path d="M9 5h6"/><path d="M9 11l2 2 4-4"/><path d="M9 17h6"/><path d="M6 3h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/></svg>
+        <span>Listeler</span>
+      </button>
+      <button class="tab plus-tab" data-tab="new" aria-label="Yoklama ekle" title="Yoklama ekle">
+        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        <span>Ekle</span>
+      </button>
+      <button class="tab" data-tab="history" aria-label="Alınanlar" title="Alınanlar">
+        <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/><path d="M12 7v5l3 2"/></svg>
+        <span>Alınanlar</span>
+      </button>
+      <button id="adminTabButton" class="tab hidden" data-tab="admin" aria-label="Yönetim" title="Yönetim">
+        <svg viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+        <span>Yönetim</span>
+      </button>
+      <button id="logoutBtn" class="nav-logout" aria-label="Çıkış" title="Çıkış">
+        <svg viewBox="0 0 24 24"><path d="M10 17l-5-5 5-5"/><path d="M5 12h12"/><path d="M14 3h5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-5"/></svg>
+        <span>Çıkış</span>
+      </button>
+    </nav>
+
+    <section id="listsPage" class="page"></section>
+    <section id="newPage" class="page hidden"></section>
+    <section id="historyPage" class="page hidden"></section>
+    <section id="adminPage" class="page hidden"></section>
+    <section id="attendancePage" class="hidden"></section>
+  </section>
+</main>
+
+<div id="toast" class="toast hidden"></div>
+</body>
+</html>
