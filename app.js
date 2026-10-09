@@ -107,7 +107,15 @@ function buildHistoryGroups(){
     .filter(h=>!h.archivedAt||showArchived)
     .forEach(h=>{
       const archived=!!h.archivedAt;
-      const rawKey=`${h.listId||h.listName}|${dayKey(h.takenAt)}|${archived?"a":"n"}`;
+      let dateGroupKey="";
+      if(historyGroupingMode==="week"){
+        dateGroupKey=getWeekDetails(h.takenAt).key;
+      }else if(historyGroupingMode==="month"){
+        dateGroupKey=getMonthDetails(h.takenAt).key;
+      }else{
+        dateGroupKey=dayKey(h.takenAt);
+      }
+      const rawKey=`${h.listId||cleanListName(h.listName)}|${dateGroupKey}|${archived?"a":"n"}`;
       if(!map.has(rawKey))map.set(rawKey,{rawKey,archived,items:[]});
       map.get(rawKey).items.push(h);
     });
@@ -459,7 +467,8 @@ function buildHistorySectionHtml(){
   const groups=buildHistoryGroups();
   historyGroupCache={};
   let lastGroupKey="";
-  const modeLabel=historyGroupingMode==="day"?"📅 Günlük":historyGroupingMode==="week"?"🗓️ Haftalık":"📆 Aylık";
+  const modeEmoji=historyGroupingMode==="day"?"☀️":historyGroupingMode==="week"?"📅":"🌙";
+  const modeTitle=historyGroupingMode==="day"?"Günlük Görünüm (Haftalık için tıklayın)":historyGroupingMode==="week"?"Haftalık Görünüm (Aylık için tıklayın)":"Aylık Görünüm (Günlük için tıklayın)";
 
   const cards=groups.map((g,i)=>{
     const key=`g${i}`;historyGroupCache[key]=g;
@@ -513,13 +522,13 @@ function buildHistorySectionHtml(){
     <div class="history-section stack" style="margin-top:24px;padding-top:20px;border-top:1px solid var(--line)">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px">
         <h2 class="section-title" style="margin:0;font-size:1.05rem;font-weight:800;letter-spacing:-0.01em;color:var(--text)">ALINANLAR (GEÇMİŞ)</h2>
-        <div style="display:flex;align-items:center;gap:6px">
-          <button type="button" class="btn secondary small" onclick="cycleHistoryGroupingMode()" title="Görünüm modunu değiştir">
-            ${modeLabel}
+        <div style="display:flex;align-items:center;gap:8px">
+          <button type="button" class="top-icon-btn" onclick="cycleHistoryGroupingMode()" title="${modeTitle}" style="font-size:1.15rem;width:34px;height:34px">
+            ${modeEmoji}
           </button>
-          <button type="button" class="btn ghost small" onclick="toggleArchiveView()" style="font-size:0.75rem;color:var(--muted);padding:4px 8px">
+          <span onclick="toggleArchiveView()" style="font-size:0.76rem;color:var(--muted);cursor:pointer;user-select:none">
             ${showArchived?"Arşivi gizle":"Arşivi göster"}
-          </button>
+          </span>
         </div>
       </div>
       <div class="history">${cards||`<div class="card" style="text-align:center;padding:32px 16px"><p class="muted" style="margin-bottom:12px">Henüz yoklama kaydı yok.</p></div>`}</div>
@@ -535,15 +544,10 @@ function renderLists(){
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
         <h2 class="section-title" style="margin:0;font-size:1.05rem;font-weight:800;letter-spacing:-0.01em;color:var(--text)">YOKLAMA PAKETLERİ</h2>
       </div>
-      <div class="grid">${app.lists.map(l=>`<article id="listCard-${l.id}" class="list-card">
-        <div><h3>${escapeHtml(l.name)}</h3><div class="muted tiny">${l.students.length} öğrenci · Bugün ${todayAttendanceCount(l.id)}</div></div>
-        <div class="list-actions">
-          <button class="icon-btn ghost list-action" onclick="downloadAllClassPdf('${l.id}')" aria-label="Yoklamaları yazdır / indir" title="Yazdır / PDF">
-            <svg viewBox="0 0 24 24"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="7"/></svg>
-          </button>
-          <button class="icon-btn list-action" onclick="startAttendance('${l.id}')" aria-label="Yoklama al" title="Yoklama al">
-            <svg viewBox="0 0 24 24"><path d="M9 5h6"/><path d="M9 11l2 2 4-4"/><path d="M9 17h6"/><path d="M6 3h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/></svg>
-          </button>
+      <div class="grid">${app.lists.map(l=>`<article id="listCard-${l.id}" class="list-card clickable" onclick="startAttendance('${l.id}')" title="Yoklama al">
+        <div>
+          <h3 style="margin-bottom:2px">${escapeHtml(l.name)}</h3>
+          <div class="muted tiny">${l.students.length} öğrenci · Bugün ${todayAttendanceCount(l.id)} yoklama</div>
         </div>
       </article>`).join("") || `<div class="card" style="text-align:center;padding:32px 16px"><p class="muted" style="margin-bottom:12px">Henüz sınıf eklenmemiş.</p><button class="btn small" onclick="switchTab('new')">Yeni Sınıf Ekle</button></div>`}</div>
     </div>

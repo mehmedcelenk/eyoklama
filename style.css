@@ -151,9 +151,9 @@
     .nav-logout{color:var(--red)}
     .page-title{font-size:1.65rem;letter-spacing:-.045em;margin:6px 0 14px;text-transform:uppercase}
     .grid{display:grid;grid-template-columns:1fr;gap:8px}
-    .list-card{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;border:1px solid var(--line);border-radius:10px;padding:12px 12px 12px 14px;background:#080808}
-    .list-actions{display:flex;gap:4px;align-items:center}
-    .list-action{align-self:center}
+    .list-card{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:#080808;transition:background .15s ease,border-color .15s ease}
+    .list-card.clickable{cursor:pointer}
+    .list-card.clickable:hover,.list-card.clickable:active{background:var(--surface2);border-color:var(--line2)}
     .notice{padding:10px 11px;border-radius:8px;background:#111;color:#d8d8d8;border:1px solid var(--line2);font-size:.87rem}
     .notice.error{background:#241010;color:#ffb4b1;border-color:#552222}.notice.success{background:#0d2114;color:#9ae6b0;border-color:#244d31}
     .pin{font-size:1.85rem;font-weight:900;letter-spacing:.14em}
