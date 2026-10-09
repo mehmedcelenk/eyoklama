@@ -783,7 +783,7 @@ async function downloadMasterRangePdf(items, titleLabel){
     return;
   }
 
-  // 1) Group classes cleanly by normalized list name (merges "MATEMATİK 1", "MATEMATİK1", "- MATEMATİK 1")
+  // 1) Group classes cleanly by normalized list name
   const classMap=new Map();
   sessions.forEach(sess=>{
     const cleanName=cleanListName(sess.h.listName);
@@ -795,7 +795,7 @@ async function downloadMasterRangePdf(items, titleLabel){
   });
   const classGroups=[...classMap.values()].sort((a,b)=>a.listName.localeCompare(b.listName,"tr"));
 
-  // 2) Deduplicate students across all lists & sessions (merges Mahmud/Mahmut, Mehmed/Mehmet, duplicates)
+  // 2) Deduplicate students across all lists & sessions
   const studentMap=new Map();
 
   app.lists.forEach(l=>{
@@ -843,30 +843,33 @@ async function downloadMasterRangePdf(items, titleLabel){
     return;
   }
 
-  // 3) Calculate exact layout math to fit ON EXACTLY 1 PAGE both horizontally & vertically
+  // 3) Calculate dimensions & single-page font scaling
   const totalCols=sessions.length;
   const isLandscape=totalCols>16;
-  const printableWidth=isLandscape?822:575; // Page width - 20pt margin
+  const printableWidth=isLandscape?822:575;
   const nameColWidth=isLandscape?140:125;
-  const colWidth=Math.max(16,Math.floor((printableWidth-nameColWidth)/totalCols));
+  const colWidth=Math.max(15,Math.min(22,Math.floor((printableWidth-nameColWidth)/totalCols)));
 
-  // Dynamic font sizing & vertical padding based on student count
+  // Dynamic font sizing & vertical padding based on student count N
   const N=allStudents.length;
-  let bodyFont=7.2;
-  let markFont=8.0;
-  let sessionFont=6.2;
-  let rowPad=0.8;
+  let bodyFont, markFont, sessionFont, rowPad;
 
-  if(N>50){
-    bodyFont=5.5; markFont=6.5; sessionFont=5.2; rowPad=0.1;
-  }else if(N>35){
-    bodyFont=6.2; markFont=7.2; sessionFont=5.8; rowPad=0.3;
-  }else if(N>25){
-    bodyFont=6.8; markFont=7.8; sessionFont=6.0; rowPad=0.5;
+  if(N<=20){
+    bodyFont=8.0; markFont=9.0; sessionFont=6.5; rowPad=1.5;
+  }else if(N<=30){
+    bodyFont=7.5; markFont=8.5; sessionFont=6.2; rowPad=1.0;
+  }else if(N<=40){
+    bodyFont=6.8; markFont=7.8; sessionFont=5.8; rowPad=0.5;
+  }else if(N<=55){
+    bodyFont=6.0; markFont=7.0; sessionFont=5.5; rowPad=0.2;
+  }else if(N<=70){
+    bodyFont=5.2; markFont=6.0; sessionFont=5.0; rowPad=0.0;
+  }else{
+    bodyFont=4.5; markFont=5.5; sessionFont=4.5; rowPad=0.0;
   }
 
-  // 4) Build table headers
-  const headerRow1=[{text:"İSİM SOYİSİM",rowSpan:2,bold:true,fontSize:bodyFont,margin:[0,6,0,0],color:"#0f172a"}];
+  // 4) Build minimal, clean table headers
+  const headerRow1=[{text:"İSİM SOYİSİM",rowSpan:2,bold:true,fontSize:bodyFont,margin:[0,6,0,0],color:"#1e293b",fillColor:"#f8fafc"}];
   const headerRow2=[{}];
 
   classGroups.forEach(cg=>{
@@ -876,8 +879,8 @@ async function downloadMasterRangePdf(items, titleLabel){
       bold:true,
       fontSize:bodyFont,
       alignment:"center",
-      fillColor:"#e0e7ff",
-      color:"#1e1b4b"
+      fillColor:"#f1f5f9",
+      color:"#0f172a"
     });
     for(let k=1;k<cg.items.length;k++)headerRow1.push({});
 
@@ -889,38 +892,34 @@ async function downloadMasterRangePdf(items, titleLabel){
         bold:true,
         fontSize:sessionFont,
         alignment:"center",
-        color:"#334155",
-        fillColor:"#f1f5f9"
+        color:"#475569",
+        fillColor:"#ffffff"
       });
     });
   });
 
-  // 5) Build student rows
+  // 5) Build student rows with REAL DATA ONLY (unrecorded attendance stays EMPTY)
   const rows=allStudents.map(s=>{
-    const rowCells=[{text:s.name,fontSize:bodyFont,bold:true,margin:[1,rowPad,0,rowPad],color:"#0f172a"}];
+    const rowCells=[{text:s.name,fontSize:bodyFont,bold:true,margin:[1,rowPad,0,rowPad],color:"#1e293b"}];
 
     classGroups.forEach(cg=>{
-      const isEnrolledInClass=s.listKeys.has(cg.groupKey)||cg.items.some(({r})=>r.entries.some(e=>{
-        const ek=normalizeStudentKey(e.firstName, e.lastName, e.studentId);
-        return ek===s.normKey || (e.studentId && s.ids.has(e.studentId));
-      }));
-
       cg.items.forEach(({r})=>{
-        if(!isEnrolledInClass){
-          rowCells.push({text:"·",color:"#cbd5e1",fontSize:markFont,alignment:"center",margin:[0,rowPad,0,rowPad]});
+        const entry=r.entries.find(e=>{
+          const ek=normalizeStudentKey(e.firstName, e.lastName, e.studentId);
+          return ek===s.normKey || (e.studentId && s.ids.has(e.studentId));
+        });
+
+        if(!entry){
+          // REAL DATA FIX: If student was NOT in this session's attendance -> EMPTY CELL!
+          rowCells.push({text:"",fontSize:markFont,alignment:"center",margin:[0,rowPad,0,rowPad]});
+        }else if(entry.status==="present"){
+          rowCells.push({text:"+",color:"#16a34a",bold:true,fontSize:markFont,alignment:"center",margin:[0,rowPad,0,rowPad]});
+        }else if(entry.status==="excused"){
+          rowCells.push({text:"±",color:"#d97706",bold:true,fontSize:markFont,alignment:"center",margin:[0,rowPad,0,rowPad]});
+        }else if(entry.status==="absent"){
+          rowCells.push({text:"-",color:"#dc2626",bold:true,fontSize:markFont,alignment:"center",margin:[0,rowPad,0,rowPad]});
         }else{
-          const entry=r.entries.find(e=>{
-            const ek=normalizeStudentKey(e.firstName, e.lastName, e.studentId);
-            return ek===s.normKey || (e.studentId && s.ids.has(e.studentId));
-          });
-          const st=entry?entry.status:"present";
-          if(st==="present"){
-            rowCells.push({text:"+",color:"#16a34a",bold:true,fontSize:markFont,alignment:"center",margin:[0,rowPad,0,rowPad]});
-          }else if(st==="excused"){
-            rowCells.push({text:"±",color:"#d97706",bold:true,fontSize:markFont,alignment:"center",margin:[0,rowPad,0,rowPad]});
-          }else{
-            rowCells.push({text:"-",color:"#dc2626",bold:true,fontSize:markFont,alignment:"center",margin:[0,rowPad,0,rowPad]});
-          }
+          rowCells.push({text:"",fontSize:markFont,alignment:"center",margin:[0,rowPad,0,rowPad]});
         }
       });
     });
@@ -955,13 +954,13 @@ async function downloadMasterRangePdf(items, titleLabel){
         layout:{
           hLineWidth:(i,node)=>i===0||i===2||i===node.table.body.length?0.5:0.15,
           vLineWidth:()=>0.15,
-          hLineColor:()=>"#cbd5e1",
-          vLineColor:()=>"#e2e8f0",
+          hLineColor:()=>"#e2e8f0",
+          vLineColor:()=>"#f1f5f9",
           paddingLeft:()=>1,
           paddingRight:()=>1,
           paddingTop:()=>0,
           paddingBottom:()=>0,
-          fillColor:(rowIndex)=>rowIndex<2?null:(rowIndex%2===0?"#f8fafc":null)
+          fillColor:(rowIndex)=>rowIndex<2?null:(rowIndex%2===0?"#fafafa":null)
         }
       }
     ]
