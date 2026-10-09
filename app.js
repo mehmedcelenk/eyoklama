@@ -726,6 +726,27 @@ async function downloadGroupRangePdf(groupKey){
   }
 }
 
+function cleanListName(name){
+  if(!name) return "Ders";
+  const cleaned = name.replace(/^[\s\-–—_]+/, "").trim();
+  return cleaned || "Ders";
+}
+
+function formatTitleCaseTR(str){
+  if(!str) return "";
+  return str
+    .trim()
+    .split(/\s+/)
+    .map(w => w ? w.charAt(0).toLocaleUpperCase("tr-TR") + w.slice(1).toLocaleLowerCase("tr-TR") : "")
+    .join(" ");
+}
+
+function normalizeStudentKey(firstName, lastName, studentId){
+  const fn = (firstName || "").trim().toLocaleUpperCase("tr-TR");
+  const ln = (lastName || "").trim().toLocaleUpperCase("tr-TR");
+  return `${fn} ${ln}`.replace(/\s+/g, " ");
+}
+
 async function downloadMasterRangePdf(items, titleLabel){
   if(typeof pdfMake==="undefined")throw new Error("PDF modülü yüklenemedi.");
 
@@ -742,35 +763,55 @@ async function downloadMasterRangePdf(items, titleLabel){
     return;
   }
 
+  // 1) Group classes cleanly by normalized list name
   const classMap=new Map();
   sessions.forEach(sess=>{
-    const k=sess.h.listId||sess.h.listName;
-    if(!classMap.has(k))classMap.set(k,{listId:sess.h.listId,listName:sess.h.listName,items:[]});
-    classMap.get(k).items.push(sess);
+    const cleanName=cleanListName(sess.h.listName);
+    const groupKey=cleanName.toLocaleUpperCase("tr-TR");
+    if(!classMap.has(groupKey)){
+      classMap.set(groupKey,{groupKey,listName:cleanName,items:[]});
+    }
+    classMap.get(groupKey).items.push(sess);
   });
   const classGroups=[...classMap.values()].sort((a,b)=>a.listName.localeCompare(b.listName,"tr"));
 
+  // 2) Deduplicate students across all lists & sessions
   const studentMap=new Map();
+
   app.lists.forEach(l=>{
-    if(classGroups.some(cg=>cg.listId===l.id||cg.listName===l.name)){
+    const cName=cleanListName(l.name).toLocaleUpperCase("tr-TR");
+    if(classGroups.some(cg=>cg.groupKey===cName)){
       l.students.forEach(s=>{
-        const k=s.id||`${s.firstName}|${s.lastName}`;
-        if(!studentMap.has(k)){
-          studentMap.set(k,{key:k,id:s.id,firstName:s.firstName,lastName:s.lastName,name:fullName(s),listIds:new Set([l.id])});
+        const normKey=normalizeStudentKey(s.firstName, s.lastName, s.id);
+        if(!studentMap.has(normKey)){
+          studentMap.set(normKey,{
+            normKey,
+            ids:new Set(s.id?[s.id]:[]),
+            name:formatTitleCaseTR(`${s.firstName||""} ${s.lastName||""}`),
+            listKeys:new Set([cName])
+          });
         }else{
-          studentMap.get(k).listIds.add(l.id);
+          if(s.id)studentMap.get(normKey).ids.add(s.id);
+          studentMap.get(normKey).listKeys.add(cName);
         }
       });
     }
   });
 
   sessions.forEach(({r,h})=>{
+    const cName=cleanListName(h.listName).toLocaleUpperCase("tr-TR");
     r.entries.forEach(e=>{
-      const k=e.studentId||`${e.firstName}|${e.lastName}`;
-      if(!studentMap.has(k)){
-        studentMap.set(k,{key:k,id:e.studentId,firstName:e.firstName,lastName:e.lastName,name:`${e.firstName} ${e.lastName}`.trim(),listIds:new Set([h.listId])});
-      }else if(h.listId){
-        studentMap.get(k).listIds.add(h.listId);
+      const normKey=normalizeStudentKey(e.firstName, e.lastName, e.studentId);
+      if(!studentMap.has(normKey)){
+        studentMap.set(normKey,{
+          normKey,
+          ids:new Set(e.studentId?[e.studentId]:[]),
+          name:formatTitleCaseTR(`${e.firstName||""} ${e.lastName||""}`),
+          listKeys:new Set([cName])
+        });
+      }else{
+        if(e.studentId)studentMap.get(normKey).ids.add(e.studentId);
+        studentMap.get(normKey).listKeys.add(cName);
       }
     });
   });
@@ -782,11 +823,22 @@ async function downloadMasterRangePdf(items, titleLabel){
     return;
   }
 
+  // 3) Dimensions & Layout calculation
+  const totalCols=sessions.length;
+  const isLandscape=totalCols>15;
+  const printableWidth=isLandscape?814:567;
+  const nameColWidth=isLandscape?180:160;
+  const remainingWidth=printableWidth-nameColWidth;
+  const colWidth=Math.max(18,Math.floor(remainingWidth/totalCols));
+
   const bodyFont=7.5;
   const dateFont=7.5;
-  const sessionFont=6;
+  const sessionFont=6.5;
+  const markFont=8.5;
+  const rowPad=1.5;
 
-  const headerRow1=[{text:"İSİM SOYİSİM",rowSpan:2,bold:true,fontSize:bodyFont,margin:[0,8,0,0]}];
+  // 4) Build table headers
+  const headerRow1=[{text:"İSİM SOYİSİM",rowSpan:2,bold:true,fontSize:bodyFont,margin:[0,8,0,0],color:"#0f172a"}];
   const headerRow2=[{}];
 
   classGroups.forEach(cg=>{
@@ -796,46 +848,50 @@ async function downloadMasterRangePdf(items, titleLabel){
       bold:true,
       fontSize:dateFont,
       alignment:"center",
-      fillColor:"#eef2ff"
+      fillColor:"#e0e7ff",
+      color:"#1e1b4b"
     });
     for(let k=1;k<cg.items.length;k++)headerRow1.push({});
 
     cg.items.forEach((sess,localIdx)=>{
       const dateStr=pdfCleanDate(sess.h.takenAt);
-      const sessionLabel=cg.items.length>1?`${dateStr} ${localIdx+1}/${cg.items.length}`:dateStr;
+      const sessionLabel=cg.items.length>1?`${dateStr}\n(${localIdx+1}/${cg.items.length})`:dateStr;
       headerRow2.push({
         text:sessionLabel,
         bold:true,
         fontSize:sessionFont,
         alignment:"center",
-        color:"#444"
+        color:"#334155",
+        fillColor:"#f1f5f9"
       });
     });
   });
 
-  const totalCols=sessions.length;
-  const colWidth=Math.max(8,Math.min(14,(800-140)/totalCols));
-  const markFont=Math.max(7,Math.min(9.5,colWidth*0.75));
-  const rowPad=0.5;
-
+  // 5) Build student rows
   const rows=allStudents.map(s=>{
-    const rowCells=[{text:s.name,fontSize:bodyFont,margin:[0,rowPad,0,rowPad]}];
+    const rowCells=[{text:s.name,fontSize:bodyFont,bold:true,margin:[2,rowPad,0,rowPad],color:"#0f172a"}];
 
     classGroups.forEach(cg=>{
-      const isEnrolled=(cg.listId&&s.listIds.has(cg.listId))||cg.items.some(({r})=>r.entries.some(e=>(e.studentId&&e.studentId===s.id)||(e.firstName===s.firstName&&e.lastName===s.lastName)));
+      const isEnrolledInClass=s.listKeys.has(cg.groupKey)||cg.items.some(({r})=>r.entries.some(e=>{
+        const ek=normalizeStudentKey(e.firstName, e.lastName, e.studentId);
+        return ek===s.normKey || (e.studentId && s.ids.has(e.studentId));
+      }));
 
       cg.items.forEach(({r})=>{
-        if(!isEnrolled){
-          rowCells.push({text:"",fontSize:markFont,alignment:"center",margin:[0,rowPad,0,rowPad]});
+        if(!isEnrolledInClass){
+          rowCells.push({text:"·",color:"#cbd5e1",fontSize:markFont,alignment:"center",margin:[0,rowPad,0,rowPad]});
         }else{
-          const entry=r.entries.find(e=>(e.studentId&&e.studentId===s.id)||(e.firstName===s.firstName&&e.lastName===s.lastName));
+          const entry=r.entries.find(e=>{
+            const ek=normalizeStudentKey(e.firstName, e.lastName, e.studentId);
+            return ek===s.normKey || (e.studentId && s.ids.has(e.studentId));
+          });
           const st=entry?entry.status:"present";
           if(st==="present"){
-            rowCells.push({text:"+",color:"#247a43",bold:true,fontSize:markFont,alignment:"center",margin:[0,rowPad,0,rowPad]});
+            rowCells.push({text:"+",color:"#16a34a",bold:true,fontSize:markFont,alignment:"center",margin:[0,rowPad,0,rowPad]});
           }else if(st==="excused"){
             rowCells.push({text:"±",color:"#d97706",bold:true,fontSize:markFont,alignment:"center",margin:[0,rowPad,0,rowPad]});
           }else{
-            rowCells.push({text:"-",color:"#d32f2f",bold:true,fontSize:markFont,alignment:"center",margin:[0,rowPad,0,rowPad]});
+            rowCells.push({text:"-",color:"#dc2626",bold:true,fontSize:markFont,alignment:"center",margin:[0,rowPad,0,rowPad]});
           }
         }
       });
@@ -844,42 +900,40 @@ async function downloadMasterRangePdf(items, titleLabel){
     return rowCells;
   });
 
-  const isLandscape=totalCols>8;
-
   const doc={
     pageSize:"A4",
     pageOrientation:isLandscape?"landscape":"portrait",
-    pageMargins:[16,14,16,16],
-    defaultStyle:{font:"Roboto",fontSize:bodyFont,color:"#202020"},
+    pageMargins:[14,12,14,12],
+    defaultStyle:{font:"Roboto",fontSize:bodyFont,color:"#1e293b"},
     content:[
       {
         columns:[
           {
             stack:[
-              {text:titleLabel,fontSize:12,bold:true},
-              {text:`${classGroups.length} sınıf · ${totalCols} ders kaydı · + Var  - Yok  ± İzinli`,fontSize:6.5,color:"#666666",margin:[0,2,0,0]}
+              {text:titleLabel,fontSize:13,bold:true,color:"#0f172a"},
+              {text:`${classGroups.length} ders grubu · ${totalCols} ders kaydı · ${allStudents.length} öğrenci · + Var  - Yok  ± İzinli`,fontSize:7,color:"#64748b",margin:[0,2,0,0]}
             ]
           }
         ],
-        margin:[0,0,0,6]
+        margin:[0,0,0,8]
       },
       {
         table:{
           headerRows:2,
-          widths:["auto",...sessions.map(()=>colWidth)],
+          widths:[nameColWidth,...sessions.map(()=>colWidth)],
           body:[headerRow1,headerRow2,...rows],
           dontBreakRows:true
         },
         layout:{
-          hLineWidth:(i,node)=>i===0||i===2||i===node.table.body.length?0.55:0.18,
-          vLineWidth:()=>0.15,
-          hLineColor:()=>"#d8d8d8",
-          vLineColor:()=>"#e5e5e5",
-          paddingLeft:(i)=>i===0?4:1,
-          paddingRight:(i)=>i===0?6:1,
-          paddingTop:()=>0,
-          paddingBottom:()=>0,
-          fillColor:(rowIndex)=>rowIndex<2?"#f4f4f4":(rowIndex%2===0?"#fafafa":null)
+          hLineWidth:(i,node)=>i===0||i===2||i===node.table.body.length?0.6:0.2,
+          vLineWidth:()=>0.2,
+          hLineColor:()=>"#cbd5e1",
+          vLineColor:()=>"#e2e8f0",
+          paddingLeft:()=>2,
+          paddingRight:()=>2,
+          paddingTop:()=>1,
+          paddingBottom:()=>1,
+          fillColor:(rowIndex)=>rowIndex<2?null:(rowIndex%2===0?"#f8fafc":null)
         }
       }
     ]
