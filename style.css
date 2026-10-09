@@ -98,15 +98,14 @@
     .attendance-shell{min-height:100vh;padding-top:60px}
     .attendance-top{
       position:fixed;top:0;left:50%;transform:translateX(-50%);width:min(720px,100%);z-index:70;
-      display:grid;grid-template-columns:40px minmax(0,1fr) auto;
-      align-items:center;gap:9px;padding:10px 12px;
+      display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;min-height:50px;
       background:rgba(0,0,0,.96);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)
     }
-    .attendance-title{min-width:0}
+    .attendance-title{flex:1;min-width:0}
     .attendance-title strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.92rem}
-    .top-counts{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+    .top-counts{display:flex;align-items:center;gap:4px;flex-shrink:0}
     .top-count{
-      min-width:34px;padding:2px 4px;text-align:center;line-height:1
+      min-width:34px;padding:2px 5px;text-align:center;line-height:1
     }
     .top-count b{display:block;font-size:.95rem;font-weight:900}
     .top-count span{display:block;font-size:.6rem;color:var(--muted);margin-top:1px;font-weight:600}

@@ -57,6 +57,46 @@ function formatHistoryDay(day){
     timeZone:"Europe/Istanbul",weekday:"long",day:"numeric",month:"long",year:"numeric"
   }).format(new Date(Date.UTC(y,m-1,d,9,0,0)));
 }
+function getWeekDetails(iso){
+  const dt=new Date(iso);
+  const dayOfWeek=(dt.getDay()+6)%7;
+  const mon=new Date(dt);mon.setDate(dt.getDate()-dayOfWeek);
+  const sun=new Date(mon);sun.setDate(mon.getDate()+6);
+  const startDayStr=dayKey(mon.toISOString());
+  const fStart=new Intl.DateTimeFormat("tr-TR",{day:"numeric",month:"short"}).format(mon);
+  const fEnd=new Intl.DateTimeFormat("tr-TR",{day:"numeric",month:"short",year:"numeric"}).format(sun);
+
+  const target=new Date(dt.valueOf());
+  const dayNr=(dt.getDay()+6)%7;
+  target.setDate(target.getDate()-dayNr+3);
+  const firstThursday=target.valueOf();
+  target.setMonth(0,1);
+  if(target.getDay()!==4){
+    target.setMonth(0,1+((4-target.getDay()+7)%7));
+  }
+  const weekNum=1+Math.round((firstThursday-target.valueOf())/604800000);
+
+  return {
+    key:`week-${startDayStr}`,
+    label:`${fStart} – ${fEnd} (${weekNum}. Hafta)`
+  };
+}
+function getMonthDetails(iso){
+  const dt=new Date(iso);
+  const y=dt.getFullYear();
+  const m=dt.getMonth()+1;
+  const monthStr=`${y}-${String(m).padStart(2,"0")}`;
+  const label=new Intl.DateTimeFormat("tr-TR",{month:"long",year:"numeric"}).format(dt);
+  return {
+    key:`month-${monthStr}`,
+    label
+  };
+}
+let historyGroupingMode="day";
+function cycleHistoryGroupingMode(){
+  historyGroupingMode=historyGroupingMode==="day"?"week":historyGroupingMode==="week"?"month":"day";
+  renderHistory();
+}
 function todayAttendanceCount(listId){
   const d=todayKey();
   return app.history.filter(h=>!h.archivedAt&&h.listId===listId&&dayKey(h.takenAt)===d).length;
@@ -490,7 +530,7 @@ function renderAttendance(){
   const saveAction=isPermMode?"savePrePermissions()":"saveNewAttendance()";
   root.innerHTML=`<div class="attendance-shell">
     <div class="attendance-top">
-      <button class="icon-btn ghost" onclick="cancelAttendance()" aria-label="Geri" title="Geri">
+      <button class="icon-btn ghost" onclick="cancelAttendance()" aria-label="Geri">
         <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
       </button>
       <div class="attendance-title">
@@ -592,18 +632,41 @@ async function saveNewAttendance(){
 function renderHistory(){
   const groups=buildHistoryGroups();
   historyGroupCache={};
-  let lastDay="";
+  let lastGroupKey="";
+  const modeLabel=historyGroupingMode==="day"?"📅 Günlük":historyGroupingMode==="week"?"🗓️ Haftalık":"📆 Aylık";
+
   const cards=groups.map((g,i)=>{
     const key=`g${i}`;historyGroupCache[key]=g;
     const sel=selectedHistoryItem(key), h=sel.item;
-    const day=dayKey(h.takenAt);
-    const divider=day!==lastDay?`<div class="history-day">
-      <div class="history-day-line"><span class="history-day-label">${escapeHtml(formatHistoryDay(day))}</span></div>
-      <button type="button" class="history-day-download" onclick="downloadDayPdf('${day}')" aria-label="${escapeHtml(formatHistoryDay(day))} PDF indir" title="Günün PDF'ini indir">
+
+    let currentGroupKey="";
+    let currentGroupLabel="";
+    let downloadOnClick="";
+
+    if(historyGroupingMode==="day"){
+      const day=dayKey(h.takenAt);
+      currentGroupKey=day;
+      currentGroupLabel=formatHistoryDay(day);
+      downloadOnClick=`downloadDayPdf('${day}')`;
+    }else if(historyGroupingMode==="week"){
+      const w=getWeekDetails(h.takenAt);
+      currentGroupKey=w.key;
+      currentGroupLabel=w.label;
+      downloadOnClick=`downloadGroupRangePdf('${w.key}')`;
+    }else{
+      const m=getMonthDetails(h.takenAt);
+      currentGroupKey=m.key;
+      currentGroupLabel=m.label;
+      downloadOnClick=`downloadGroupRangePdf('${m.key}')`;
+    }
+
+    const divider=currentGroupKey!==lastGroupKey?`<div class="history-day">
+      <div class="history-day-line"><span class="history-day-label">${escapeHtml(currentGroupLabel)}</span></div>
+      <button type="button" class="history-day-download" onclick="${downloadOnClick}" aria-label="${escapeHtml(currentGroupLabel)} PDF indir" title="PDF indir">
         <svg viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
       </button>
     </div>`:"";
-    lastDay=day;
+    lastGroupKey=currentGroupKey;
 
     return `${divider}<details id="historyCard-${key}" class="history-item" ontoggle="toggleHistoryGroup(this,'${key}')">
       <summary>
@@ -620,9 +683,209 @@ function renderHistory(){
     </details>`;
   }).join("");
 
-  $("historyPage").innerHTML=`<h1 class="page-title">ALINANLAR</h1>
-    <div class="history-controls"><button class="archive-toggle" onclick="toggleArchiveView()">${showArchived?"Arşivi gizle":"Arşivi göster"}</button></div>
-    <div class="history">${cards||`<div class="card" style="text-align:center;padding:32px 16px"><p class="muted" style="margin-bottom:12px">Henüz yoklama kaydı yok.</p><button class="btn small" onclick="switchTab('lists')">Yoklamalara Git</button></div>`}</div>`;
+  $("historyPage").innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+    <h1 class="page-title" style="margin:0">ALINANLAR</h1>
+    <button type="button" class="btn secondary small" onclick="cycleHistoryGroupingMode()" title="Görünüm modunu değiştir">
+      ${modeLabel}
+    </button>
+  </div>
+  <div class="history-controls"><button class="archive-toggle" onclick="toggleArchiveView()">${showArchived?"Arşivi gizle":"Arşivi göster"}</button></div>
+  <div class="history">${cards||`<div class="card" style="text-align:center;padding:32px 16px"><p class="muted" style="margin-bottom:12px">Henüz yoklama kaydı yok.</p><button class="btn small" onclick="switchTab('lists')">Yoklamalara Git</button></div>`}</div>`;
+}
+
+async function downloadGroupRangePdf(groupKey){
+  try{
+    const matchingHistory=app.history.filter(h=>{
+      if(h.archivedAt&&!showArchived)return false;
+      if(historyGroupingMode==="week"){
+        return getWeekDetails(h.takenAt).key===groupKey;
+      }
+      if(historyGroupingMode==="month"){
+        return getMonthDetails(h.takenAt).key===groupKey;
+      }
+      return dayKey(h.takenAt)===groupKey;
+    });
+
+    if(!matchingHistory.length){
+      toast("PDF indirmek için aktif yoklama bulunamadı.");
+      return;
+    }
+
+    let titleLabel="";
+    if(historyGroupingMode==="week"){
+      titleLabel=getWeekDetails(matchingHistory[0].takenAt).label;
+    }else if(historyGroupingMode==="month"){
+      titleLabel=getMonthDetails(matchingHistory[0].takenAt).label;
+    }else{
+      titleLabel=formatHistoryDay(dayKey(matchingHistory[0].takenAt));
+    }
+
+    await downloadMasterRangePdf(matchingHistory, titleLabel);
+  }catch(e){
+    toast(e.message||"PDF oluşturulamadı.");
+  }
+}
+
+async function downloadMasterRangePdf(items, titleLabel){
+  if(typeof pdfMake==="undefined")throw new Error("PDF modülü yüklenemedi.");
+
+  const sortedItems=[...items].sort((a,b)=>new Date(a.takenAt)-new Date(b.takenAt));
+  const sessions=[];
+  for(const h of sortedItems){
+    const r=attendanceCache[h.id]||await rpc("get_attendance",{p_token:token,p_attendance_id:h.id});
+    attendanceCache[h.id]=r;
+    sessions.push({h,r});
+  }
+
+  if(!sessions.length){
+    toast("Yoklama verisi bulunamadı.");
+    return;
+  }
+
+  const classMap=new Map();
+  sessions.forEach(sess=>{
+    const k=sess.h.listId||sess.h.listName;
+    if(!classMap.has(k))classMap.set(k,{listId:sess.h.listId,listName:sess.h.listName,items:[]});
+    classMap.get(k).items.push(sess);
+  });
+  const classGroups=[...classMap.values()].sort((a,b)=>a.listName.localeCompare(b.listName,"tr"));
+
+  const studentMap=new Map();
+  app.lists.forEach(l=>{
+    if(classGroups.some(cg=>cg.listId===l.id||cg.listName===l.name)){
+      l.students.forEach(s=>{
+        const k=s.id||`${s.firstName}|${s.lastName}`;
+        if(!studentMap.has(k)){
+          studentMap.set(k,{key:k,id:s.id,firstName:s.firstName,lastName:s.lastName,name:fullName(s),listIds:new Set([l.id])});
+        }else{
+          studentMap.get(k).listIds.add(l.id);
+        }
+      });
+    }
+  });
+
+  sessions.forEach(({r,h})=>{
+    r.entries.forEach(e=>{
+      const k=e.studentId||`${e.firstName}|${e.lastName}`;
+      if(!studentMap.has(k)){
+        studentMap.set(k,{key:k,id:e.studentId,firstName:e.firstName,lastName:e.lastName,name:`${e.firstName} ${e.lastName}`.trim(),listIds:new Set([h.listId])});
+      }else if(h.listId){
+        studentMap.get(k).listIds.add(h.listId);
+      }
+    });
+  });
+
+  const allStudents=[...studentMap.values()].sort((a,b)=>a.name.localeCompare(b.name,"tr"));
+
+  if(!allStudents.length){
+    toast("Öğrenci bulunamadı.");
+    return;
+  }
+
+  const bodyFont=7.5;
+  const dateFont=7.5;
+  const sessionFont=6;
+
+  const headerRow1=[{text:"İSİM SOYİSİM",rowSpan:2,bold:true,fontSize:bodyFont,margin:[0,8,0,0]}];
+  const headerRow2=[{}];
+
+  classGroups.forEach(cg=>{
+    headerRow1.push({
+      text:cg.listName,
+      colSpan:cg.items.length,
+      bold:true,
+      fontSize:dateFont,
+      alignment:"center",
+      fillColor:"#eef2ff"
+    });
+    for(let k=1;k<cg.items.length;k++)headerRow1.push({});
+
+    cg.items.forEach((sess,localIdx)=>{
+      const dateStr=pdfCleanDate(sess.h.takenAt);
+      const sessionLabel=cg.items.length>1?`${dateStr} ${localIdx+1}/${cg.items.length}`:dateStr;
+      headerRow2.push({
+        text:sessionLabel,
+        bold:true,
+        fontSize:sessionFont,
+        alignment:"center",
+        color:"#444"
+      });
+    });
+  });
+
+  const totalCols=sessions.length;
+  const colWidth=Math.max(8,Math.min(14,(800-140)/totalCols));
+  const markFont=Math.max(7,Math.min(9.5,colWidth*0.75));
+  const rowPad=0.5;
+
+  const rows=allStudents.map(s=>{
+    const rowCells=[{text:s.name,fontSize:bodyFont,margin:[0,rowPad,0,rowPad]}];
+
+    classGroups.forEach(cg=>{
+      const isEnrolled=(cg.listId&&s.listIds.has(cg.listId))||cg.items.some(({r})=>r.entries.some(e=>(e.studentId&&e.studentId===s.id)||(e.firstName===s.firstName&&e.lastName===s.lastName)));
+
+      cg.items.forEach(({r})=>{
+        if(!isEnrolled){
+          rowCells.push({text:"",fontSize:markFont,alignment:"center",margin:[0,rowPad,0,rowPad]});
+        }else{
+          const entry=r.entries.find(e=>(e.studentId&&e.studentId===s.id)||(e.firstName===s.firstName&&e.lastName===s.lastName));
+          const st=entry?entry.status:"present";
+          if(st==="present"){
+            rowCells.push({text:"+",color:"#247a43",bold:true,fontSize:markFont,alignment:"center",margin:[0,rowPad,0,rowPad]});
+          }else if(st==="excused"){
+            rowCells.push({text:"±",color:"#d97706",bold:true,fontSize:markFont,alignment:"center",margin:[0,rowPad,0,rowPad]});
+          }else{
+            rowCells.push({text:"-",color:"#d32f2f",bold:true,fontSize:markFont,alignment:"center",margin:[0,rowPad,0,rowPad]});
+          }
+        }
+      });
+    });
+
+    return rowCells;
+  });
+
+  const isLandscape=totalCols>8;
+
+  const doc={
+    pageSize:"A4",
+    pageOrientation:isLandscape?"landscape":"portrait",
+    pageMargins:[16,14,16,16],
+    defaultStyle:{font:"Roboto",fontSize:bodyFont,color:"#202020"},
+    content:[
+      {
+        columns:[
+          {
+            stack:[
+              {text:titleLabel,fontSize:12,bold:true},
+              {text:`${classGroups.length} sınıf · ${totalCols} ders kaydı · + Var  - Yok  ± İzinli`,fontSize:6.5,color:"#666666",margin:[0,2,0,0]}
+            ]
+          }
+        ],
+        margin:[0,0,0,6]
+      },
+      {
+        table:{
+          headerRows:2,
+          widths:["auto",...sessions.map(()=>colWidth)],
+          body:[headerRow1,headerRow2,...rows],
+          dontBreakRows:true
+        },
+        layout:{
+          hLineWidth:(i,node)=>i===0||i===2||i===node.table.body.length?0.55:0.18,
+          vLineWidth:()=>0.15,
+          hLineColor:()=>"#d8d8d8",
+          vLineColor:()=>"#e5e5e5",
+          paddingLeft:(i)=>i===0?4:1,
+          paddingRight:(i)=>i===0?6:1,
+          paddingTop:()=>0,
+          paddingBottom:()=>0,
+          fillColor:(rowIndex)=>rowIndex<2?"#f4f4f4":(rowIndex%2===0?"#fafafa":null)
+        }
+      }
+    ]
+  };
+
+  pdfMake.createPdf(doc).download(`yoklama-cizelgesi-${safeFileName(titleLabel)}.pdf`);
 }
 function toggleArchiveView(){
   showArchived=!showArchived;
