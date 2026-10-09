@@ -344,78 +344,48 @@ function saveTodayPermissions(permMap){
   }catch{}
 }
 
-let tempPrePermissions={};
-
-function openPrePermissionModal(){
-  tempPrePermissions={...getTodayPermissions()};
-  const modal=$("prePermissionModal");
-  if(modal)modal.classList.remove("hidden");
-  const input=$("prePermissionSearch");
-  if(input)input.value="";
-  renderPrePermissionList();
-}
-
-function closePrePermissionModal(){
-  const modal=$("prePermissionModal");
-  if(modal)modal.classList.add("hidden");
-}
-
-function renderPrePermissionList(){
-  const q=($("prePermissionSearch")?.value||"").trim().toLowerCase();
+function startPrePermissionView(){
+  const todayPerms=getTodayPermissions();
   const allStudents=[];
   app.lists.forEach(l=>{
     l.students.forEach(s=>{
-      const name=fullName(s);
-      if(!q||name.toLowerCase().includes(q)||l.name.toLowerCase().includes(q)){
-        allStudents.push({...s,name,listName:l.name});
-      }
+      allStudents.push({...s,listName:l.name});
     });
   });
+  allStudents.sort((a,b)=>fullName(a).localeCompare(fullName(b),"tr"));
 
-  allStudents.sort((a,b)=>a.name.localeCompare(b.name,"tr"));
+  const statuses={};
+  allStudents.forEach(s=>{
+    statuses[s.id]=todayPerms[s.id]?"excused":"absent";
+  });
 
-  const listEl=$("prePermissionList");
-  if(!listEl)return;
-
-  if(!allStudents.length){
-    listEl.innerHTML=`<div class="muted tiny" style="text-align:center;padding:24px">Öğrenci bulunamadı.</div>`;
-    return;
-  }
-
-  listEl.innerHTML=allStudents.map(s=>{
-    const isChecked=!!tempPrePermissions[s.id];
-    return `<div class="student-select-item ${isChecked?"checked":""}" onclick="togglePrePermission('${s.id}')">
-      <div class="student-meta">
-        <strong>${escapeHtml(s.name)}</strong>
-        <span class="student-class">${escapeHtml(s.listName)}</span>
-      </div>
-      <span class="check-badge">${isChecked?"± İzinli":"Seç"}</span>
-    </div>`;
-  }).join("");
-}
-
-function filterPrePermissionList(){
-  renderPrePermissionList();
-}
-
-function togglePrePermission(studentId){
-  if(tempPrePermissions[studentId]){
-    delete tempPrePermissions[studentId];
-  }else{
-    tempPrePermissions[studentId]=true;
-  }
-  renderPrePermissionList();
+  active={
+    mode:"permission",
+    listId:null,
+    listName:"Günün İzinlilerini Seç (±)",
+    students:allStudents,
+    statuses
+  };
+  renderAttendance();
 }
 
 async function savePrePermissions(){
-  saveTodayPermissions(tempPrePermissions);
-  closePrePermissionModal();
-  renderLists();
+  const permMap={};
+  if(active?.statuses){
+    Object.keys(active.statuses).forEach(id=>{
+      if(active.statuses[id]==="excused"){
+        permMap[id]=true;
+      }
+    });
+  }
+  saveTodayPermissions(permMap);
+  active=null;
+  sessionStorage.removeItem("eyoklama_active");
+  switchTab("lists");
   toast("Günün izinlileri kaydedildi.");
 
   const d=todayKey();
   const todayHistory=app.history.filter(h=>!h.archivedAt&&dayKey(h.takenAt)===d);
-  const permMap=tempPrePermissions;
 
   if(todayHistory.length && Object.keys(permMap).length){
     for(const h of todayHistory){
@@ -445,7 +415,7 @@ function renderLists(){
 
   $("listsPage").innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
     <h1 class="page-title" style="margin:0">YOKLAMALAR</h1>
-    <button type="button" class="btn secondary small" onclick="openPrePermissionModal()" title="Günün İzinlilerini Seç">
+    <button type="button" class="btn secondary small" onclick="startPrePermissionView()" title="Günün İzinlilerini Seç">
       ± İzinli Ekle ${permBadge}
     </button>
   </div>
@@ -516,6 +486,8 @@ function renderAttendance(){
   $("tabs").classList.add("hidden");
   document.querySelectorAll(".page").forEach(x=>x.classList.add("hidden"));
   const root=$("attendancePage");root.classList.remove("hidden");
+  const isPermMode=active.mode==="permission";
+  const saveAction=isPermMode?"savePrePermissions()":"saveNewAttendance()";
   root.innerHTML=`<div class="attendance-shell">
     <div class="attendance-top">
       <button class="icon-btn ghost" onclick="cancelAttendance()" aria-label="Geri" title="Geri">
@@ -529,7 +501,7 @@ function renderAttendance(){
 
     <div class="student-list">${active.students.map(renderStudent).join("")}</div>
 
-    <button class="save-fab" onclick="saveNewAttendance()"
+    <button class="save-fab" onclick="${saveAction}"
       aria-label="Kaydet" title="Kaydet">
       <svg viewBox="0 0 24 24"><path d="M5 12l4 4L19 6"/></svg>
     </button>
@@ -542,9 +514,10 @@ function renderStudent(s){
   const stateLabel=st==="present"?"+":st==="excused"?"±":"-";
   const lockedClass=isLocked?"locked":"";
   const lockTag=isLocked?`<span style="font-size:0.68rem;color:#d97706;margin-left:4px" title="İdare İzni (Kilitli)">🔒</span>`:"";
+  const listTag=s.listName?`<span class="muted tiny" style="margin-left:6px;font-weight:normal">(${escapeHtml(s.listName)})</span>`:"";
   return `<div class="student-card ${lockedClass}" onclick="handleStudentTap(event,'${s.id}')">
     <span class="student-bullet" aria-hidden="true">•</span>
-    <span class="student-name">${escapeHtml(fullName(s))}${lockTag}</span>
+    <span class="student-name">${escapeHtml(fullName(s))}${listTag}${lockTag}</span>
     <span class="attendance-tag ${st} ${lockedClass}">${stateLabel}</span>
   </div>`;
 }
@@ -553,6 +526,12 @@ function handleStudentTap(ev,id){
   ev.stopPropagation();
   if(active?.preExcused?.[id]){
     toast("Bu öğrenci idare tarafından önceden İzinli (±) olarak kilitlendi.");
+    return;
+  }
+  if(active?.mode==="permission"){
+    const cur=active.statuses[id]||"absent";
+    active.statuses[id]=cur==="excused"?"absent":"excused";
+    renderAttendance();
     return;
   }
   const cur=active.statuses[id]||"absent";
@@ -566,14 +545,20 @@ function updateCounts(){
     excused:vals.filter(x=>x==="excused").length
   };
   const el=$("topCounts");
-  if(el) el.innerHTML=`
-    <span class="top-count present" title="Var (+)"><b>${c.present}</b><span>+</span></span>
-    <span class="top-count absent" title="Yok (-)"><b>${c.absent}</b><span>-</span></span>
-    <span class="top-count excused" title="İzinli (±)"><b>${c.excused}</b><span>±</span></span>`;
+  if(el){
+    if(active?.mode==="permission"){
+      el.innerHTML=`<span class="top-count excused" title="İzinli (±)"><b>${c.excused}</b><span>± İzinli</span></span>`;
+    }else{
+      el.innerHTML=`
+        <span class="top-count present" title="Var (+)"><b>${c.present}</b><span>+</span></span>
+        <span class="top-count absent" title="Yok (-)"><b>${c.absent}</b><span>-</span></span>
+        <span class="top-count excused" title="İzinli (±)"><b>${c.excused}</b><span>±</span></span>`;
+    }
+  }
 
   const fab=document.querySelector(".save-fab");
   if(fab){
-    const hasActive=(c.present+c.excused)>0;
+    const hasActive=active?.mode==="permission"?true:(c.present+c.excused)>0;
     fab.classList.toggle("dimmed",!hasActive);
   }
 }

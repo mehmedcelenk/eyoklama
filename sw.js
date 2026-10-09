@@ -1,4 +1,4 @@
-const CACHE_NAME = "eyoklama-v3-cache-v8";
+const CACHE_NAME = "eyoklama-v3-cache-v9";
 const ASSETS = [
   "./",
   "./index.html",
