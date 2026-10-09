@@ -242,10 +242,13 @@ async function logout(){
   try{ if(token) await rpc("app_logout",{p_token:token}); }catch{}
   token=""; active=null;attendanceCache={};
   sessionStorage.removeItem("eyoklama_active");
+  localStorage.removeItem(TEACHER_NAME_KEY);
+  localStorage.removeItem(TEACHER_WEEK_UNTIL_KEY);
   if(typeof window !== "undefined"){
     $("appView")?.classList.add("hidden"); $("loginView")?.classList.remove("hidden");
+    if($("loginName")) $("loginName").value="";
     if($("loginPin")) $("loginPin").value="";
-    renderLoginMode();
+    renderLoginMode(true);
   }
 }
 
@@ -309,10 +312,12 @@ if(typeof window !== "undefined"){
   });
 
   $("differentTeacherBtn")?.addEventListener("click", ()=>{
+    localStorage.removeItem(TEACHER_NAME_KEY);
+    localStorage.removeItem(TEACHER_WEEK_UNTIL_KEY);
     renderLoginMode(true);
-    $("loginName").value="";
-    $("loginPin").value="";
-    $("loginName").focus();
+    if($("loginName")) $("loginName").value="";
+    if($("loginPin")) $("loginPin").value="";
+    $("loginName")?.focus();
   });
 
   ["loginName","loginPin"].forEach(id=>$(id)?.addEventListener("keydown",e=>{if(e.key==="Enter")$("loginBtn")?.click()}));
