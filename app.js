@@ -328,35 +328,37 @@ if(typeof window !== "undefined"){
   window.addEventListener("online",()=>toast("İnternet bağlantısı yeniden kuruldu."));
 }
 
+function updateTopBar(){
+  const todayPerms=getTodayPermissions();
+  const permCount=Object.keys(todayPerms).length;
+  const badgeEl=$("topPermBadge");
+  if(badgeEl){
+    badgeEl.textContent=permCount;
+    badgeEl.classList.toggle("hidden", permCount===0);
+  }
+  $("topAdminBtn")?.classList.toggle("hidden", app.role!=="admin");
+}
+
 function showApp(){
   if(typeof window === "undefined") return;
   $("loginView").classList.add("hidden");$("appView").classList.remove("hidden");
-  $("adminTabButton").classList.toggle("hidden",app.role!=="admin");
-  window.scrollTo(0,0);
+  updateTopBar();
+  switchTab("lists");
 }
-if(typeof document !== "undefined"){
-  document.querySelectorAll(".tab[data-tab]").forEach(b=>b.onclick=()=>{
-    const activeTab=document.querySelector(".tab.active");
-    if(activeTab?.dataset.tab===b.dataset.tab && $("attendancePage")?.classList.contains("hidden")){
-      window.scrollTo({top:0,behavior:"smooth"});
-      return;
-    }
-    switchTab(b.dataset.tab);
-  });
-}
+
 function switchTab(tab){
-  if(tab!=="history"){historyDrafts={};historyEditModes={}}
+  if(tab!=="history" && tab!=="lists"){historyDrafts={};historyEditModes={}}
   active=null;
   sessionStorage.removeItem("eyoklama_active");
-  $("attendancePage").classList.add("hidden");
-  $("tabs").classList.remove("hidden");
-  document.querySelectorAll(".page").forEach(x=>x.classList.add("hidden"));document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
-  const btn=document.querySelector(`.tab[data-tab="${tab}"]`);if(btn)btn.classList.add("active");
-  $(`${tab}Page`).classList.remove("hidden");
-  if(tab==="lists")renderLists();
-  if(tab==="new")renderNewList();
-  if(tab==="history")renderHistory();
-  if(tab==="admin")renderAdmin();
+  $("attendancePage")?.classList.add("hidden");
+  document.querySelectorAll(".page").forEach(x=>x.classList.add("hidden"));
+
+  const targetTab = (tab === "history" || tab === "lists") ? "lists" : tab;
+  $(`${targetTab}Page`)?.classList.remove("hidden");
+
+  if(targetTab==="lists") renderLists();
+  if(targetTab==="new") renderNewList();
+  if(targetTab==="admin") renderAdmin();
   window.scrollTo(0,0);
 }
 function renderCurrent(){
@@ -453,28 +455,107 @@ async function savePrePermissions(){
   }
 }
 
-function renderLists(){
-  const todayPerms=getTodayPermissions();
-  const permCount=Object.keys(todayPerms).length;
-  const permBadge=permCount>0?`<span class="badge-count">${permCount}</span>`:"";
+function buildHistorySectionHtml(){
+  const groups=buildHistoryGroups();
+  historyGroupCache={};
+  let lastGroupKey="";
+  const modeLabel=historyGroupingMode==="day"?"📅 Günlük":historyGroupingMode==="week"?"🗓️ Haftalık":"📆 Aylık";
 
-  $("listsPage").innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-    <h1 class="page-title" style="margin:0">YOKLAMALAR</h1>
-    <button type="button" class="btn secondary small" onclick="startPrePermissionView()" title="Günün İzinlilerini Seç">
-      ± İzinli Ekle ${permBadge}
-    </button>
-  </div>
-  <div class="grid">${app.lists.map(l=>`<article id="listCard-${l.id}" class="list-card">
-    <div><h3>${escapeHtml(l.name)}</h3><div class="muted tiny">${l.students.length} öğrenci · Bugün ${todayAttendanceCount(l.id)}</div></div>
-    <div class="list-actions">
-      <button class="icon-btn ghost list-action" onclick="downloadAllClassPdf('${l.id}')" aria-label="Yoklamaları yazdır / indir" title="Yazdır / PDF">
-        <svg viewBox="0 0 24 24"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="7"/></svg>
+  const cards=groups.map((g,i)=>{
+    const key=`g${i}`;historyGroupCache[key]=g;
+    const sel=selectedHistoryItem(key), h=sel.item;
+
+    let currentGroupKey="";
+    let currentGroupLabel="";
+    let downloadOnClick="";
+
+    if(historyGroupingMode==="day"){
+      const day=dayKey(h.takenAt);
+      currentGroupKey=day;
+      currentGroupLabel=formatHistoryDay(day);
+      downloadOnClick=`downloadDayPdf('${day}')`;
+    }else if(historyGroupingMode==="week"){
+      const w=getWeekDetails(h.takenAt);
+      currentGroupKey=w.key;
+      currentGroupLabel=w.label;
+      downloadOnClick=`downloadGroupRangePdf('${w.key}')`;
+    }else{
+      const m=getMonthDetails(h.takenAt);
+      currentGroupKey=m.key;
+      currentGroupLabel=m.label;
+      downloadOnClick=`downloadGroupRangePdf('${m.key}')`;
+    }
+
+    const divider=currentGroupKey!==lastGroupKey?`<div class="history-day">
+      <div class="history-day-line"><span class="history-day-label">${escapeHtml(currentGroupLabel)}</span></div>
+      <button type="button" class="history-day-download" onclick="${downloadOnClick}" aria-label="${escapeHtml(currentGroupLabel)} PDF indir" title="PDF indir">
+        <svg viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
       </button>
-      <button class="icon-btn list-action" onclick="startAttendance('${l.id}')" aria-label="Yoklama al" title="Yoklama al">
-        <svg viewBox="0 0 24 24"><path d="M9 5h6"/><path d="M9 11l2 2 4-4"/><path d="M9 17h6"/><path d="M6 3h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/></svg>
-      </button>
+    </div>`:"";
+    lastGroupKey=currentGroupKey;
+
+    return `${divider}<details id="historyCard-${key}" class="history-item" ontoggle="toggleHistoryGroup(this,'${key}')">
+      <summary>
+        <div class="history-summary">
+          <div id="historyInfo-${key}" style="flex:1;min-width:0">${historyInfoHtml(h,g)}</div>
+          <div class="history-summary-actions">
+            <span class="history-chevron" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+            </span>
+          </div>
+        </div>
+      </summary>
+      <div id="historyBody-${key}" class="history-body"><div class="muted tiny">Yükleniyor…</div></div>
+    </details>`;
+  }).join("");
+
+  return `
+    <div class="history-section stack" style="margin-top:24px;padding-top:20px;border-top:1px solid var(--line)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px">
+        <h2 class="section-title" style="margin:0;font-size:1.05rem;font-weight:800;letter-spacing:-0.01em;color:var(--text)">ALINANLAR (GEÇMİŞ)</h2>
+        <div style="display:flex;align-items:center;gap:6px">
+          <button type="button" class="btn secondary small" onclick="cycleHistoryGroupingMode()" title="Görünüm modunu değiştir">
+            ${modeLabel}
+          </button>
+          <button type="button" class="btn ghost small" onclick="toggleArchiveView()" style="font-size:0.75rem;color:var(--muted);padding:4px 8px">
+            ${showArchived?"Arşivi gizle":"Arşivi göster"}
+          </button>
+        </div>
+      </div>
+      <div class="history">${cards||`<div class="card" style="text-align:center;padding:32px 16px"><p class="muted" style="margin-bottom:12px">Henüz yoklama kaydı yok.</p></div>`}</div>
     </div>
-  </article>`).join("") || `<div class="card" style="text-align:center;padding:32px 16px"><p class="muted" style="margin-bottom:12px">Henüz sınıf eklenmemiş.</p><button class="btn small" onclick="switchTab('new')">Yeni Sınıf Ekle</button></div>`}</div>`;
+  `;
+}
+
+function renderLists(){
+  updateTopBar();
+
+  const listsHtml=`
+    <div class="lists-section stack">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <h2 class="section-title" style="margin:0;font-size:1.05rem;font-weight:800;letter-spacing:-0.01em;color:var(--text)">YOKLAMA PAKETLERİ</h2>
+      </div>
+      <div class="grid">${app.lists.map(l=>`<article id="listCard-${l.id}" class="list-card">
+        <div><h3>${escapeHtml(l.name)}</h3><div class="muted tiny">${l.students.length} öğrenci · Bugün ${todayAttendanceCount(l.id)}</div></div>
+        <div class="list-actions">
+          <button class="icon-btn ghost list-action" onclick="downloadAllClassPdf('${l.id}')" aria-label="Yoklamaları yazdır / indir" title="Yazdır / PDF">
+            <svg viewBox="0 0 24 24"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="7"/></svg>
+          </button>
+          <button class="icon-btn list-action" onclick="startAttendance('${l.id}')" aria-label="Yoklama al" title="Yoklama al">
+            <svg viewBox="0 0 24 24"><path d="M9 5h6"/><path d="M9 11l2 2 4-4"/><path d="M9 17h6"/><path d="M6 3h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/></svg>
+          </button>
+        </div>
+      </article>`).join("") || `<div class="card" style="text-align:center;padding:32px 16px"><p class="muted" style="margin-bottom:12px">Henüz sınıf eklenmemiş.</p><button class="btn small" onclick="switchTab('new')">Yeni Sınıf Ekle</button></div>`}</div>
+    </div>
+  `;
+
+  const historyHtml=buildHistorySectionHtml();
+
+  $("listsPage").innerHTML=listsHtml + historyHtml;
+}
+
+function renderHistory(){
+  renderLists();
 }
 async function startAttendance(listId){
   const list=app.lists.find(x=>x.id===listId); if(!list)return;
@@ -1658,7 +1739,7 @@ async function archiveHistoryAttendance(key){
 function renderNewList(){
   importedStudents=[];
   $("newPage").innerHTML=`<div class="stack">
-    <h1 class="page-title">YOKLAMA EKLE</h1>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><button type="button" class="top-icon-btn" onclick="switchTab('lists')" title="Geri"><svg viewBox="0 0 24 24"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button><h1 class="page-title" style="margin:0">YOKLAMA EKLE</h1></div>
     <div class="plain-section">
       <label>Sınıf adı<input id="newListName" type="text" placeholder="Örn. TDE Joker"></label>
     </div>
@@ -1800,7 +1881,7 @@ function renderAdmin(){
   if(app.role!=="admin")return;
   const pinDisplay=pinRevealed?escapeHtml(app.teacherPin||"------"):(app.teacherPin?"••••••":"------");
   $("adminPage").innerHTML=`<div class="stack">
-    <h1 class="page-title">YÖNETİM</h1>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><button type="button" class="top-icon-btn" onclick="switchTab('lists')" title="Geri"><svg viewBox="0 0 24 24"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button><h1 class="page-title" style="margin:0">YÖNETİM & AYARLAR</h1></div>
 
     <section class="plain-section stack">
       <div>

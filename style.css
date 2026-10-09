@@ -17,7 +17,7 @@
       -webkit-tap-highlight-color:transparent
     }
     button,input{font:inherit}button{cursor:pointer}
-    .app{width:min(720px,100%);margin:auto;padding:12px 12px 108px}
+    .app{width:min(720px,100%);margin:auto;padding:12px 12px 40px}
     .hidden{display:none!important}.stack{display:grid;gap:12px}
     .row{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.between{justify-content:space-between}
     h1,h2,h3,p{margin-top:0}h1{font-size:clamp(1.8rem,7vw,2.35rem);margin-bottom:5px;letter-spacing:-.045em}
@@ -54,12 +54,92 @@
       border-radius:9px;background:var(--surface2);color:#eee
     }
     .icon-btn svg,.save-fab svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-    .bottom-nav{
-      position:fixed;left:50%;bottom:max(10px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:70;
-      width:min(680px,calc(100% - 20px));display:grid;grid-auto-flow:column;grid-auto-columns:1fr;
-      background:rgba(12,12,12,.94);backdrop-filter:blur(16px);border:1px solid var(--line2);
-      border-radius:20px;padding:5px;box-shadow:0 14px 36px rgba(0,0,0,.48)
+
+    /* Top Bar Styling */
+    .top-nav {
+      position: sticky;
+      top: 0;
+      z-index: 80;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 4px;
+      background: rgba(0, 0, 0, 0.94);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 18px;
     }
+    .top-nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .login-mark.small {
+      width: 34px;
+      height: 34px;
+      flex: 0 0 34px;
+      border-radius: 9px;
+    }
+    .login-mark.small svg {
+      width: 17px;
+      height: 17px;
+    }
+    .brand-title {
+      font-weight: 850;
+      font-size: 1.08rem;
+      color: var(--text);
+      letter-spacing: -0.025em;
+    }
+    .top-nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .top-icon-btn {
+      position: relative;
+      width: 38px;
+      height: 38px;
+      border: none !important;
+      background: transparent !important;
+      color: #a3a3a3;
+      border-radius: 9px;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      padding: 0;
+      transition: color 0.15s ease, background 0.15s ease;
+      box-shadow: none !important;
+    }
+    .top-icon-btn:hover, .top-icon-btn:active {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.08) !important;
+    }
+    .top-icon-btn.danger:hover, .top-icon-btn.danger:active {
+      color: var(--red) !important;
+      background: var(--redbg) !important;
+    }
+    .top-icon-btn svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .top-icon-btn .badge-count {
+      position: absolute;
+      top: 3px;
+      right: 3px;
+      min-width: 16px;
+      height: 16px;
+      font-size: 0.62rem;
+      padding: 0 4px;
+      margin-left: 0;
+    }
+    .bottom-nav{display:none!important}
     .tab,.nav-logout{
       min-height:50px;border:0;background:transparent;color:#777;border-radius:15px;
       display:grid;place-items:center;gap:2px;padding:5px 8px;font-weight:760
