@@ -733,7 +733,9 @@ async function downloadGroupRangePdf(groupKey){
 
 function cleanListName(name){
   if(!name) return "Ders";
-  const cleaned = name.replace(/^[\s\-–—_]+/, "").trim();
+  let cleaned = name.replace(/^[\s\-–—_]+/, "").trim();
+  cleaned = cleaned.replace(/([A-ZÇĞİÖŞÜa-zçğıöşü]+)\s*(\d+)/gi, "$1 $2");
+  cleaned = cleaned.replace(/\s+/g, " ").trim();
   return cleaned || "Ders";
 }
 
@@ -747,9 +749,22 @@ function formatTitleCaseTR(str){
 }
 
 function normalizeStudentKey(firstName, lastName, studentId){
-  const fn = (firstName || "").trim().toLocaleUpperCase("tr-TR");
-  const ln = (lastName || "").trim().toLocaleUpperCase("tr-TR");
-  return `${fn} ${ln}`.replace(/\s+/g, " ");
+  const fn = (firstName || "")
+    .normalize("NFC")
+    .replace(/[\u00a0\u180e\u2000-\u200b\u202f\u205f\u3000\ufeff]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLocaleUpperCase("tr-TR");
+  const ln = (lastName || "")
+    .normalize("NFC")
+    .replace(/[\u00a0\u180e\u2000-\u200b\u202f\u205f\u3000\ufeff]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLocaleUpperCase("tr-TR");
+  
+  let full = `${fn} ${ln}`.trim().replace(/\s+/g, " ");
+  full = full.replace(/\bMAHMUD\b/gi, "MAHMUT").replace(/\bMEHMED\b/gi, "MEHMET");
+  return full;
 }
 
 async function downloadMasterRangePdf(items, titleLabel){
@@ -768,7 +783,7 @@ async function downloadMasterRangePdf(items, titleLabel){
     return;
   }
 
-  // 1) Group classes cleanly by normalized list name
+  // 1) Group classes cleanly by normalized list name (merges "MATEMATİK 1", "MATEMATİK1", "- MATEMATİK 1")
   const classMap=new Map();
   sessions.forEach(sess=>{
     const cleanName=cleanListName(sess.h.listName);
@@ -780,7 +795,7 @@ async function downloadMasterRangePdf(items, titleLabel){
   });
   const classGroups=[...classMap.values()].sort((a,b)=>a.listName.localeCompare(b.listName,"tr"));
 
-  // 2) Deduplicate students across all lists & sessions
+  // 2) Deduplicate students across all lists & sessions (merges Mahmud/Mahmut, Mehmed/Mehmet, duplicates)
   const studentMap=new Map();
 
   app.lists.forEach(l=>{
@@ -828,22 +843,30 @@ async function downloadMasterRangePdf(items, titleLabel){
     return;
   }
 
-  // 3) Dimensions & Layout calculation
+  // 3) Calculate exact layout math to fit ON EXACTLY 1 PAGE both horizontally & vertically
   const totalCols=sessions.length;
-  const isLandscape=totalCols>15;
-  const printableWidth=isLandscape?814:567;
-  const nameColWidth=isLandscape?180:160;
-  const remainingWidth=printableWidth-nameColWidth;
-  const colWidth=Math.max(18,Math.floor(remainingWidth/totalCols));
+  const isLandscape=totalCols>16;
+  const printableWidth=isLandscape?822:575; // Page width - 20pt margin
+  const nameColWidth=isLandscape?140:125;
+  const colWidth=Math.max(16,Math.floor((printableWidth-nameColWidth)/totalCols));
 
-  const bodyFont=7.5;
-  const dateFont=7.5;
-  const sessionFont=6.5;
-  const markFont=8.5;
-  const rowPad=1.5;
+  // Dynamic font sizing & vertical padding based on student count
+  const N=allStudents.length;
+  let bodyFont=7.2;
+  let markFont=8.0;
+  let sessionFont=6.2;
+  let rowPad=0.8;
+
+  if(N>50){
+    bodyFont=5.5; markFont=6.5; sessionFont=5.2; rowPad=0.1;
+  }else if(N>35){
+    bodyFont=6.2; markFont=7.2; sessionFont=5.8; rowPad=0.3;
+  }else if(N>25){
+    bodyFont=6.8; markFont=7.8; sessionFont=6.0; rowPad=0.5;
+  }
 
   // 4) Build table headers
-  const headerRow1=[{text:"İSİM SOYİSİM",rowSpan:2,bold:true,fontSize:bodyFont,margin:[0,8,0,0],color:"#0f172a"}];
+  const headerRow1=[{text:"İSİM SOYİSİM",rowSpan:2,bold:true,fontSize:bodyFont,margin:[0,6,0,0],color:"#0f172a"}];
   const headerRow2=[{}];
 
   classGroups.forEach(cg=>{
@@ -851,7 +874,7 @@ async function downloadMasterRangePdf(items, titleLabel){
       text:cg.listName,
       colSpan:cg.items.length,
       bold:true,
-      fontSize:dateFont,
+      fontSize:bodyFont,
       alignment:"center",
       fillColor:"#e0e7ff",
       color:"#1e1b4b"
@@ -874,7 +897,7 @@ async function downloadMasterRangePdf(items, titleLabel){
 
   // 5) Build student rows
   const rows=allStudents.map(s=>{
-    const rowCells=[{text:s.name,fontSize:bodyFont,bold:true,margin:[2,rowPad,0,rowPad],color:"#0f172a"}];
+    const rowCells=[{text:s.name,fontSize:bodyFont,bold:true,margin:[1,rowPad,0,rowPad],color:"#0f172a"}];
 
     classGroups.forEach(cg=>{
       const isEnrolledInClass=s.listKeys.has(cg.groupKey)||cg.items.some(({r})=>r.entries.some(e=>{
@@ -908,19 +931,19 @@ async function downloadMasterRangePdf(items, titleLabel){
   const doc={
     pageSize:"A4",
     pageOrientation:isLandscape?"landscape":"portrait",
-    pageMargins:[14,12,14,12],
+    pageMargins:[10,8,10,8],
     defaultStyle:{font:"Roboto",fontSize:bodyFont,color:"#1e293b"},
     content:[
       {
         columns:[
           {
             stack:[
-              {text:titleLabel,fontSize:13,bold:true,color:"#0f172a"},
-              {text:`${classGroups.length} ders grubu · ${totalCols} ders kaydı · ${allStudents.length} öğrenci · + Var  - Yok  ± İzinli`,fontSize:7,color:"#64748b",margin:[0,2,0,0]}
+              {text:titleLabel,fontSize:11,bold:true,color:"#0f172a"},
+              {text:`${classGroups.length} ders grubu · ${totalCols} ders kaydı · ${allStudents.length} öğrenci · + Var  - Yok  ± İzinli`,fontSize:6.5,color:"#64748b",margin:[0,1,0,0]}
             ]
           }
         ],
-        margin:[0,0,0,8]
+        margin:[0,0,0,4]
       },
       {
         table:{
@@ -930,14 +953,14 @@ async function downloadMasterRangePdf(items, titleLabel){
           dontBreakRows:true
         },
         layout:{
-          hLineWidth:(i,node)=>i===0||i===2||i===node.table.body.length?0.6:0.2,
-          vLineWidth:()=>0.2,
+          hLineWidth:(i,node)=>i===0||i===2||i===node.table.body.length?0.5:0.15,
+          vLineWidth:()=>0.15,
           hLineColor:()=>"#cbd5e1",
           vLineColor:()=>"#e2e8f0",
-          paddingLeft:()=>2,
-          paddingRight:()=>2,
-          paddingTop:()=>1,
-          paddingBottom:()=>1,
+          paddingLeft:()=>1,
+          paddingRight:()=>1,
+          paddingTop:()=>0,
+          paddingBottom:()=>0,
           fillColor:(rowIndex)=>rowIndex<2?null:(rowIndex%2===0?"#f8fafc":null)
         }
       }
