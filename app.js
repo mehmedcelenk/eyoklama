@@ -1,1756 +1,128 @@
-const SUPABASE_URL = "https://pdvwyfolkyuqipfwbggb.supabase.co";
-const SUPABASE_KEY = "sb_publishable_wzer9xrRSfmFieTPg-xb1A_kg10P-pF";
-const DEVICE_KEY = "eyoklama_v3_device";
-const TEACHER_NAME_KEY = "eyoklama_v3_teacher_name";
-const TEACHER_WEEK_UNTIL_KEY = "eyoklama_v3_teacher_week_until";
-function getDeviceToken(){
-  if(typeof localStorage === "undefined") return "0000000000000000000000000000000000000000000000000000000000000000";
-  let v=localStorage.getItem(DEVICE_KEY)||"";
-  if(!/^[0-9a-f]{64}$/.test(v)){
-    const bytes=new Uint8Array(32);crypto.getRandomValues(bytes);
-    v=Array.from(bytes,b=>b.toString(16).padStart(2,"0")).join("");
-    localStorage.setItem(DEVICE_KEY,v);
-  }
-  return v;
-}
-const deviceToken=getDeviceToken();
-let sb=null;
-async function getSupabaseClient(){
-  if(sb)return sb;
-  for(let i=0;i<50&&(typeof window === "undefined" || !window.supabase);i++){
-    await new Promise(r=>setTimeout(r,100));
-  }
-  if(typeof window === "undefined" || !window.supabase)throw new Error("Bağlantı modülü yüklenemedi. İnternet bağlantısını kontrol edip tekrar deneyin.");
-  sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{
-    auth:{persistSession:false,autoRefreshToken:false}
-  });
-  return sb;
-}
+(function(){const e=document.createElement("link").relList;if(e&&e.supports&&e.supports("modulepreload"))return;for(const n of document.querySelectorAll('link[rel="modulepreload"]'))r(n);new MutationObserver(n=>{for(const i of n)if(i.type==="childList")for(const a of i.addedNodes)a.tagName==="LINK"&&a.rel==="modulepreload"&&r(a)}).observe(document,{childList:!0,subtree:!0});function s(n){const i={};return n.integrity&&(i.integrity=n.integrity),n.referrerPolicy&&(i.referrerPolicy=n.referrerPolicy),n.crossOrigin==="use-credentials"?i.credentials="include":n.crossOrigin==="anonymous"?i.credentials="omit":i.credentials="same-origin",i}function r(n){if(n.ep)return;n.ep=!0;const i=s(n);fetch(n.href,i)}})();const Gn="modulepreload",Vn=function(t,e){return new URL(t,e).href},Ps={},Jn=function(e,s,r){let n=Promise.resolve();if(s&&s.length>0){let a=function(u){return Promise.all(u.map(d=>Promise.resolve(d).then(f=>({status:"fulfilled",value:f}),f=>({status:"rejected",reason:f}))))};const o=document.getElementsByTagName("link"),l=document.querySelector("meta[property=csp-nonce]"),c=l?.nonce||l?.getAttribute("nonce");n=a(s.map(u=>{if(u=Vn(u,r),u in Ps)return;Ps[u]=!0;const d=u.endsWith(".css"),f=d?'[rel="stylesheet"]':"";if(!!r)for(let g=o.length-1;g>=0;g--){const m=o[g];if(m.href===u&&(!d||m.rel==="stylesheet"))return}else if(document.querySelector(`link[href="${u}"]${f}`))return;const p=document.createElement("link");if(p.rel=d?"stylesheet":Gn,d||(p.as="script"),p.crossOrigin="",p.href=u,c&&p.setAttribute("nonce",c),document.head.appendChild(p),d)return new Promise((g,m)=>{p.addEventListener("load",g),p.addEventListener("error",()=>m(new Error(`Unable to preload CSS for ${u}`)))})}))}function i(a){const o=new Event("vite:preloadError",{cancelable:!0});if(o.payload=a,window.dispatchEvent(o),!o.defaultPrevented)throw a}return n.then(a=>{for(const o of a||[])o.status==="rejected"&&i(o.reason);return e().catch(i)})},Yn=Symbol.for("@supabase/supabase-js.traceContextExtractor");function Xn(){return globalThis[Yn]}function Kt(t,e){var s={};for(var r in t)Object.prototype.hasOwnProperty.call(t,r)&&e.indexOf(r)<0&&(s[r]=t[r]);if(t!=null&&typeof Object.getOwnPropertySymbols=="function")for(var n=0,r=Object.getOwnPropertySymbols(t);n<r.length;n++)e.indexOf(r[n])<0&&Object.prototype.propertyIsEnumerable.call(t,r[n])&&(s[r[n]]=t[r[n]]);return s}function Zn(t,e,s,r){function n(i){return i instanceof s?i:new s(function(a){a(i)})}return new(s||(s=Promise))(function(i,a){function o(u){try{c(r.next(u))}catch(d){a(d)}}function l(u){try{c(r.throw(u))}catch(d){a(d)}}function c(u){u.done?i(u.value):n(u.value).then(o,l)}c((r=r.apply(t,e||[])).next())})}const Qn=t=>t?(...e)=>t(...e):(...e)=>fetch(...e);class _s extends Error{constructor(e,s="FunctionsError",r){super(e),this.name=s,this.context=r}toJSON(){return{name:this.name,message:this.message,context:this.context}}}class ei extends _s{constructor(e){super("Failed to send a request to the Edge Function","FunctionsFetchError",e)}}class Is extends _s{constructor(e){super("Relay Error invoking the Edge Function","FunctionsRelayError",e)}}class Ns extends _s{constructor(e){super("Edge Function returned a non-2xx status code","FunctionsHttpError",e)}}var as;(function(t){t.Any="any",t.ApNortheast1="ap-northeast-1",t.ApNortheast2="ap-northeast-2",t.ApSouth1="ap-south-1",t.ApSoutheast1="ap-southeast-1",t.ApSoutheast2="ap-southeast-2",t.CaCentral1="ca-central-1",t.EuCentral1="eu-central-1",t.EuWest1="eu-west-1",t.EuWest2="eu-west-2",t.EuWest3="eu-west-3",t.SaEast1="sa-east-1",t.UsEast1="us-east-1",t.UsWest1="us-west-1",t.UsWest2="us-west-2"})(as||(as={}));class ti{constructor(e,{headers:s={},customFetch:r,region:n=as.Any}={}){this.url=e,this.headers=s,this.region=n,this.fetch=Qn(r)}setAuth(e){this.headers.Authorization=`Bearer ${e}`}invoke(e){return Zn(this,arguments,void 0,function*(s,r={}){var n,i;let a,o,l;try{const{headers:c,method:u,body:d,signal:f,timeout:h}=r;let p={},{region:g}=r;g||(g=this.region);const m=new URL(`${this.url}/${s}`);g&&g!=="any"&&(p["x-region"]=g,m.searchParams.set("forceFunctionRegion",g));let y;const v=!!c&&Object.keys(c).some(A=>A.toLowerCase()==="content-type");d&&!v?typeof Blob<"u"&&d instanceof Blob||d instanceof ArrayBuffer?(p["Content-Type"]=d.type||"application/octet-stream",y=d):typeof d=="string"?(p["Content-Type"]="text/plain",y=d):typeof FormData<"u"&&d instanceof FormData?y=d:(p["Content-Type"]="application/json",y=JSON.stringify(d)):d&&typeof d!="string"&&!(typeof Blob<"u"&&d instanceof Blob)&&!(d instanceof ArrayBuffer)&&!(typeof FormData<"u"&&d instanceof FormData)?y=JSON.stringify(d):y=d;let w=f;h&&(o=new AbortController,a=setTimeout(()=>o.abort(),h),f?(w=o.signal,l=()=>o.abort(),f.addEventListener("abort",l)):w=o.signal);const R=yield this.fetch(m.toString(),{method:u||"POST",headers:Object.assign(Object.assign(Object.assign({},p),this.headers),c),body:y,signal:w}).catch(A=>{throw new ei(A)}),O=R.headers.get("x-relay-error");if(O&&O==="true")throw new Is(R);if(!R.ok)throw new Ns(R);let P=((n=R.headers.get("Content-Type"))!==null&&n!==void 0?n:"text/plain").split(";")[0].trim().toLowerCase(),L;return P==="application/json"?L=yield R.json():P==="application/octet-stream"||P==="application/pdf"?L=yield R.blob():P==="text/event-stream"?L=R:P==="multipart/form-data"?L=yield R.formData():L=yield R.text(),{data:L,error:null,response:R}}catch(c){return{data:null,error:c,response:c instanceof Ns||c instanceof Is?c.context:void 0}}finally{a&&clearTimeout(a),l&&((i=r.signal)===null||i===void 0||i.removeEventListener("abort",l))}})}}var De=class extends Error{constructor(t){super(t.message),this.name="PostgrestError",this.details=t.details,this.hint=t.hint,this.code=t.code}toJSON(){return{name:this.name,message:this.message,details:this.details,hint:this.hint,code:this.code}}};const $r=3,Ls=t=>Math.min(1e3*2**t,3e4),si=[520,503],Or=["GET","HEAD","OPTIONS"];function rt(t){"@babel/helpers - typeof";return rt=typeof Symbol=="function"&&typeof Symbol.iterator=="symbol"?function(e){return typeof e}:function(e){return e&&typeof Symbol=="function"&&e.constructor===Symbol&&e!==Symbol.prototype?"symbol":typeof e},rt(t)}function ri(t,e){if(rt(t)!="object"||!t)return t;var s=t[Symbol.toPrimitive];if(s!==void 0){var r=s.call(t,e);if(rt(r)!="object")return r;throw new TypeError("@@toPrimitive must return a primitive value.")}return(e==="string"?String:Number)(t)}function ni(t){var e=ri(t,"string");return rt(e)=="symbol"?e:e+""}function ii(t,e,s){return(e=ni(e))in t?Object.defineProperty(t,e,{value:s,enumerable:!0,configurable:!0,writable:!0}):t[e]=s,t}function js(t,e){var s=Object.keys(t);if(Object.getOwnPropertySymbols){var r=Object.getOwnPropertySymbols(t);e&&(r=r.filter(function(n){return Object.getOwnPropertyDescriptor(t,n).enumerable})),s.push.apply(s,r)}return s}function Ae(t){for(var e=1;e<arguments.length;e++){var s=arguments[e]!=null?arguments[e]:{};e%2?js(Object(s),!0).forEach(function(r){ii(t,r,s[r])}):Object.getOwnPropertyDescriptors?Object.defineProperties(t,Object.getOwnPropertyDescriptors(s)):js(Object(s)).forEach(function(r){Object.defineProperty(t,r,Object.getOwnPropertyDescriptor(s,r))})}return t}function xs(t,e){return new Promise(s=>{if(e?.aborted){s();return}const r=setTimeout(()=>{e?.removeEventListener("abort",n),s()},t);function n(){clearTimeout(r),s()}e?.addEventListener("abort",n)})}function ai(t,e,s,r){return!(!r||s>=$r||!Or.includes(t)||!si.includes(e))}async function Pr(t,e,s,r){let n=0;for(;;){const l=Ae({},s.headers);n>0&&(l["X-Retry-Count"]=String(n));let c;try{c=await t(e,{method:s.method,headers:l,body:s.body,signal:s.signal})}catch(u){var i;if(u?.name==="AbortError"||u?.code==="ABORT_ERR"||u?.name==="TimeoutError"&&(!((i=s.signal)===null||i===void 0)&&i.aborted)||!Or.includes(s.method))throw u;if(r&&n<$r){const d=Ls(n);n++,await xs(d,s.signal);continue}throw u}if(ai(s.method,c.status,n,r)){var a,o;const u=(a=(o=c.headers)===null||o===void 0?void 0:o.get("Retry-After"))!==null&&a!==void 0?a:null,d=u!==null?Math.max(0,parseInt(u,10)||0)*1e3:Ls(n);await c.text(),n++,await xs(d,s.signal);continue}return c}}var oi=class{constructor(t){var e,s,r,n,i;this.shouldThrowOnError=!1,this.retryEnabled=!0,this.method=t.method,this.url=t.url,this.headers=new Headers(t.headers),this.schema=t.schema,this.body=t.body,this.shouldThrowOnError=(e=t.shouldThrowOnError)!==null&&e!==void 0?e:!1,this.signal=t.signal,this.isMaybeSingle=(s=t.isMaybeSingle)!==null&&s!==void 0?s:!1,this.shouldStripNulls=(r=t.shouldStripNulls)!==null&&r!==void 0?r:!1,this.urlLengthLimit=(n=t.urlLengthLimit)!==null&&n!==void 0?n:8e3,this.retryEnabled=(i=t.retry)!==null&&i!==void 0?i:!0,t.fetch?this.fetch=t.fetch:this.fetch=fetch}throwOnError(){return this.shouldThrowOnError=!0,this}stripNulls(){if(this.headers.get("Accept")==="text/csv")throw new Error("stripNulls() cannot be used with csv()");return this.shouldStripNulls=!0,this}setHeader(t,e){return this.headers=new Headers(this.headers),this.headers.set(t,e),this}retry(t){return this.retryEnabled=t,this}then(t,e){var s=this;if(this.schema===void 0||(["GET","HEAD"].includes(this.method)?this.headers.set("Accept-Profile",this.schema):this.headers.set("Content-Profile",this.schema)),this.method!=="GET"&&this.method!=="HEAD"&&this.headers.set("Content-Type","application/json"),this.shouldStripNulls){const a=this.headers.get("Accept");a==="application/vnd.pgrst.object+json"?this.headers.set("Accept","application/vnd.pgrst.object+json;nulls=stripped"):(!a||a==="application/json")&&this.headers.set("Accept","application/vnd.pgrst.array+json;nulls=stripped")}const r=this.fetch;let i=(async()=>{const a={};s.headers.forEach((l,c)=>{a[c]=l});const o=await Pr(r,s.url.toString(),{method:s.method,headers:a,body:JSON.stringify(s.body,(l,c)=>typeof c=="bigint"?c.toString():c),signal:s.signal},s.retryEnabled);return await s.processResponse(o)})();return this.shouldThrowOnError||(i=i.catch(a=>{var o;let l="",c="",u="";const d=a?.cause;if(d){var f,h,p,g;const v=(f=d?.message)!==null&&f!==void 0?f:"",w=(h=d?.code)!==null&&h!==void 0?h:"";l=`${(p=a?.name)!==null&&p!==void 0?p:"FetchError"}: ${a?.message}`,l+=`
 
-let token = "";
-if(typeof sessionStorage !== "undefined") sessionStorage.removeItem("eyoklama_v2_session");
-let app = { role:null, displayName:"", lists:[], history:[], teacherPin:null, teacherPinDate:null };
-let active = null;
-let attendanceLockTimer = null;
-let importedStudents = [];
-let attendanceCache = {};
-let historyGroupIndex = {};
-let historyGroupCache = {};
-let historyDrafts = {};
-let historyEditModes = {};
-let historyUndoTokens = {};
-let showArchived = false;
+Caused by: ${(g=d?.name)!==null&&g!==void 0?g:"Error"}: ${v}`,w&&(l+=` (${w})`),d?.stack&&(l+=`
+${d.stack}`)}else{var m;l=(m=a?.stack)!==null&&m!==void 0?m:""}const y=this.url.toString().length;return a?.name==="AbortError"||a?.code==="ABORT_ERR"?(u="",c="Request was aborted (timeout or manual cancellation)",y>this.urlLengthLimit&&(c+=`. Note: Your request URL is ${y} characters, which may exceed server limits. If selecting many fields, consider using views. If filtering with large arrays (e.g., .in('id', [many IDs])), consider using an RPC function to pass values server-side.`)):(d?.name==="HeadersOverflowError"||d?.code==="UND_ERR_HEADERS_OVERFLOW")&&(u="",c="HTTP headers exceeded server limits (typically 16KB)",y>this.urlLengthLimit&&(c+=`. Your request URL is ${y} characters. If selecting many fields, consider using views. If filtering with large arrays (e.g., .in('id', [200+ IDs])), consider using an RPC function instead.`)),{success:!1,error:{message:`${(o=a?.name)!==null&&o!==void 0?o:"FetchError"}: ${a?.message}`,details:l,hint:c,code:u},data:null,count:null,status:0,statusText:""}})),i.then(t,e)}async processResponse(t){var e=this;let s=null,r=null,n=null,i=t.status,a=t.statusText;if(t.ok){var o,l;if(e.method!=="HEAD"){var c;const h=await t.text();if(h!=="")if(e.headers.get("Accept")==="text/csv")r=h;else if(e.headers.get("Accept")&&(!((c=e.headers.get("Accept"))===null||c===void 0)&&c.includes("application/vnd.pgrst.plan+text")))r=h;else try{r=JSON.parse(h)}catch{if(s={message:h},r=null,e.shouldThrowOnError)throw new De({message:h,details:"",hint:"",code:""})}}const d=(o=e.headers.get("Prefer"))===null||o===void 0?void 0:o.match(/count=(exact|planned|estimated)/),f=(l=t.headers.get("content-range"))===null||l===void 0?void 0:l.split("/");if(d&&f&&f.length>1&&(n=parseInt(f[1])),e.isMaybeSingle&&Array.isArray(r))if(r.length>1){if(s={code:"PGRST116",details:`Results contain ${r.length} rows, application/vnd.pgrst.object+json requires 1 row`,hint:null,message:"JSON object requested, multiple (or no) rows returned"},r=null,n=null,i=406,a="Not Acceptable",e.shouldThrowOnError){var u;throw new De(Ae(Ae({},s),{},{hint:(u=s.hint)!==null&&u!==void 0?u:""}))}}else r.length===1?r=r[0]:r=null}else{const d=await t.text();try{s=JSON.parse(d),Array.isArray(s)&&t.status===404&&(r=[],s=null,i=200,a="OK")}catch{t.status===404&&d===""?(i=204,a="No Content"):s={message:d}}if(s&&e.shouldThrowOnError)throw new De(s)}return{success:s===null,error:s,data:r,count:n,status:i,statusText:a}}returns(){return this}overrideTypes(){return this}},li=class extends oi{throwOnError(){return super.throwOnError()}select(t){let e=!1;const s=(t??"*").split("").map(r=>/\s/.test(r)&&!e?"":(r==='"'&&(e=!e),r)).join("");return this.url.searchParams.set("select",s),this.headers.append("Prefer","return=representation"),this}order(t,{ascending:e=!0,nullsFirst:s,foreignTable:r,referencedTable:n=r}={}){const i=n?`${n}.order`:"order",a=this.url.searchParams.get(i);return this.url.searchParams.set(i,`${a?`${a},`:""}${t}.${e?"asc":"desc"}${s===void 0?"":s?".nullsfirst":".nullslast"}`),this}limit(t,{foreignTable:e,referencedTable:s=e}={}){const r=typeof s>"u"?"limit":`${s}.limit`;return this.url.searchParams.set(r,`${t}`),this}range(t,e,{foreignTable:s,referencedTable:r=s}={}){const n=typeof r>"u"?"offset":`${r}.offset`,i=typeof r>"u"?"limit":`${r}.limit`;return this.url.searchParams.set(n,`${t}`),this.url.searchParams.set(i,`${e-t+1}`),this}abortSignal(t){return this.signal=t,this}single(){return this.headers.set("Accept","application/vnd.pgrst.object+json"),this}maybeSingle(){return this.isMaybeSingle=!0,this}csv(){return this.headers.set("Accept","text/csv"),this}geojson(){return this.headers.set("Accept","application/geo+json"),this}explain({analyze:t=!1,verbose:e=!1,settings:s=!1,buffers:r=!1,wal:n=!1,format:i="text"}={}){var a;const o=[t?"analyze":null,e?"verbose":null,s?"settings":null,r?"buffers":null,n?"wal":null].filter(Boolean).join("|"),l=(a=this.headers.get("Accept"))!==null&&a!==void 0?a:"application/json";return this.headers.set("Accept",`application/vnd.pgrst.plan+${i}; for="${l}"; options=${o};`),i==="json"?this:this}rollback(){return this.headers.append("Prefer","tx=rollback"),this}returns(){return this}maxAffected(t){return this.headers.append("Prefer","handling=strict"),this.headers.append("Prefer",`max-affected=${t}`),this}};const Ds=new RegExp("[,()]");var je=class extends li{throwOnError(){return super.throwOnError()}eq(t,e){return this.url.searchParams.append(t,`eq.${e}`),this}neq(t,e){return this.url.searchParams.append(t,`neq.${e}`),this}gt(t,e){return this.url.searchParams.append(t,`gt.${e}`),this}gte(t,e){return this.url.searchParams.append(t,`gte.${e}`),this}lt(t,e){return this.url.searchParams.append(t,`lt.${e}`),this}lte(t,e){return this.url.searchParams.append(t,`lte.${e}`),this}like(t,e){return this.url.searchParams.append(t,`like.${e}`),this}likeAllOf(t,e){return this.url.searchParams.append(t,`like(all).{${e.join(",")}}`),this}likeAnyOf(t,e){return this.url.searchParams.append(t,`like(any).{${e.join(",")}}`),this}ilike(t,e){return this.url.searchParams.append(t,`ilike.${e}`),this}ilikeAllOf(t,e){return this.url.searchParams.append(t,`ilike(all).{${e.join(",")}}`),this}ilikeAnyOf(t,e){return this.url.searchParams.append(t,`ilike(any).{${e.join(",")}}`),this}regexMatch(t,e){return this.url.searchParams.append(t,`match.${e}`),this}regexIMatch(t,e){return this.url.searchParams.append(t,`imatch.${e}`),this}is(t,e){return this.url.searchParams.append(t,`is.${e}`),this}isDistinct(t,e){return this.url.searchParams.append(t,`isdistinct.${e}`),this}in(t,e){const s=Array.from(new Set(e)).map(r=>typeof r=="string"&&Ds.test(r)?`"${r}"`:`${r}`).join(",");return this.url.searchParams.append(t,`in.(${s})`),this}notIn(t,e){const s=Array.from(new Set(e)).map(r=>typeof r=="string"&&Ds.test(r)?`"${r}"`:`${r}`).join(",");return this.url.searchParams.append(t,`not.in.(${s})`),this}contains(t,e){return typeof e=="string"?this.url.searchParams.append(t,`cs.${e}`):Array.isArray(e)?this.url.searchParams.append(t,`cs.{${e.join(",")}}`):this.url.searchParams.append(t,`cs.${JSON.stringify(e)}`),this}containedBy(t,e){return typeof e=="string"?this.url.searchParams.append(t,`cd.${e}`):Array.isArray(e)?this.url.searchParams.append(t,`cd.{${e.join(",")}}`):this.url.searchParams.append(t,`cd.${JSON.stringify(e)}`),this}rangeGt(t,e){return this.url.searchParams.append(t,`sr.${e}`),this}rangeGte(t,e){return this.url.searchParams.append(t,`nxl.${e}`),this}rangeLt(t,e){return this.url.searchParams.append(t,`sl.${e}`),this}rangeLte(t,e){return this.url.searchParams.append(t,`nxr.${e}`),this}rangeAdjacent(t,e){return this.url.searchParams.append(t,`adj.${e}`),this}overlaps(t,e){return typeof e=="string"?this.url.searchParams.append(t,`ov.${e}`):this.url.searchParams.append(t,`ov.{${e.join(",")}}`),this}textSearch(t,e,{config:s,type:r}={}){let n="";r==="plain"?n="pl":r==="phrase"?n="ph":r==="websearch"&&(n="w");const i=s===void 0?"":`(${s})`;return this.url.searchParams.append(t,`${n}fts${i}.${e}`),this}match(t){return Object.entries(t).filter(([e,s])=>s!==void 0).forEach(([e,s])=>{this.url.searchParams.append(e,`eq.${s}`)}),this}not(t,e,s){return this.url.searchParams.append(t,`not.${e}.${s}`),this}or(t,{foreignTable:e,referencedTable:s=e}={}){const r=s?`${s}.or`:"or";return this.url.searchParams.append(r,`(${t})`),this}filter(t,e,s){return this.url.searchParams.append(t,`${e}.${s}`),this}},ci=class{constructor(t,{headers:e={},schema:s,fetch:r,urlLengthLimit:n=8e3,retry:i}){this.url=t,this.headers=new Headers(e),this.schema=s,this.fetch=r,this.urlLengthLimit=n,this.retry=i}cloneRequestState(){return{url:new URL(this.url.toString()),headers:new Headers(this.headers)}}select(t,e){const{head:s=!1,count:r}=e??{},n=s?"HEAD":"GET";let i=!1;const a=(t??"*").split("").map(c=>/\s/.test(c)&&!i?"":(c==='"'&&(i=!i),c)).join(""),{url:o,headers:l}=this.cloneRequestState();return o.searchParams.set("select",a),r&&l.append("Prefer",`count=${r}`),new je({method:n,url:o,headers:l,schema:this.schema,fetch:this.fetch,urlLengthLimit:this.urlLengthLimit,retry:this.retry})}insert(t,{count:e,defaultToNull:s=!0}={}){var r;const n="POST",{url:i,headers:a}=this.cloneRequestState();if(e&&a.append("Prefer",`count=${e}`),s||a.append("Prefer","missing=default"),Array.isArray(t)){const o=t.reduce((l,c)=>l.concat(Object.keys(c)),[]);if(o.length>0){const l=[...new Set(o)].map(c=>`"${c}"`);i.searchParams.set("columns",l.join(","))}}return new je({method:n,url:i,headers:a,schema:this.schema,body:t,fetch:(r=this.fetch)!==null&&r!==void 0?r:fetch,urlLengthLimit:this.urlLengthLimit,retry:this.retry})}upsert(t,{onConflict:e,ignoreDuplicates:s=!1,count:r,defaultToNull:n=!0}={}){var i;const a="POST",{url:o,headers:l}=this.cloneRequestState();if(l.append("Prefer",`resolution=${s?"ignore":"merge"}-duplicates`),e!==void 0&&o.searchParams.set("on_conflict",e),r&&l.append("Prefer",`count=${r}`),n||l.append("Prefer","missing=default"),Array.isArray(t)){const c=t.reduce((u,d)=>u.concat(Object.keys(d)),[]);if(c.length>0){const u=[...new Set(c)].map(d=>`"${d}"`);o.searchParams.set("columns",u.join(","))}}return new je({method:a,url:o,headers:l,schema:this.schema,body:t,fetch:(i=this.fetch)!==null&&i!==void 0?i:fetch,urlLengthLimit:this.urlLengthLimit,retry:this.retry})}update(t,{count:e}={}){var s;const r="PATCH",{url:n,headers:i}=this.cloneRequestState();return e&&i.append("Prefer",`count=${e}`),new je({method:r,url:n,headers:i,schema:this.schema,body:t,fetch:(s=this.fetch)!==null&&s!==void 0?s:fetch,urlLengthLimit:this.urlLengthLimit,retry:this.retry})}delete({count:t}={}){var e;const s="DELETE",{url:r,headers:n}=this.cloneRequestState();return t&&n.append("Prefer",`count=${t}`),new je({method:s,url:r,headers:n,schema:this.schema,fetch:(e=this.fetch)!==null&&e!==void 0?e:fetch,urlLengthLimit:this.urlLengthLimit,retry:this.retry})}};function ui(t,e){try{const a=JSON.parse(t);if(a&&typeof a=="object"&&!Array.isArray(a)){var s,r,n,i;return new De({message:String((s=a.message)!==null&&s!==void 0?s:t),details:(r=a.details)!==null&&r!==void 0?r:"",hint:(n=a.hint)!==null&&n!==void 0?n:"",code:(i=a.code)!==null&&i!==void 0?i:""})}}catch{}return new De({message:t||e,details:"",hint:"",code:""})}function Us(t,e,s){var r;const n=t;return{success:!1,error:new De({message:`${(r=n?.name)!==null&&r!==void 0?r:"FetchError"}: ${n?.message}`,details:"",hint:"",code:""}),data:null,count:null,status:e,statusText:s}}var di=class Ir{constructor(e,{headers:s={},schema:r,fetch:n,timeout:i,urlLengthLimit:a=8e3,retry:o}={}){this.url=e,this.headers=new Headers(s),this.schemaName=r,this.urlLengthLimit=a;const l=n??globalThis.fetch;i!==void 0&&i>0?this.fetch=(c,u)=>{const d=new AbortController,f=setTimeout(()=>d.abort(),i),h=u?.signal;if(h){if(h.aborted)return clearTimeout(f),l(c,u);const p=()=>{clearTimeout(f),d.abort()};return h.addEventListener("abort",p,{once:!0}),l(c,Ae(Ae({},u),{},{signal:d.signal})).finally(()=>{clearTimeout(f),h.removeEventListener("abort",p)})}return l(c,Ae(Ae({},u),{},{signal:d.signal})).finally(()=>clearTimeout(f))}:this.fetch=l,this.retry=o}from(e){if(!e||typeof e!="string"||e.trim()==="")throw new Error("Invalid relation name: relation must be a non-empty string.");return new ci(new URL(`${this.url}/${e}`),{headers:new Headers(this.headers),schema:this.schemaName,fetch:this.fetch,urlLengthLimit:this.urlLengthLimit,retry:this.retry})}schema(e){return new Ir(this.url,{headers:this.headers,schema:e,fetch:this.fetch,urlLengthLimit:this.urlLengthLimit,retry:this.retry})}async getOpenApiSpec(){var e=this,s;const r=new Headers(e.headers);r.set("Accept","application/openapi+json"),e.schemaName&&r.set("Accept-Profile",e.schemaName);const n={};r.forEach((c,u)=>{n[u]=c});const i=(s=e.fetch)!==null&&s!==void 0?s:globalThis.fetch;let a;try{var o;a=await Pr(i,`${e.url}/`,{method:"GET",headers:n},(o=e.retry)!==null&&o!==void 0?o:!0)}catch(c){return Us(c,0,"")}let l;try{l=await a.text()}catch(c){return Us(c,a.status,a.statusText)}if(a.ok)try{return{success:!0,error:null,data:JSON.parse(l),count:null,status:a.status,statusText:a.statusText}}catch{}return{success:!1,error:ui(l,a.statusText),data:null,count:null,status:a.status,statusText:a.statusText}}rpc(e,s={},{head:r=!1,get:n=!1,count:i}={}){var a;let o;const l=new URL(`${this.url}/rpc/${e}`);let c;const u=h=>h!==null&&typeof h=="object"&&(!Array.isArray(h)||h.some(u)),d=r&&Object.values(s).some(u);d?(o="POST",c=s):r||n?(o=r?"HEAD":"GET",Object.entries(s).filter(([h,p])=>p!==void 0).map(([h,p])=>[h,Array.isArray(p)?`{${p.join(",")}}`:`${p}`]).forEach(([h,p])=>{l.searchParams.append(h,p)})):(o="POST",c=s);const f=new Headers(this.headers);return d?f.set("Prefer",i?`count=${i},return=minimal`:"return=minimal"):i&&f.set("Prefer",`count=${i}`),new je({method:o,url:l,headers:f,schema:this.schemaName,body:c,fetch:(a=this.fetch)!==null&&a!==void 0?a:fetch,urlLengthLimit:this.urlLengthLimit,retry:this.retry})}};class hi{constructor(){}static detectEnvironment(){var e;if(typeof WebSocket<"u")return{type:"native",wsConstructor:WebSocket};const s=globalThis;if(typeof globalThis<"u"&&typeof s.WebSocket<"u")return{type:"native",wsConstructor:s.WebSocket};const r=typeof global<"u"?global:void 0;if(r&&typeof r.WebSocket<"u")return{type:"native",wsConstructor:r.WebSocket};if(typeof globalThis<"u"&&typeof s.WebSocketPair<"u"&&typeof globalThis.WebSocket>"u")return{type:"cloudflare",error:"Cloudflare Workers detected. WebSocket clients are not supported in Cloudflare Workers.",workaround:"Use Cloudflare Workers WebSocket API for server-side WebSocket handling, or deploy to a different runtime."};if(typeof globalThis<"u"&&s.EdgeRuntime||typeof navigator<"u"&&(!((e=navigator.userAgent)===null||e===void 0)&&e.includes("Vercel-Edge")))return{type:"unsupported",error:"Edge runtime detected (Vercel Edge/Netlify Edge). WebSockets are not supported in edge functions.",workaround:"Use serverless functions or a different deployment target for WebSocket functionality."};const n=globalThis.process;if(n){const i=n.versions;if(i&&i.node)return{type:"unsupported",error:"Node.js detected but native WebSocket not found.",workaround:"Ensure you are running Node.js 22+ or provide a WebSocket implementation via the transport option."}}return{type:"unsupported",error:"Unknown JavaScript runtime without WebSocket support.",workaround:"Ensure you're running in a supported environment (browser, Node.js, Deno) or provide a custom WebSocket implementation."}}static getWebSocketConstructor(){const e=this.detectEnvironment();if(e.wsConstructor)return e.wsConstructor;let s=e.error||"WebSocket not supported in this environment.";throw e.workaround&&(s+=`
 
-const $ = id => typeof document !== "undefined" ? document.getElementById(id) : null;
-const escapeHtml = v => String(v ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
-const fullName = s => `${s.firstName || ""} ${s.lastName || ""}`.replace(/\s+/g," ").trim();
-const fmt = iso => new Intl.DateTimeFormat("tr-TR",{dateStyle:"medium",timeStyle:"short"}).format(new Date(iso));
-function dayKey(iso){
-  const parts=new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/Istanbul",year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(new Date(iso));
-  const get=t=>parts.find(p=>p.type===t)?.value||"";
-  return `${get("year")}-${get("month")}-${get("day")}`;
-}
-function todayKey(){return dayKey(new Date().toISOString())}
-function formatHistoryDay(day){
-  const [y,m,d]=String(day).split("-").map(Number);
-  return new Intl.DateTimeFormat("tr-TR",{
-    timeZone:"Europe/Istanbul",weekday:"long",day:"numeric",month:"long",year:"numeric"
-  }).format(new Date(Date.UTC(y,m-1,d,9,0,0)));
-}
-function getWeekDetails(iso){
-  const dt=new Date(iso);
-  const dayOfWeek=(dt.getDay()+6)%7;
-  const mon=new Date(dt);mon.setDate(dt.getDate()-dayOfWeek);
-  const sun=new Date(mon);sun.setDate(mon.getDate()+6);
-  const startDayStr=dayKey(mon.toISOString());
-  const fStart=new Intl.DateTimeFormat("tr-TR",{day:"numeric",month:"short"}).format(mon);
-  const fEnd=new Intl.DateTimeFormat("tr-TR",{day:"numeric",month:"short",year:"numeric"}).format(sun);
-
-  const target=new Date(dt.valueOf());
-  const dayNr=(dt.getDay()+6)%7;
-  target.setDate(target.getDate()-dayNr+3);
-  const firstThursday=target.valueOf();
-  target.setMonth(0,1);
-  if(target.getDay()!==4){
-    target.setMonth(0,1+((4-target.getDay()+7)%7));
-  }
-  const weekNum=1+Math.round((firstThursday-target.valueOf())/604800000);
-
-  return {
-    key:`week-${startDayStr}`,
-    label:`${fStart} – ${fEnd} (${weekNum}. Hafta)`
-  };
-}
-function getMonthDetails(iso){
-  const dt=new Date(iso);
-  const y=dt.getFullYear();
-  const m=dt.getMonth()+1;
-  const monthStr=`${y}-${String(m).padStart(2,"0")}`;
-  const label=new Intl.DateTimeFormat("tr-TR",{month:"long",year:"numeric"}).format(dt);
-  return {
-    key:`month-${monthStr}`,
-    label
-  };
-}
-let historyGroupingMode="day";
-function cycleHistoryGroupingMode(){
-  historyGroupingMode=historyGroupingMode==="day"?"week":historyGroupingMode==="week"?"month":"day";
-  renderHistory();
-}
-function todayAttendanceCount(listId){
-  const d=todayKey();
-  return app.history.filter(h=>!h.archivedAt&&h.listId===listId&&dayKey(h.takenAt)===d).length;
-}
-function buildHistoryGroups(){
-  const map=new Map();
-  app.history
-    .filter(h=>!h.archivedAt||showArchived)
-    .forEach(h=>{
-      const archived=!!h.archivedAt;
-      let dateGroupKey="";
-      if(historyGroupingMode==="week"){
-        dateGroupKey=getWeekDetails(h.takenAt).key;
-      }else if(historyGroupingMode==="month"){
-        dateGroupKey=getMonthDetails(h.takenAt).key;
-      }else{
-        dateGroupKey=dayKey(h.takenAt);
-      }
-      const rawKey=`${h.listId||cleanListName(h.listName)}|${dateGroupKey}|${archived?"a":"n"}`;
-      if(!map.has(rawKey))map.set(rawKey,{rawKey,archived,items:[]});
-      map.get(rawKey).items.push(h);
-    });
-  const groups=[...map.values()];
-  groups.forEach(g=>g.items.sort((a,b)=>new Date(a.takenAt)-new Date(b.takenAt)));
-  groups.sort((a,b)=>new Date(b.items[b.items.length-1].takenAt)-new Date(a.items[a.items.length-1].takenAt));
-  return groups;
-}
-function selectedHistoryItem(key){
-  const g=historyGroupCache[key];if(!g)return null;
-  const i=Math.min(historyGroupIndex[g.rawKey]||0,g.items.length-1);
-  historyGroupIndex[g.rawKey]=Math.max(0,i);
-  return {group:g,index:i,item:g.items[i]};
-}
-function formatCardDate(iso){
-  const parts=new Intl.DateTimeFormat("tr-TR",{day:"2-digit",month:"2-digit",year:"2-digit",timeZone:"Europe/Istanbul"}).formatToParts(new Date(iso));
-  const d=parts.find(p=>p.type==="day")?.value||"";
-  const m=parts.find(p=>p.type==="month")?.value||"";
-  const y=parts.find(p=>p.type==="year")?.value||"";
-  return `${d}.${m}.${y}`;
-}
-function formatCardTime(iso){
-  return new Intl.DateTimeFormat("tr-TR",{hour:"2-digit",minute:"2-digit",timeZone:"Europe/Istanbul"}).format(new Date(iso));
-}
-function historyInfoHtml(h,g){
-  return `<strong>${escapeHtml(h.listName)}${g.archived?`<span class="archive-tag">ARŞİV</span>`:""}</strong>
-    <div class="history-card-meta">
-      <span class="history-card-date">${formatCardDate(h.takenAt)}</span>
-      <div class="history-card-times">
-        ${g.items.map(it=>`<span class="history-time-badge">${formatCardTime(it.takenAt)}</span>`).join("")}
-      </div>
-      <span class="history-card-teacher">${escapeHtml(h.takenByName)}</span>
-    </div>`;
-}
-
-const LOGIN_ATTEMPTS_KEY="eyoklama_login_attempts";
-function getLoginRateLimitMsg(){
-  try{
-    const rec=JSON.parse(localStorage.getItem(LOGIN_ATTEMPTS_KEY)||"{}");
-    const now=Date.now();
-    if(rec.blockedUntil&&rec.blockedUntil>now){
-      const sec=Math.ceil((rec.blockedUntil-now)/1000);
-      return `Çok fazla hatalı deneme yapıldı. Lütfen ${sec} saniye bekleyin.`;
+Suggested solution: ${e.workaround}`),new Error(s)}static isWebSocketSupported(){try{return this.detectEnvironment().type==="native"}catch{return!1}}}const fi="2.117.3",pi=`realtime-js/${fi}`,gi="1.0.0",Nr="2.0.0",mi=Nr,yi=1e4,vi=15e3,wi=1e4,bi=100,ye={closed:"closed",errored:"errored",joined:"joined",joining:"joining",leaving:"leaving"},Lr={close:"phx_close",error:"phx_error",join:"phx_join",leave:"phx_leave",access_token:"access_token"},os={connecting:"connecting",closing:"closing",closed:"closed"};class _i{constructor(e){this.HEADER_LENGTH=1,this.USER_BROADCAST_PUSH_META_LENGTH=6,this.KINDS={userBroadcastPush:3,userBroadcast:4},this.BINARY_ENCODING=0,this.JSON_ENCODING=1,this.BROADCAST_EVENT="broadcast",this.allowedMetadataKeys=[],this.allowedMetadataKeys=e??[]}encode(e,s){if(e.event===this.BROADCAST_EVENT&&!(e.payload instanceof ArrayBuffer)&&typeof e.payload.event=="string")return s(this._binaryEncodeUserBroadcastPush(e));let r=[e.join_ref,e.ref,e.topic,e.event,e.payload];return s(JSON.stringify(r))}_binaryEncodeUserBroadcastPush(e){var s;return this._isArrayBuffer((s=e.payload)===null||s===void 0?void 0:s.payload)?this._encodeBinaryUserBroadcastPush(e):this._encodeJsonUserBroadcastPush(e)}_encodeBinaryUserBroadcastPush(e){var s,r;const n=(r=(s=e.payload)===null||s===void 0?void 0:s.payload)!==null&&r!==void 0?r:new ArrayBuffer(0);return this._encodeUserBroadcastPush(e,this.BINARY_ENCODING,n)}_encodeJsonUserBroadcastPush(e){var s,r;const n=(r=(s=e.payload)===null||s===void 0?void 0:s.payload)!==null&&r!==void 0?r:{},a=new TextEncoder().encode(JSON.stringify(n)).buffer;return this._encodeUserBroadcastPush(e,this.JSON_ENCODING,a)}_encodeUserBroadcastPush(e,s,r){var n,i;const a=new TextEncoder,o=a.encode(e.topic),l=a.encode((n=e.ref)!==null&&n!==void 0?n:""),c=a.encode((i=e.join_ref)!==null&&i!==void 0?i:""),u=a.encode(e.payload.event),d=this.allowedMetadataKeys?this._pick(e.payload,this.allowedMetadataKeys):{},f=a.encode(Object.keys(d).length===0?"":JSON.stringify(d));if(c.length>255)throw new Error(`joinRef length ${c.length} exceeds maximum of 255`);if(l.length>255)throw new Error(`ref length ${l.length} exceeds maximum of 255`);if(o.length>255)throw new Error(`topic length ${o.length} exceeds maximum of 255`);if(u.length>255)throw new Error(`userEvent length ${u.length} exceeds maximum of 255`);if(f.length>255)throw new Error(`metadata length ${f.length} exceeds maximum of 255`);const h=this.USER_BROADCAST_PUSH_META_LENGTH+c.length+l.length+o.length+u.length+f.length,p=new ArrayBuffer(this.HEADER_LENGTH+h),g=new DataView(p),m=new Uint8Array(p);let y=0;g.setUint8(y++,this.KINDS.userBroadcastPush),g.setUint8(y++,c.length),g.setUint8(y++,l.length),g.setUint8(y++,o.length),g.setUint8(y++,u.length),g.setUint8(y++,f.length),g.setUint8(y++,s),m.set(c,y),y+=c.length,m.set(l,y),y+=l.length,m.set(o,y),y+=o.length,m.set(u,y),y+=u.length,m.set(f,y),y+=f.length;var v=new Uint8Array(p.byteLength+r.byteLength);return v.set(new Uint8Array(p),0),v.set(new Uint8Array(r),p.byteLength),v.buffer}decode(e,s){if(this._isArrayBuffer(e)){let r=this._binaryDecode(e);return s(r)}if(typeof e=="string"){const r=JSON.parse(e),[n,i,a,o,l]=r;return s({join_ref:n,ref:i,topic:a,event:o,payload:l})}return s({})}_binaryDecode(e){const s=new DataView(e),r=s.getUint8(0),n=new TextDecoder;switch(r){case this.KINDS.userBroadcast:return this._decodeUserBroadcast(e,s,n)}}_decodeUserBroadcast(e,s,r){const n=s.getUint8(1),i=s.getUint8(2),a=s.getUint8(3),o=s.getUint8(4);let l=this.HEADER_LENGTH+4;const c=r.decode(e.slice(l,l+n));l=l+n;const u=r.decode(e.slice(l,l+i));l=l+i;const d=r.decode(e.slice(l,l+a));l=l+a;const f=e.slice(l,e.byteLength),h=o===this.JSON_ENCODING?JSON.parse(r.decode(f)):f,p={type:this.BROADCAST_EVENT,event:u,payload:h};return a>0&&(p.meta=JSON.parse(d)),{join_ref:null,ref:null,topic:c,event:this.BROADCAST_EVENT,payload:p}}_isArrayBuffer(e){var s;return e instanceof ArrayBuffer||((s=e?.constructor)===null||s===void 0?void 0:s.name)==="ArrayBuffer"}_pick(e,s){return!e||typeof e!="object"?{}:Object.fromEntries(Object.entries(e).filter(([r])=>s.includes(r)))}}var j;(function(t){t.abstime="abstime",t.bool="bool",t.date="date",t.daterange="daterange",t.float4="float4",t.float8="float8",t.int2="int2",t.int4="int4",t.int4range="int4range",t.int8="int8",t.int8range="int8range",t.json="json",t.jsonb="jsonb",t.money="money",t.numeric="numeric",t.oid="oid",t.reltime="reltime",t.text="text",t.time="time",t.timestamp="timestamp",t.timestamptz="timestamptz",t.timetz="timetz",t.tsrange="tsrange",t.tstzrange="tstzrange"})(j||(j={}));const Bs=(t,e,s={})=>{var r;const n=(r=s.skipTypes)!==null&&r!==void 0?r:[];return e?Object.keys(e).reduce((i,a)=>(i[a]=ki(a,t,e,n),i),{}):{}},ki=(t,e,s,r)=>{const n=e.find(o=>o.name===t),i=n?.type,a=s[t];return i&&!r.includes(i)?jr(i,a):ls(a)},jr=(t,e)=>{if(t.charAt(0)==="_"){const s=t.slice(1,t.length);return Ai(e,s)}switch(t){case j.bool:return Si(e);case j.float4:case j.float8:case j.int2:case j.int4:case j.int8:case j.numeric:case j.oid:return Ei(e);case j.json:case j.jsonb:return Ti(e);case j.timestamp:return Ri(e);case j.abstime:case j.date:case j.daterange:case j.int4range:case j.int8range:case j.money:case j.reltime:case j.text:case j.time:case j.timestamptz:case j.timetz:case j.tsrange:case j.tstzrange:return ls(e);default:return ls(e)}},ls=t=>t,Si=t=>{switch(t){case"t":return!0;case"f":return!1;default:return t}},Ei=t=>{if(typeof t=="string"){const e=parseFloat(t);if(!Number.isNaN(e))return e}return t},Ti=t=>{if(typeof t=="string")try{return JSON.parse(t)}catch{return t}return t},Ai=(t,e)=>{if(typeof t!="string")return t;const s=t.length-1,r=t[s];if(t[0]==="{"&&r==="}"){let i;const a=t.slice(1,s);try{i=JSON.parse("["+a+"]")}catch{i=a?a.split(","):[]}return i.map(o=>jr(e,o))}return t},Ri=t=>typeof t=="string"?t.replace(" ","T"):t,xr=t=>{const e=new URL(t);return e.protocol=e.protocol.replace(/^ws/i,"http"),e.pathname=e.pathname.replace(/\/+$/,"").replace(/\/socket\/websocket$/i,"").replace(/\/socket$/i,"").replace(/\/websocket$/i,""),e.pathname===""||e.pathname==="/"?e.pathname="/api/broadcast":e.pathname=e.pathname+"/api/broadcast",e.href};var Ue=t=>typeof t=="function"?t:function(){return t},Ci=typeof self<"u"?self:null,xe=typeof window<"u"?window:null,re=Ci||xe||globalThis,$i="2.0.0",Oi=1e4,Pi=1e3,Ii=100,ne={connecting:0,open:1,closing:2,closed:3},K={closed:"closed",errored:"errored",joined:"joined",joining:"joining",leaving:"leaving"},ue={close:"phx_close",error:"phx_error",join:"phx_join",reply:"phx_reply",leave:"phx_leave"},cs={longpoll:"longpoll",websocket:"websocket"},Ni={complete:4},us="base64url.bearer.phx.",yt=class{constructor(t,e,s,r){this.channel=t,this.event=e,this.payload=s||function(){return{}},this.receivedResp=null,this.timeout=r,this.timeoutTimer=null,this.recHooks=[],this.sent=!1,this.ref=void 0}resend(t){this.timeout=t,this.reset(),this.send()}send(){this.hasReceived("timeout")||(this.startTimeout(),this.sent=!0,this.channel.socket.push({topic:this.channel.topic,event:this.event,payload:this.payload(),ref:this.ref,join_ref:this.channel.joinRef()}))}receive(t,e){return this.hasReceived(t)&&e(this.receivedResp.response),this.recHooks.push({status:t,callback:e}),this}reset(){this.cancelRefEvent(),this.ref=null,this.refEvent=null,this.receivedResp=null,this.sent=!1}destroy(){this.cancelRefEvent(),this.cancelTimeout()}matchReceive({status:t,response:e,_ref:s}){this.recHooks.filter(r=>r.status===t).forEach(r=>r.callback(e))}cancelRefEvent(){this.refEvent&&this.channel.off(this.refEvent)}cancelTimeout(){clearTimeout(this.timeoutTimer),this.timeoutTimer=null}startTimeout(){this.timeoutTimer&&this.cancelTimeout(),this.ref=this.channel.socket.makeRef(),this.refEvent=this.channel.replyEventName(this.ref),this.channel.on(this.refEvent,t=>{this.cancelRefEvent(),this.cancelTimeout(),this.receivedResp=t,this.matchReceive(t)}),this.timeoutTimer=setTimeout(()=>{this.trigger("timeout",{})},this.timeout)}hasReceived(t){return this.receivedResp&&this.receivedResp.status===t}trigger(t,e){this.channel.trigger(this.refEvent,{status:t,response:e})}},Dr=class{constructor(t,e){this.callback=t,this.timerCalc=e,this.timer=void 0,this.tries=0}reset(){this.tries=0,clearTimeout(this.timer)}scheduleTimeout(){clearTimeout(this.timer),this.timer=setTimeout(()=>{this.tries=this.tries+1,this.callback()},this.timerCalc(this.tries+1))}},Li=class{constructor(t,e,s){this.state=K.closed,this.topic=t,this.params=Ue(e||{}),this.socket=s,this.bindings=[],this.bindingRef=0,this.timeout=this.socket.timeout,this.joinedOnce=!1,this.joinPush=new yt(this,ue.join,this.params,this.timeout),this.pushBuffer=[],this.stateChangeRefs=[],this.rejoinTimer=new Dr(()=>{this.socket.isConnected()&&this.rejoin()},this.socket.rejoinAfterMs),this.stateChangeRefs.push(this.socket.onError(()=>this.rejoinTimer.reset())),this.stateChangeRefs.push(this.socket.onOpen(()=>{this.rejoinTimer.reset(),this.isErrored()&&this.rejoin()})),this.joinPush.receive("ok",()=>{this.state=K.joined,this.rejoinTimer.reset(),this.pushBuffer.forEach(r=>r.send()),this.pushBuffer=[]}),this.joinPush.receive("error",r=>{this.state=K.errored,this.socket.hasLogger()&&this.socket.log("channel",`error ${this.topic}`,r),this.socket.isConnected()&&this.rejoinTimer.scheduleTimeout()}),this.onClose(()=>{this.rejoinTimer.reset(),this.socket.hasLogger()&&this.socket.log("channel",`close ${this.topic}`),this.state=K.closed,this.socket.remove(this)}),this.onError(r=>{this.socket.hasLogger()&&this.socket.log("channel",`error ${this.topic}`,r),this.isJoining()&&this.joinPush.reset(),this.state=K.errored,this.socket.isConnected()&&this.rejoinTimer.scheduleTimeout()}),this.joinPush.receive("timeout",()=>{this.socket.hasLogger()&&this.socket.log("channel",`timeout ${this.topic}`,this.joinPush.timeout),new yt(this,ue.leave,Ue({}),this.timeout).send(),this.state=K.errored,this.joinPush.reset(),this.socket.isConnected()&&this.rejoinTimer.scheduleTimeout()}),this.on(ue.reply,(r,n)=>{this.trigger(this.replyEventName(n),r)})}join(t=this.timeout){if(this.joinedOnce)throw new Error("tried to join multiple times. 'join' can only be called a single time per channel instance");return this.timeout=t,this.joinedOnce=!0,this.rejoin(),this.joinPush}teardown(){this.pushBuffer.forEach(t=>t.destroy()),this.pushBuffer=[],this.rejoinTimer.reset(),this.joinPush.destroy(),this.state=K.closed,this.bindings=[]}onClose(t){this.on(ue.close,t)}onError(t){return this.on(ue.error,e=>t(e))}on(t,e){let s=this.bindingRef++;return this.bindings.push({event:t,ref:s,callback:e}),s}off(t,e){this.bindings=this.bindings.filter(s=>!(s.event===t&&(typeof e>"u"||e===s.ref)))}canPush(){return this.socket.isConnected()&&this.isJoined()}push(t,e,s=this.timeout){if(e=e||{},!this.joinedOnce)throw new Error(`tried to push '${t}' to '${this.topic}' before joining. Use channel.join() before pushing events`);let r=new yt(this,t,function(){return e},s);return this.canPush()?r.send():(r.startTimeout(),this.pushBuffer.push(r)),r}leave(t=this.timeout){this.rejoinTimer.reset(),this.joinPush.cancelTimeout(),this.state=K.leaving;let e=()=>{this.socket.hasLogger()&&this.socket.log("channel",`leave ${this.topic}`),this.trigger(ue.close,"leave")},s=new yt(this,ue.leave,Ue({}),t);return s.receive("ok",()=>e()).receive("timeout",()=>e()),s.send(),this.canPush()||s.trigger("ok",{}),s}onMessage(t,e,s){return e}filterBindings(t,e,s){return!0}isMember(t,e,s,r){return this.topic!==t?!1:r&&r!==this.joinRef()?(this.socket.hasLogger()&&this.socket.log("channel","dropping outdated message",{topic:t,event:e,payload:s,joinRef:r}),!1):!0}joinRef(){return this.joinPush.ref}rejoin(t=this.timeout){this.isLeaving()||(this.socket.leaveOpenTopic(this.topic),this.state=K.joining,this.joinPush.resend(t))}trigger(t,e,s,r){let n=this.onMessage(t,e,s,r);if(e&&!n)throw new Error("channel onMessage callbacks must return the payload, modified or unmodified");let i=this.bindings.filter(a=>a.event===t&&this.filterBindings(a,e,s));for(let a=0;a<i.length;a++)i[a].callback(n,s,r||this.joinRef())}replyEventName(t){return`chan_reply_${t}`}isClosed(){return this.state===K.closed}isErrored(){return this.state===K.errored}isJoined(){return this.state===K.joined}isJoining(){return this.state===K.joining}isLeaving(){return this.state===K.leaving}},Ot=class{static request(t,e,s,r,n,i,a){if(re.XDomainRequest){let o=new re.XDomainRequest;return this.xdomainRequest(o,t,e,r,n,i,a)}else if(re.XMLHttpRequest){let o=new re.XMLHttpRequest;return this.xhrRequest(o,t,e,s,r,n,i,a)}else{if(re.fetch&&re.AbortController)return this.fetchRequest(t,e,s,r,n,i,a);throw new Error("No suitable XMLHttpRequest implementation found")}}static fetchRequest(t,e,s,r,n,i,a){let o={method:t,headers:s,body:r},l=null;return n&&(l=new AbortController,setTimeout(()=>l.abort(),n),o.signal=l.signal),re.fetch(e,o).then(c=>c.text()).then(c=>this.parseJSON(c)).then(c=>a&&a(c)).catch(c=>{c.name==="AbortError"&&i?i():a&&a(null)}),l}static xdomainRequest(t,e,s,r,n,i,a){return t.timeout=n,t.open(e,s),t.onload=()=>{let o=this.parseJSON(t.responseText);a&&a(o)},i&&(t.ontimeout=i),t.onprogress=()=>{},t.send(r),t}static xhrRequest(t,e,s,r,n,i,a,o){t.open(e,s,!0),t.timeout=i;for(let[l,c]of Object.entries(r))t.setRequestHeader(l,c);return t.onerror=()=>o&&o(null),t.onreadystatechange=()=>{if(t.readyState===Ni.complete&&o){let l=this.parseJSON(t.responseText);o(l)}},a&&(t.ontimeout=a),t.send(n),t}static parseJSON(t){if(!t||t==="")return null;try{return JSON.parse(t)}catch{return console&&console.log("failed to parse JSON response",t),null}}static serialize(t,e){let s=[];for(var r in t){if(!Object.prototype.hasOwnProperty.call(t,r))continue;let n=e?`${e}[${r}]`:r,i=t[r];typeof i=="object"?s.push(this.serialize(i,n)):s.push(encodeURIComponent(n)+"="+encodeURIComponent(i))}return s.join("&")}static appendParams(t,e){if(Object.keys(e).length===0)return t;let s=t.match(/\?/)?"&":"?";return`${t}${s}${this.serialize(e)}`}},ji=t=>{let e="",s=new Uint8Array(t),r=s.byteLength;for(let n=0;n<r;n++)e+=String.fromCharCode(s[n]);return btoa(e)},Pe=class{constructor(t,e){e&&e.length===2&&e[1].startsWith(us)&&(this.authToken=atob(e[1].slice(us.length))),this.endPoint=null,this.token=null,this.skipHeartbeat=!0,this.reqs=new Set,this.awaitingBatchAck=!1,this.currentBatch=null,this.currentBatchTimer=null,this.batchBuffer=[],this.onopen=function(){},this.onerror=function(){},this.onmessage=function(){},this.onclose=function(){},this.pollEndpoint=this.normalizeEndpoint(t),this.readyState=ne.connecting,setTimeout(()=>this.poll(),0)}normalizeEndpoint(t){return t.replace("ws://","http://").replace("wss://","https://").replace(new RegExp("(.*)/"+cs.websocket),"$1/"+cs.longpoll)}endpointURL(){return Ot.appendParams(this.pollEndpoint,{token:this.token})}closeAndRetry(t,e,s){this.close(t,e,s),this.readyState=ne.connecting}ontimeout(){this.onerror("timeout"),this.closeAndRetry(1005,"timeout",!1)}isActive(){return this.readyState===ne.open||this.readyState===ne.connecting}poll(){const t={Accept:"application/json"};this.authToken&&(t["X-Phoenix-AuthToken"]=this.authToken),this.ajax("GET",t,null,()=>this.ontimeout(),e=>{if(e){var{status:s,token:r,messages:n}=e;if(s===410&&this.token!==null){this.onerror(410),this.closeAndRetry(3410,"session_gone",!1);return}this.token=r}else s=0;switch(s){case 200:n.forEach(i=>{setTimeout(()=>this.onmessage({data:i}),0)}),this.poll();break;case 204:this.poll();break;case 410:this.readyState=ne.open,this.onopen({}),this.poll();break;case 403:this.onerror(403),this.close(1008,"forbidden",!1);break;case 0:case 500:this.onerror(500),this.closeAndRetry(1011,"internal server error",500);break;default:throw new Error(`unhandled poll status ${s}`)}})}send(t){typeof t!="string"&&(t=ji(t)),this.currentBatch?this.currentBatch.push(t):this.awaitingBatchAck?this.batchBuffer.push(t):(this.currentBatch=[t],this.currentBatchTimer=setTimeout(()=>{this.batchSend(this.currentBatch),this.currentBatch=null},0))}batchSend(t,e=0){this.awaitingBatchAck=!0;const s=e+Ii,r=t.slice(e,s);this.ajax("POST",{"Content-Type":"application/x-ndjson"},r.join(`
+`),()=>this.onerror("timeout"),n=>{!n||n.status!==200?(this.awaitingBatchAck=!1,this.onerror(n&&n.status),this.closeAndRetry(1011,"internal server error",!1)):s<t.length?this.batchSend(t,s):this.batchBuffer.length>0?(this.batchSend(this.batchBuffer),this.batchBuffer=[]):this.awaitingBatchAck=!1})}close(t,e,s){for(let n of this.reqs)n.abort();this.readyState=ne.closed;let r=Object.assign({code:1e3,reason:void 0,wasClean:!0},{code:t,reason:e,wasClean:s});this.batchBuffer=[],clearTimeout(this.currentBatchTimer),this.currentBatchTimer=null,typeof CloseEvent<"u"?this.onclose(new CloseEvent("close",r)):this.onclose(r)}ajax(t,e,s,r,n){let i,a=()=>{this.reqs.delete(i),r()};i=Ot.request(t,this.endpointURL(),e,s,this.timeout,a,o=>{this.reqs.delete(i),this.isActive()&&n(o)}),this.reqs.add(i)}},xi=class Ve{constructor(e,s={}){let r=s.events||{state:"presence_state",diff:"presence_diff"};this.state=Object.create(null),this.pendingDiffs=[],this.channel=e,this.joinRef=null,this.caller={onJoin:function(){},onLeave:function(){},onSync:function(){}},this.channel.on(r.state,n=>{let{onJoin:i,onLeave:a,onSync:o}=this.caller;this.joinRef=this.channel.joinRef(),this.state=Ve.syncState(this.state,n,i,a),this.pendingDiffs.forEach(l=>{this.state=Ve.syncDiff(this.state,l,i,a)}),this.pendingDiffs=[],o()}),this.channel.on(r.diff,n=>{let{onJoin:i,onLeave:a,onSync:o}=this.caller;this.inPendingSyncState()?this.pendingDiffs.push(n):(this.state=Ve.syncDiff(this.state,n,i,a),o())})}onJoin(e){this.caller.onJoin=e}onLeave(e){this.caller.onLeave=e}onSync(e){this.caller.onSync=e}list(e){return Ve.list(this.state,e)}inPendingSyncState(){return!this.joinRef||this.joinRef!==this.channel.joinRef()}static syncState(e,s,r,n){let i=this.toNullProtoObj(this.clone(e));s=this.toNullProtoObj(s);let a=Object.create(null),o=Object.create(null);return this.map(i,(l,c)=>{s[l]||(o[l]=c)}),this.map(s,(l,c)=>{let u=i[l];if(u){let d=c.metas.map(g=>g.phx_ref),f=u.metas.map(g=>g.phx_ref),h=c.metas.filter(g=>f.indexOf(g.phx_ref)<0),p=u.metas.filter(g=>d.indexOf(g.phx_ref)<0);h.length>0&&(a[l]=c,a[l].metas=h),p.length>0&&(o[l]=this.clone(u),o[l].metas=p)}else a[l]=c}),this.syncDiff(i,{joins:a,leaves:o},r,n)}static syncDiff(e,s,r,n){e=this.toNullProtoObj(e);let{joins:i,leaves:a}=this.clone(s);return r||(r=function(){}),n||(n=function(){}),this.map(i,(o,l)=>{let c=e[o];if(e[o]=this.clone(l),c){let u=e[o].metas.map(f=>f.phx_ref),d=c.metas.filter(f=>u.indexOf(f.phx_ref)<0);e[o].metas.unshift(...d)}r(o,c,l)}),this.map(a,(o,l)=>{let c=e[o];if(!c)return;let u=l.metas.map(d=>d.phx_ref);c.metas=c.metas.filter(d=>u.indexOf(d.phx_ref)<0),n(o,c,l),c.metas.length===0&&delete e[o]}),e}static list(e,s){return s||(s=function(r,n){return n}),this.map(e,(r,n)=>s(r,n))}static map(e,s){return Object.getOwnPropertyNames(e).map(r=>s(r,e[r]))}static toNullProtoObj(e){if(Object.getPrototypeOf(e)===null)return e;let s=Object.create(null);return Object.getOwnPropertyNames(e).forEach(r=>{s[r]=e[r]}),s}static clone(e){return JSON.parse(JSON.stringify(e))}},vt={HEADER_LENGTH:1,META_LENGTH:4,KINDS:{push:0,reply:1,broadcast:2},encode(t,e){if(t.payload.constructor===ArrayBuffer)return e(this.binaryEncode(t));{let s=[t.join_ref,t.ref,t.topic,t.event,t.payload];return e(JSON.stringify(s))}},decode(t,e){if(t.constructor===ArrayBuffer)return e(this.binaryDecode(t));{let[s,r,n,i,a]=JSON.parse(t);return e({join_ref:s,ref:r,topic:n,event:i,payload:a})}},binaryEncode(t){let{join_ref:e,ref:s,event:r,topic:n,payload:i}=t,a=new TextEncoder,o=a.encode(e),l=a.encode(s),c=a.encode(n),u=a.encode(r);this.assertFieldSize(o.byteLength,"join_ref"),this.assertFieldSize(l.byteLength,"ref"),this.assertFieldSize(c.byteLength,"topic"),this.assertFieldSize(u.byteLength,"event");let d=this.META_LENGTH+o.byteLength+l.byteLength+c.byteLength+u.byteLength,f=new ArrayBuffer(this.HEADER_LENGTH+d),h=new Uint8Array(f),p=new DataView(f),g=0;p.setUint8(g++,this.KINDS.push),p.setUint8(g++,o.byteLength),p.setUint8(g++,l.byteLength),p.setUint8(g++,c.byteLength),p.setUint8(g++,u.byteLength),h.set(o,g),g+=o.byteLength,h.set(l,g),g+=l.byteLength,h.set(c,g),g+=c.byteLength,h.set(u,g),g+=u.byteLength;var m=new Uint8Array(f.byteLength+i.byteLength);return m.set(h,0),m.set(new Uint8Array(i),f.byteLength),m.buffer},assertFieldSize(t,e){if(t>255)throw new Error(`unable to convert ${e} to binary: must be less than or equal to 255 bytes, but is ${t} bytes`)},binaryDecode(t){let e=new DataView(t),s=e.getUint8(0),r=new TextDecoder;switch(s){case this.KINDS.push:return this.decodePush(t,e,r);case this.KINDS.reply:return this.decodeReply(t,e,r);case this.KINDS.broadcast:return this.decodeBroadcast(t,e,r)}},decodePush(t,e,s){let r=e.getUint8(1),n=e.getUint8(2),i=e.getUint8(3),a=this.HEADER_LENGTH+this.META_LENGTH-1,o=s.decode(t.slice(a,a+r));a=a+r;let l=s.decode(t.slice(a,a+n));a=a+n;let c=s.decode(t.slice(a,a+i));a=a+i;let u=t.slice(a,t.byteLength);return{join_ref:o,ref:null,topic:l,event:c,payload:u}},decodeReply(t,e,s){let r=e.getUint8(1),n=e.getUint8(2),i=e.getUint8(3),a=e.getUint8(4),o=this.HEADER_LENGTH+this.META_LENGTH,l=s.decode(t.slice(o,o+r));o=o+r;let c=s.decode(t.slice(o,o+n));o=o+n;let u=s.decode(t.slice(o,o+i));o=o+i;let d=s.decode(t.slice(o,o+a));o=o+a;let f=t.slice(o,t.byteLength),h={status:d,response:f};return{join_ref:l,ref:c,topic:u,event:ue.reply,payload:h}},decodeBroadcast(t,e,s){let r=e.getUint8(1),n=e.getUint8(2),i=this.HEADER_LENGTH+2,a=s.decode(t.slice(i,i+r));i=i+r;let o=s.decode(t.slice(i,i+n));i=i+n;let l=t.slice(i,t.byteLength);return{join_ref:null,ref:null,topic:a,event:o,payload:l}}},Di=class{constructor(t,e={}){this.stateChangeCallbacks={open:[],close:[],error:[],message:[]},this.channels=[],this.sendBuffer=[],this.ref=0,this.fallbackRef=null,this.timeout=e.timeout||Oi,this.transport=e.transport||re.WebSocket||Pe,this.conn=void 0,this.primaryPassedHealthCheck=!1,this.longPollFallbackMs=e.longPollFallbackMs,this.fallbackTimer=null;let s=null;try{s=re&&re.sessionStorage}catch{}this.sessionStore=e.sessionStorage||s,this.establishedConnections=0,this.defaultEncoder=vt.encode.bind(vt),this.defaultDecoder=vt.decode.bind(vt),this.closeWasClean=!0,this.disconnecting=!1,this.binaryType=e.binaryType||"arraybuffer",this.connectClock=1,this.pageHidden=!1,this.encode=void 0,this.decode=void 0,this.transport!==Pe?(this.encode=e.encode||this.defaultEncoder,this.decode=e.decode||this.defaultDecoder):(this.encode=this.defaultEncoder,this.decode=this.defaultDecoder);let r=null;xe&&xe.addEventListener&&(xe.addEventListener("pagehide",n=>{this.conn&&(this.disconnect(),r=this.connectClock)}),xe.addEventListener("pageshow",n=>{r===this.connectClock&&(r=null,this.connect())}),xe.addEventListener("visibilitychange",()=>{document.visibilityState==="hidden"?this.pageHidden=!0:(this.pageHidden=!1,!this.isConnected()&&!this.closeWasClean&&this.teardown(()=>this.connect()))})),this.heartbeatIntervalMs=e.heartbeatIntervalMs||3e4,this.autoSendHeartbeat=e.autoSendHeartbeat??!0,this.heartbeatCallback=e.heartbeatCallback??(()=>{}),this.rejoinAfterMs=n=>e.rejoinAfterMs?e.rejoinAfterMs(n):[1e3,2e3,5e3][n-1]||1e4,this.reconnectAfterMs=n=>e.reconnectAfterMs?e.reconnectAfterMs(n):[10,50,100,150,200,250,500,1e3,2e3][n-1]||5e3,this.logger=e.logger||null,!this.logger&&e.debug&&(this.logger=(n,i,a)=>{console.log(`${n}: ${i}`,a)}),this.longpollerTimeout=e.longpollerTimeout||2e4,this.params=Ue(e.params||{}),this.endPoint=`${t}/${cs.websocket}`,this.vsn=e.vsn||$i,this.heartbeatTimeoutTimer=null,this.heartbeatTimer=null,this.heartbeatSentAt=null,this.pendingHeartbeatRef=null,this.reconnectTimer=new Dr(()=>{if(this.pageHidden){this.log("Not reconnecting as page is hidden!"),this.teardown();return}this.teardown(async()=>{e.beforeReconnect&&await e.beforeReconnect(),this.connect()})},this.reconnectAfterMs),this.authToken=e.authToken&&Ue(e.authToken)}getLongPollTransport(){return Pe}replaceTransport(t){this.connectClock++,this.closeWasClean=!0,clearTimeout(this.fallbackTimer),this.reconnectTimer.reset(),this.conn&&(this.conn.close(),this.conn=null),this.transport=t}protocol(){return location.protocol.match(/^https/)?"wss":"ws"}endPointURL(){let t=Ot.appendParams(Ot.appendParams(this.endPoint,this.params()),{vsn:this.vsn});return t.charAt(0)!=="/"?t:t.charAt(1)==="/"?`${this.protocol()}:${t}`:`${this.protocol()}://${location.host}${t}`}disconnect(t,e,s){this.connectClock++,this.disconnecting=!0,this.closeWasClean=!0,clearTimeout(this.fallbackTimer),this.reconnectTimer.reset(),this.teardown(()=>{this.disconnecting=!1,t&&t()},e,s)}connect(t){t&&(console&&console.log("passing params to connect is deprecated. Instead pass :params to the Socket constructor"),this.params=Ue(t)),!(this.conn&&!this.disconnecting)&&(this.longPollFallbackMs&&this.transport!==Pe?this.connectWithFallback(Pe,this.longPollFallbackMs):this.transportConnect())}log(t,e,s){this.logger&&this.logger(t,e,s)}hasLogger(){return this.logger!==null}onOpen(t){let e=this.makeRef();return this.stateChangeCallbacks.open.push([e,t]),e}onClose(t){let e=this.makeRef();return this.stateChangeCallbacks.close.push([e,t]),e}onError(t){let e=this.makeRef();return this.stateChangeCallbacks.error.push([e,t]),e}onMessage(t){let e=this.makeRef();return this.stateChangeCallbacks.message.push([e,t]),e}onHeartbeat(t){this.heartbeatCallback=t}ping(t){if(!this.isConnected())return!1;let e=this.makeRef(),s=Date.now();this.push({topic:"phoenix",event:"heartbeat",payload:{},ref:e});let r=this.onMessage(n=>{n.ref===e&&(this.off([r]),t(Date.now()-s))});return!0}transportName(t){switch(t){case Pe:return"LongPoll";default:return t.name}}transportConnect(){this.connectClock++,this.closeWasClean=!1;let t;this.authToken&&(t=["phoenix",`${us}${btoa(this.authToken()).replace(/=/g,"")}`]),this.conn=new this.transport(this.endPointURL(),t),this.conn.binaryType=this.binaryType,this.conn.timeout=this.longpollerTimeout,this.conn.onopen=()=>this.onConnOpen(),this.conn.onerror=e=>this.onConnError(e),this.conn.onmessage=e=>this.onConnMessage(e),this.conn.onclose=e=>this.onConnClose(e)}getSession(t){return this.sessionStore&&this.sessionStore.getItem(t)}storeSession(t,e){this.sessionStore&&this.sessionStore.setItem(t,e)}connectWithFallback(t,e=2500){clearTimeout(this.fallbackTimer);let s=!1,r=!0,n,i,a=this.transportName(t),o=l=>{this.log("transport",`falling back to ${a}...`,l),this.off([n,i]),r=!1,this.replaceTransport(t),this.transportConnect()};if(this.getSession(`phx:fallback:${a}`))return o("memorized");this.fallbackTimer=setTimeout(o,e),i=this.onError(l=>{this.log("transport","error",l),r&&!s&&(clearTimeout(this.fallbackTimer),o(l))}),this.fallbackRef&&this.off([this.fallbackRef]),this.fallbackRef=this.onOpen(()=>{if(s=!0,!r){let l=this.transportName(t);return this.primaryPassedHealthCheck||this.storeSession(`phx:fallback:${l}`,"true"),this.log("transport",`established ${l} fallback`)}clearTimeout(this.fallbackTimer),this.fallbackTimer=setTimeout(o,e),this.ping(l=>{this.log("transport","connected to primary after",l),this.primaryPassedHealthCheck=!0,clearTimeout(this.fallbackTimer)})}),this.transportConnect()}clearHeartbeats(){clearTimeout(this.heartbeatTimer),clearTimeout(this.heartbeatTimeoutTimer)}onConnOpen(){this.hasLogger()&&this.log("transport",`connected to ${this.endPointURL()}`),this.closeWasClean=!1,this.disconnecting=!1,this.establishedConnections++,this.flushSendBuffer(),this.reconnectTimer.reset(),this.autoSendHeartbeat&&this.resetHeartbeat(),this.triggerStateCallbacks("open")}heartbeatTimeout(){if(this.pendingHeartbeatRef){this.pendingHeartbeatRef=null,this.heartbeatSentAt=null,this.hasLogger()&&this.log("transport","heartbeat timeout. Attempting to re-establish connection");try{this.heartbeatCallback("timeout")}catch(t){this.log("error","error in heartbeat callback",t)}this.triggerChanError(new Error("heartbeat timeout")),this.closeWasClean=!1,this.teardown(()=>this.reconnectTimer.scheduleTimeout(),Pi,"heartbeat timeout")}}resetHeartbeat(){this.conn&&this.conn.skipHeartbeat||(this.pendingHeartbeatRef=null,this.clearHeartbeats(),this.heartbeatTimer=setTimeout(()=>this.sendHeartbeat(),this.heartbeatIntervalMs))}teardown(t,e,s){if(!this.conn)return t&&t();const r=this.conn;this.waitForBufferDone(r,()=>{e?r.close(e,s||""):r.close(),this.waitForSocketClosed(r,()=>{this.conn===r&&(this.conn.onopen=function(){},this.conn.onerror=function(){},this.conn.onmessage=function(){},this.conn.onclose=function(){},this.conn=null),t&&t()})})}waitForBufferDone(t,e,s=1){if(s===5||!t.bufferedAmount){e();return}setTimeout(()=>{this.waitForBufferDone(t,e,s+1)},150*s)}waitForSocketClosed(t,e,s=1){if(s===5||t.readyState===ne.closed){e();return}setTimeout(()=>{this.waitForSocketClosed(t,e,s+1)},150*s)}onConnClose(t){this.conn&&(this.conn.onclose=()=>{}),this.hasLogger()&&this.log("transport","close",t),this.triggerChanError(t),this.clearHeartbeats(),this.closeWasClean||this.reconnectTimer.scheduleTimeout(),this.triggerStateCallbacks("close",t)}onConnError(t){this.hasLogger()&&this.log("transport","error",t);let e=this.transport,s=this.establishedConnections;this.triggerStateCallbacks("error",t,e,s),(e===this.transport||s>0)&&this.triggerChanError(t)}triggerChanError(t){this.channels.forEach(e=>{e.isErrored()||e.isLeaving()||e.isClosed()||e.trigger(ue.error,t)})}connectionState(){switch(this.conn&&this.conn.readyState){case ne.connecting:return"connecting";case ne.open:return"open";case ne.closing:return"closing";default:return"closed"}}isConnected(){return this.connectionState()==="open"}remove(t){this.off(t.stateChangeRefs),this.channels=this.channels.filter(e=>e!==t)}off(t){for(let e in this.stateChangeCallbacks)this.stateChangeCallbacks[e]=this.stateChangeCallbacks[e].filter(([s])=>t.indexOf(s)===-1)}channel(t,e={}){let s=new Li(t,e,this);return this.channels.push(s),s}push(t){if(this.hasLogger()){let{topic:e,event:s,payload:r,ref:n,join_ref:i}=t;this.log("push",`${e} ${s} (${i}, ${n})`,r)}this.isConnected()?this.encode(t,e=>this.conn.send(e)):this.sendBuffer.push(()=>this.encode(t,e=>this.conn.send(e)))}makeRef(){let t=this.ref+1;return t===this.ref?this.ref=0:this.ref=t,this.ref.toString()}sendHeartbeat(){if(!this.isConnected()){try{this.heartbeatCallback("disconnected")}catch(t){this.log("error","error in heartbeat callback",t)}return}if(this.pendingHeartbeatRef){this.heartbeatTimeout();return}this.pendingHeartbeatRef=this.makeRef(),this.heartbeatSentAt=Date.now(),this.push({topic:"phoenix",event:"heartbeat",payload:{},ref:this.pendingHeartbeatRef});try{this.heartbeatCallback("sent")}catch(t){this.log("error","error in heartbeat callback",t)}this.heartbeatTimeoutTimer=setTimeout(()=>this.heartbeatTimeout(),this.heartbeatIntervalMs)}flushSendBuffer(){this.isConnected()&&this.sendBuffer.length>0&&(this.sendBuffer.forEach(t=>t()),this.sendBuffer=[])}onConnMessage(t){this.decode(t.data,e=>{let{topic:s,event:r,payload:n,ref:i,join_ref:a}=e;if(i&&i===this.pendingHeartbeatRef){const o=this.heartbeatSentAt?Date.now()-this.heartbeatSentAt:void 0;this.clearHeartbeats();try{this.heartbeatCallback(n.status==="ok"?"ok":"error",o)}catch(l){this.log("error","error in heartbeat callback",l)}this.pendingHeartbeatRef=null,this.heartbeatSentAt=null,this.autoSendHeartbeat&&(this.heartbeatTimer=setTimeout(()=>this.sendHeartbeat(),this.heartbeatIntervalMs))}this.hasLogger()&&this.log("receive",`${n.status||""} ${s} ${r} ${i&&"("+i+")"||""}`.trim(),n);for(let o=0;o<this.channels.length;o++){const l=this.channels[o];l.isMember(s,r,n,a)&&l.trigger(r,n,i,a)}this.triggerStateCallbacks("message",e)})}triggerStateCallbacks(t,...e){try{this.stateChangeCallbacks[t].forEach(([s,r])=>{try{r(...e)}catch(n){this.log("error",`error in ${t} callback`,n)}})}catch(s){this.log("error",`error triggering ${t} callbacks`,s)}}leaveOpenTopic(t){let e=this.channels.find(s=>s.topic===t&&(s.isJoined()||s.isJoining()));e&&(this.hasLogger()&&this.log("transport",`leaving duplicate topic "${t}"`),e.leave())}};class Xe{constructor(e,s){const r=Bi(s);this.presence=new xi(e.getChannel(),r),this.presence.onJoin((n,i,a)=>{const o=Xe.onJoinPayload(n,i,a);e.getChannel().trigger("presence",o)}),this.presence.onLeave((n,i,a)=>{const o=Xe.onLeavePayload(n,i,a);e.getChannel().trigger("presence",o)}),this.presence.onSync(()=>{e.getChannel().trigger("presence",{event:"sync"})})}get state(){return Xe.transformState(this.presence.state)}static transformState(e){return e=Ui(e),Object.getOwnPropertyNames(e).reduce((s,r)=>{const n=e[r];return s[r]=Tt(n),s},{})}static onJoinPayload(e,s,r){const n=Ms(s),i=Tt(r);return{event:"join",key:e,currentPresences:n,newPresences:i}}static onLeavePayload(e,s,r){const n=Ms(s),i=Tt(r);return{event:"leave",key:e,currentPresences:n,leftPresences:i}}}function Tt(t){return t.metas.map(e=>{const s=Object.getOwnPropertyDescriptors(e),r=Object.defineProperties({},s);return r.presence_ref=r.phx_ref,delete r.phx_ref,delete r.phx_ref_prev,r})}function Ui(t){return JSON.parse(JSON.stringify(t))}function Bi(t){return t?.events&&{events:t.events}}function Ms(t){return t?.metas?Tt(t):[]}var Hs;(function(t){t.SYNC="sync",t.JOIN="join",t.LEAVE="leave"})(Hs||(Hs={}));class Mi{get state(){return this.presenceAdapter.state}constructor(e,s){this.channel=e,this.presenceAdapter=new Xe(this.channel.channelAdapter,s)}}function Hi(t){if(t instanceof Error)return t;if(typeof t=="string")return new Error(t);if(t&&typeof t=="object"){const e=t;if(typeof e.code=="number"){const s=typeof e.reason=="string"&&e.reason?` (${e.reason})`:"";return new Error(`socket closed: ${e.code}${s}`,{cause:t})}return new Error("channel error: transport failure",{cause:t})}return new Error("channel error: connection lost")}class Fi{constructor(e,s,r){const n=zi(r);this.channel=e.getSocket().channel(s,n),this.socket=e}get state(){return this.channel.state}set state(e){this.channel.state=e}get joinedOnce(){return this.channel.joinedOnce}get joinPush(){return this.channel.joinPush}get rejoinTimer(){return this.channel.rejoinTimer}on(e,s){return this.channel.on(e,s)}off(e,s){this.channel.off(e,s)}subscribe(e){return this.channel.join(e)}unsubscribe(e){return this.channel.leave(e)}teardown(){this.channel.teardown()}onClose(e){this.channel.onClose(e)}onError(e){return this.channel.onError(e)}push(e,s,r){let n;try{n=this.channel.push(e,s,r)}catch{throw new Error(`tried to push '${e}' to '${this.channel.topic}' before joining. Use channel.subscribe() before pushing events`)}if(this.channel.pushBuffer.length>bi){const i=this.channel.pushBuffer.shift();i.cancelTimeout(),this.socket.log("channel",`discarded push due to buffer overflow: ${i.event}`,i.payload())}return n}updateJoinPayload(e){const s=this.channel.joinPush.payload();this.channel.joinPush.payload=()=>Object.assign(Object.assign({},s),e)}canPush(){return this.socket.isConnected()&&this.state===ye.joined}isJoined(){return this.state===ye.joined}isJoining(){return this.state===ye.joining}isClosed(){return this.state===ye.closed}isLeaving(){return this.state===ye.leaving}updateFilterBindings(e){this.channel.filterBindings=e}updatePayloadTransform(e){this.channel.onMessage=e}getChannel(){return this.channel}}function zi(t){return{config:Object.assign({broadcast:{ack:!1,self:!1},presence:{key:"",enabled:!1},private:!1},t.config)}}const Ki=/[,()"\\]/,qi=t=>Ki.test(t)||t!==t.trim(),Wi=t=>`"${t.replace(/\\/g,"\\\\").replace(/"/g,'\\"')}"`,Fs=t=>{const e=t===null?"null":String(t);return qi(e)?Wi(e):e},Gi=t=>t===null?"null":String(t),Vi=(t,e)=>{if(t==="in"){const s=Array.isArray(e)?e:[e];if(s.length===0)throw new Error("Realtime `in` filter requires at least one value.");return`in.(${Array.from(new Set(s)).map(n=>Fs(n)).join(",")})`}return t==="is"?`is.${Gi(e)}`:`${t}.${Fs(e)}`};class Ji{constructor(){this.filters=[]}add(e,s,r,n=!1){const i=n?"not.":"";return this.filters.push(`${e}=${i}${Vi(s,r)}`),this}eq(e,s){return this.add(e,"eq",s)}neq(e,s){return this.add(e,"neq",s)}gt(e,s){return this.add(e,"gt",s)}gte(e,s){return this.add(e,"gte",s)}lt(e,s){return this.add(e,"lt",s)}lte(e,s){return this.add(e,"lte",s)}in(e,s){return this.add(e,"in",s)}like(e,s){return this.add(e,"like",s)}ilike(e,s){return this.add(e,"ilike",s)}match(e,s){return this.add(e,"match",s)}imatch(e,s){return this.add(e,"imatch",s)}is(e,s){return this.add(e,"is",s)}isDistinct(e,s){return this.add(e,"isdistinct",s)}not(e,s,r){return this.add(e,s,r,!0)}build(){return this.filters.join(",")}toString(){return this.build()}}var zs;(function(t){t.ALL="*",t.INSERT="INSERT",t.UPDATE="UPDATE",t.DELETE="DELETE"})(zs||(zs={}));var Ee;(function(t){t.BROADCAST="broadcast",t.PRESENCE="presence",t.POSTGRES_CHANGES="postgres_changes",t.SYSTEM="system"})(Ee||(Ee={}));var de;(function(t){t.SUBSCRIBED="SUBSCRIBED",t.TIMED_OUT="TIMED_OUT",t.CLOSED="CLOSED",t.CHANNEL_ERROR="CHANNEL_ERROR"})(de||(de={}));class he{get state(){return this.channelAdapter.state}set state(e){this.channelAdapter.state=e}get joinedOnce(){return this.channelAdapter.joinedOnce}get timeout(){return this.socket.timeout}get joinPush(){return this.channelAdapter.joinPush}get rejoinTimer(){return this.channelAdapter.rejoinTimer}constructor(e,s={config:{}},r){var n,i;if(this.topic=e,this.params=s,this.socket=r,this.bindings={},this.subTopic=e.replace(/^realtime:/i,""),this.params.config=Object.assign({broadcast:{ack:!1,self:!1},presence:{key:"",enabled:!1},private:!1},s.config),this.channelAdapter=new Fi(this.socket.socketAdapter,e,this.params),this.presence=new Mi(this),this._onClose(()=>{this.socket._remove(this)}),this._updateFilterTransform(),this.broadcastEndpointURL=xr(this.socket.socketAdapter.endPointURL()),this.private=this.params.config.private||!1,!this.private&&(!((i=(n=this.params.config)===null||n===void 0?void 0:n.broadcast)===null||i===void 0)&&i.replay))throw new Error(`tried to use replay on public channel '${this.topic}'. It must be a private channel.`)}subscribe(e,s=this.timeout){var r,n,i,a;if(this.socket.isConnected()||this.socket.connect(),this.channelAdapter.isClosed()){const{config:{broadcast:o,presence:l,private:c,postgres_changes_options:u}}=this.params,d=(n=(r=this.bindings.postgres_changes)===null||r===void 0?void 0:r.map(m=>m.filter))!==null&&n!==void 0?n:[],f=!!this.bindings[Ee.PRESENCE]&&this.bindings[Ee.PRESENCE].length>0||((i=this.params.config.presence)===null||i===void 0?void 0:i.enabled)===!0,h={},p=Object.assign({broadcast:o,presence:Object.assign(Object.assign({},l),{enabled:f}),postgres_changes:d,private:c},u?{postgres_changes_options:u}:{});this.socket.accessTokenValue&&(h.access_token=this.socket.accessTokenValue),this._onError(m=>{e?.(de.CHANNEL_ERROR,Hi(m))}),this._onClose(()=>e?.(de.CLOSED)),this.updateJoinPayload(Object.assign({config:p},h)),this._updateFilterMessage();const g=u?.wait&&d.length>0?Math.max(s,((a=u.timeout)!==null&&a!==void 0?a:vi)+wi):s;this.channelAdapter.subscribe(g).receive("ok",async({postgres_changes:m})=>{if(this.socket._isManualToken()||this.socket.setAuth(),m===void 0){e?.(de.SUBSCRIBED);return}this._updatePostgresBindings(m,e)}).receive("error",m=>{this.state=ye.errored;const y=Object.values(m).join(", ")||"error";e?.(de.CHANNEL_ERROR,new Error(y,{cause:m}))}).receive("timeout",()=>{e?.(de.TIMED_OUT)})}return this}_updatePostgresBindings(e,s){var r;const n=this.bindings.postgres_changes,i=(r=n?.length)!==null&&r!==void 0?r:0,a=[];for(let o=0;o<i;o++){const l=n[o],{filter:{event:c,schema:u,table:d,filter:f}}=l,h=e&&e[o];if(h&&h.event===c&&he.isFilterValueEqual(h.schema,u)&&he.isFilterValueEqual(h.table,d)&&he.isFilterValueEqual(h.filter,f))a.push(Object.assign(Object.assign({},l),{id:h.id}));else{this.unsubscribe(),this.state=ye.errored,s?.(de.CHANNEL_ERROR,new Error("mismatch between server and client bindings for postgres changes"));return}}this.bindings.postgres_changes=a,this.state!=ye.errored&&s&&s(de.SUBSCRIBED)}presenceState(){return this.presence.state}async track(e,s={}){return await this.send({type:"presence",event:"track",payload:e},s)}async untrack(e={}){return await this.send({type:"presence",event:"untrack"},e)}on(e,s,r){const n=this.channelAdapter.isJoined()||this.channelAdapter.isJoining(),i=e===Ee.PRESENCE||e===Ee.POSTGRES_CHANGES;if(n&&i)throw this.socket.log("channel",`cannot add \`${e}\` callbacks for ${this.topic} after \`subscribe()\`.`),new Error(`cannot add \`${e}\` callbacks for ${this.topic} after \`subscribe()\`.`);return this._on(e,s,r)}async httpSend(e,s,r={}){var n;if(s==null)return Promise.reject(new Error("Payload is required for httpSend()"));const i=s instanceof ArrayBuffer||ArrayBuffer.isView(s),a={apikey:this.socket.apiKey?this.socket.apiKey:"","Content-Type":i?"application/octet-stream":"application/json"};this.socket.accessTokenValue&&(a.Authorization=`Bearer ${this.socket.accessTokenValue}`);const o=new URL(this.broadcastEndpointURL);o.pathname+=`/${encodeURIComponent(this.subTopic)}/events/${encodeURIComponent(e)}`,this.private&&o.searchParams.set("private","true");const l={method:"POST",headers:a,body:i?s:JSON.stringify(s)},c=await this._fetchWithTimeout(o.toString(),l,(n=r.timeout)!==null&&n!==void 0?n:this.timeout);if(c.status===202)return{success:!0};if(c.status===404)return Promise.reject(new Error("httpSend() requires Realtime server v2.97.0 or newer; the endpoint returned 404. Update your Supabase CLI to a recent version, or upgrade the Realtime server in your self-hosted setup. See https://github.com/supabase/supabase-js/blob/master/packages/core/realtime-js/migrations/httpsend-server-version.md"));let u=c.statusText;try{const d=await c.json();u=d.error||d.message||u}catch{}return Promise.reject(new Error(u))}async send(e,s={}){var r,n;if(!this.channelAdapter.canPush()&&e.type==="broadcast"){const i="Realtime send() is automatically falling back to REST API. This behavior will be deprecated in the future. Please use httpSend() explicitly for REST delivery.";this.socket.hasLogger()?this.socket.log("channel",i):console.warn(i);const{event:a,payload:o}=e,l={apikey:this.socket.apiKey?this.socket.apiKey:"","Content-Type":"application/json"};this.socket.accessTokenValue&&(l.Authorization=`Bearer ${this.socket.accessTokenValue}`);const c={method:"POST",headers:l,body:JSON.stringify({messages:[{topic:this.subTopic,event:a,payload:o,private:this.private}]})};try{const u=await this._fetchWithTimeout(this.broadcastEndpointURL,c,(r=s.timeout)!==null&&r!==void 0?r:this.timeout);return await((n=u.body)===null||n===void 0?void 0:n.cancel()),u.ok?"ok":"error"}catch(u){return u instanceof Error&&u.name==="AbortError"?"timed out":"error"}}else return new Promise(i=>{var a,o,l;const c=this.channelAdapter.push(e.type,e,s.timeout||this.timeout);e.type==="broadcast"&&!(!((l=(o=(a=this.params)===null||a===void 0?void 0:a.config)===null||o===void 0?void 0:o.broadcast)===null||l===void 0)&&l.ack)&&i("ok"),c.receive("ok",()=>i("ok")),c.receive("error",()=>i("error")),c.receive("timeout",()=>i("timed out"))})}updateJoinPayload(e){this.channelAdapter.updateJoinPayload(e)}async unsubscribe(e=this.timeout){return new Promise(s=>{this.channelAdapter.unsubscribe(e).receive("ok",()=>s("ok")).receive("timeout",()=>s("timed out")).receive("error",()=>s("error"))})}teardown(){this.channelAdapter.teardown()}async _fetchWithTimeout(e,s,r){const n=new AbortController,i=setTimeout(()=>n.abort(),r),a=await this.socket.fetch(e,Object.assign(Object.assign({},s),{signal:n.signal}));return clearTimeout(i),a}_on(e,s,r){var n;const i=e.toLocaleLowerCase(),a=s?.filter;if((a instanceof Ji||typeof a=="object"&&a!==null&&typeof a.build=="function")&&(s=Object.assign(Object.assign({},s),{filter:a.build()})),i===Ee.POSTGRES_CHANGES&&((n=this.bindings[i])===null||n===void 0?void 0:n.find(u=>he.isSamePostgresFilter(u.filter,s))))return this.socket.log("error",`duplicate \`postgres_changes\` binding for ${this.topic} ignored`,s),this;const o=this.channelAdapter.on(e,r),l={type:i,filter:s,callback:r,ref:o};return this.bindings[i]?this.bindings[i].push(l):this.bindings[i]=[l],this._updateFilterMessage(),this}_onClose(e){this.channelAdapter.onClose(e)}_onError(e){this.channelAdapter.onError(e)}_updateFilterMessage(){this.channelAdapter.updateFilterBindings((e,s,r)=>{var n,i,a,o,l,c,u;const d=e.event.toLocaleLowerCase();if(this._notThisChannelEvent(d,r))return!1;const f=(n=this.bindings[d])===null||n===void 0?void 0:n.find(h=>h.ref===e.ref);if(!f)return!0;if(["broadcast","presence","postgres_changes"].includes(d))if("id"in f){const h=f.id,p=(i=f.filter)===null||i===void 0?void 0:i.event;return h&&((a=s.ids)===null||a===void 0?void 0:a.includes(h))&&(p==="*"||p?.toLocaleLowerCase()===((o=s.data)===null||o===void 0?void 0:o.type.toLocaleLowerCase()))}else{const h=(c=(l=f?.filter)===null||l===void 0?void 0:l.event)===null||c===void 0?void 0:c.toLocaleLowerCase();return h==="*"||h===((u=s?.event)===null||u===void 0?void 0:u.toLocaleLowerCase())}else return f.type.toLocaleLowerCase()===d})}_notThisChannelEvent(e,s){const{close:r,error:n,leave:i,join:a}=Lr;return s&&[r,n,i,a].includes(e)&&s!==this.joinPush.ref}_updateFilterTransform(){this.channelAdapter.updatePayloadTransform((e,s,r)=>{if(typeof s=="object"&&"ids"in s){const n=s.data,{schema:i,table:a,commit_timestamp:o,type:l,errors:c}=n;return Object.assign(Object.assign({},{schema:i,table:a,commit_timestamp:o,eventType:l,new:{},old:{},errors:c}),this._getPayloadRecords(n))}return s})}copyBindings(e){if(this.joinedOnce)throw new Error("cannot copy bindings into joined channel");for(const s in e.bindings)for(const r of e.bindings[s])this._on(r.type,r.filter,r.callback)}static isFilterValueEqual(e,s){return(e??void 0)===(s??void 0)}static isSamePostgresFilter(e,s){var r,n,i,a;const o=(n=(r=e?.select)===null||r===void 0?void 0:r.join())!==null&&n!==void 0?n:void 0,l=(a=(i=s?.select)===null||i===void 0?void 0:i.join())!==null&&a!==void 0?a:void 0;return e?.event===s?.event&&he.isFilterValueEqual(e?.schema,s?.schema)&&he.isFilterValueEqual(e?.table,s?.table)&&he.isFilterValueEqual(e?.filter,s?.filter)&&o===l}_getPayloadRecords(e){const s={new:{},old:{}};return(e.type==="INSERT"||e.type==="UPDATE")&&(s.new=Bs(e.columns,e.record)),(e.type==="UPDATE"||e.type==="DELETE")&&(s.old=Bs(e.columns,e.old_record)),s}}class Yi{constructor(e,s){this.socket=new Di(e,s)}get timeout(){return this.socket.timeout}get endPoint(){return this.socket.endPoint}get transport(){return this.socket.transport}get heartbeatIntervalMs(){return this.socket.heartbeatIntervalMs}get heartbeatCallback(){return this.socket.heartbeatCallback}set heartbeatCallback(e){this.socket.heartbeatCallback=e}get heartbeatTimer(){return this.socket.heartbeatTimer}get pendingHeartbeatRef(){return this.socket.pendingHeartbeatRef}get reconnectTimer(){return this.socket.reconnectTimer}get vsn(){return this.socket.vsn}get encode(){return this.socket.encode}get decode(){return this.socket.decode}get reconnectAfterMs(){return this.socket.reconnectAfterMs}get sendBuffer(){return this.socket.sendBuffer}get stateChangeCallbacks(){return this.socket.stateChangeCallbacks}connect(){this.socket.connect()}disconnect(e,s,r,n=1e4){return new Promise(i=>{setTimeout(()=>i("timeout"),n),this.socket.disconnect(()=>{e(),i("ok")},s,r)})}push(e){this.socket.push(e)}log(e,s,r){this.socket.log(e,s,r)}hasLogger(){return this.socket.hasLogger()}makeRef(){return this.socket.makeRef()}onOpen(e){this.socket.onOpen(e)}onClose(e){this.socket.onClose(e)}onError(e){this.socket.onError(e)}onMessage(e){this.socket.onMessage(e)}isConnected(){return this.socket.isConnected()}isConnecting(){return this.socket.connectionState()==os.connecting}isDisconnecting(){return this.socket.connectionState()==os.closing}connectionState(){return this.socket.connectionState()}endPointURL(){return this.socket.endPointURL()}sendHeartbeat(){this.socket.sendHeartbeat()}getSocket(){return this.socket}}const Ks={HEARTBEAT_INTERVAL:25e3},Xi=[1e3,2e3,5e3,1e4],Zi=1e4;function Qi(){const t=new Map;return{get length(){return t.size},clear(){t.clear()},getItem(e){return t.has(e)?t.get(e):null},key(e){var s;return(s=Array.from(t.keys())[e])!==null&&s!==void 0?s:null},removeItem(e){t.delete(e)},setItem(e,s){t.set(e,String(s))}}}function ea(){try{if(typeof globalThis<"u"&&globalThis.sessionStorage)return globalThis.sessionStorage}catch{}return Qi()}const ta=`
+  addEventListener("message", (e) => {
+    if (e.data.event === "start") {
+      setInterval(() => postMessage({ event: "keepAlive" }), e.data.interval);
     }
-  }catch{}
-  return null;
-}
-function recordFailedAttempt(){
-  try{
-    const now=Date.now();
-    const rec=JSON.parse(localStorage.getItem(LOGIN_ATTEMPTS_KEY)||"{}");
-    const cnt=(rec.count||0)+1;
-    if(cnt>=3){
-      rec.blockedUntil=now+30000;
-      rec.count=0;
-    }else{
-      rec.count=cnt;
-    }
-    localStorage.setItem(LOGIN_ATTEMPTS_KEY,JSON.stringify(rec));
-  }catch{}
-}
-function resetLoginAttempts(){
-  try{localStorage.removeItem(LOGIN_ATTEMPTS_KEY)}catch{}
-}
+  });`;class sa{get endPoint(){return this.socketAdapter.endPoint}get timeout(){return this.socketAdapter.timeout}get transport(){return this.socketAdapter.transport}get heartbeatCallback(){return this.socketAdapter.heartbeatCallback}get heartbeatIntervalMs(){return this.socketAdapter.heartbeatIntervalMs}get heartbeatTimer(){return this.worker?this._workerHeartbeatTimer:this.socketAdapter.heartbeatTimer}get pendingHeartbeatRef(){return this.worker?this._pendingWorkerHeartbeatRef:this.socketAdapter.pendingHeartbeatRef}get reconnectTimer(){return this.socketAdapter.reconnectTimer}get vsn(){return this.socketAdapter.vsn}get encode(){return this.socketAdapter.encode}get decode(){return this.socketAdapter.decode}get reconnectAfterMs(){return this.socketAdapter.reconnectAfterMs}get sendBuffer(){return this.socketAdapter.sendBuffer}get stateChangeCallbacks(){return this.socketAdapter.stateChangeCallbacks}constructor(e,s){var r;if(this.channels=new Array,this.accessTokenValue=null,this.accessToken=null,this.apiKey=null,this.httpEndpoint="",this.headers={},this.params={},this.ref=0,this.serializer=new _i,this._manuallySetToken=!1,this._authPromise=null,this._authGeneration=0,this._workerHeartbeatTimer=void 0,this._pendingWorkerHeartbeatRef=null,this._pendingDisconnectTimer=null,this._disconnectOnEmptyChannelsAfterMs=0,this._resolveFetch=i=>i?(...a)=>i(...a):(...a)=>fetch(...a),!(!((r=s?.params)===null||r===void 0)&&r.apikey))throw new Error("API key is required to connect to Realtime");this.apiKey=s.params.apikey;const n=this._initializeOptions(s);this.socketAdapter=new Yi(e,n),this.httpEndpoint=xr(e),this.fetch=this._resolveFetch(s?.fetch)}connect(){if(!(this.isConnecting()||this.isDisconnecting()||this.isConnected())){this.accessToken&&!this._authPromise&&this._setAuthSafely("connect"),this._setupConnectionHandlers();try{this.socketAdapter.connect()}catch(e){const s=e.message;throw new Error(`WebSocket not available: ${s}`)}this._handleNodeJsRaceCondition()}}endpointURL(){return this.socketAdapter.endPointURL()}async disconnect(e,s){return this._cancelPendingDisconnect(),this.isDisconnecting()?"ok":await this.socketAdapter.disconnect(()=>{clearInterval(this._workerHeartbeatTimer),this._terminateWorker()},e,s)}getChannels(){return this.channels}async removeChannel(e){const s=await e.unsubscribe();return s==="ok"&&e.teardown(),s}async removeAllChannels(){const e=this.channels.map(async r=>{const n=await r.unsubscribe();return r.teardown(),n}),s=await Promise.all(e);return await this.disconnect(),s}log(e,s,r){this.socketAdapter.log(e,s,r)}hasLogger(){return this.socketAdapter.hasLogger()}connectionState(){return this.socketAdapter.connectionState()||os.closed}isConnected(){return this.socketAdapter.isConnected()}isConnecting(){return this.socketAdapter.isConnecting()}isDisconnecting(){return this.socketAdapter.isDisconnecting()}channel(e,s={config:{}}){const r=`realtime:${e}`,n=this.getChannels().find(i=>i.topic===r);if(n)return n;{const i=new he(`realtime:${e}`,s,this);return this._cancelPendingDisconnect(),this.channels.push(i),i}}push(e){this.socketAdapter.push(e)}async setAuth(e=null){const s=++this._authGeneration,r=this._performAuth(e,s);s===this._authGeneration&&(this._authPromise=r);try{await r}finally{this._authPromise===r&&(this._authPromise=null)}}_isManualToken(){return this._manuallySetToken}async sendHeartbeat(){this.socketAdapter.sendHeartbeat()}onHeartbeat(e){this.socketAdapter.heartbeatCallback=this._wrapHeartbeatCallback(e)}_makeRef(){return this.socketAdapter.makeRef()}_remove(e){this.channels=this.channels.filter(s=>s.topic!==e.topic),this.channels.length===0&&(this.log("transport","no channels remaining, scheduling disconnect"),this._schedulePendingDisconnect())}_schedulePendingDisconnect(){if(this._cancelPendingDisconnect(),this._disconnectOnEmptyChannelsAfterMs===0){this.log("transport","disconnecting immediately - no channels"),this.disconnect();return}this._pendingDisconnectTimer=setTimeout(()=>{this._pendingDisconnectTimer=null,this.channels.length===0&&(this.log("transport","deferred disconnect fired - no channels, disconnecting"),this.disconnect())},this._disconnectOnEmptyChannelsAfterMs),this.log("transport",`deferred disconnect scheduled in ${this._disconnectOnEmptyChannelsAfterMs}ms`)}_cancelPendingDisconnect(){this._pendingDisconnectTimer!==null&&(this.log("transport","pending disconnect cancelled - channel activity detected"),clearTimeout(this._pendingDisconnectTimer),this._pendingDisconnectTimer=null)}async _performAuth(e,s){let r,n=!1;if(e)r=e,n=!0;else if(this.accessToken)try{r=await this.accessToken()}catch(i){this.log("error","Error fetching access token from callback",i),r=this.accessTokenValue}else r=this.accessTokenValue;s===this._authGeneration&&(this.accessToken?this._manuallySetToken=!1:n&&(this._manuallySetToken=!0),this.accessTokenValue!=r&&(this.accessTokenValue=r,this.channels.forEach(i=>{const a={access_token:r,version:pi};i.updateJoinPayload(a),i.joinedOnce&&i.channelAdapter.isJoined()&&i.channelAdapter.push(Lr.access_token,{access_token:r})})))}async _waitForAuthIfNeeded(){this._authPromise&&await this._authPromise}_setAuthSafely(e="general"){this._isManualToken()||this.setAuth().catch(s=>{this.log("error",`Error setting auth in ${e}`,s)})}_setupConnectionHandlers(){this.socketAdapter.onOpen(()=>{(this._authPromise||(this.accessToken&&!this.accessTokenValue?this.setAuth():Promise.resolve())).catch(s=>{this.log("error","error waiting for auth on connect",s)}),this.worker&&!this.workerRef&&this._startWorkerHeartbeat()}),this.socketAdapter.onClose(()=>{this.worker&&this.workerRef&&this._terminateWorker()}),this.socketAdapter.onMessage(e=>{e.ref&&e.ref===this._pendingWorkerHeartbeatRef&&(this._pendingWorkerHeartbeatRef=null)})}_handleNodeJsRaceCondition(){this.socketAdapter.isConnected()&&this.socketAdapter.getSocket().onConnOpen()}_wrapHeartbeatCallback(e){return(s,r)=>{s!=="disconnected"&&(s=="sent"&&this._setAuthSafely(),e&&e(s,r))}}_startWorkerHeartbeat(){this.workerUrl?this.log("worker",`starting worker for from ${this.workerUrl}`):this.log("worker","starting default worker");const e=this._workerObjectUrl(this.workerUrl);this.workerRef=new Worker(e),this.workerRef.onerror=s=>{this.log("worker","worker error",s.message),this._terminateWorker(),this.disconnect()},this.workerRef.onmessage=s=>{s.data.event==="keepAlive"&&this.sendHeartbeat()},this.workerRef.postMessage({event:"start",interval:this.heartbeatIntervalMs})}_terminateWorker(){this.workerRef&&(this.log("worker","terminating worker"),this.workerRef.terminate(),this.workerRef=void 0)}_workerObjectUrl(e){let s;if(e)s=e;else{const r=new Blob([ta],{type:"application/javascript"});s=URL.createObjectURL(r)}return s}_initializeOptions(e){var s,r,n,i,a,o,l,c,u,d,f,h;this.worker=(s=e?.worker)!==null&&s!==void 0?s:!1,this.accessToken=(r=e?.accessToken)!==null&&r!==void 0?r:null;const p={};p.timeout=(n=e?.timeout)!==null&&n!==void 0?n:yi,p.heartbeatIntervalMs=(i=e?.heartbeatIntervalMs)!==null&&i!==void 0?i:Ks.HEARTBEAT_INTERVAL,this._disconnectOnEmptyChannelsAfterMs=(a=e?.disconnectOnEmptyChannelsAfterMs)!==null&&a!==void 0?a:2*((o=e?.heartbeatIntervalMs)!==null&&o!==void 0?o:Ks.HEARTBEAT_INTERVAL),p.transport=(l=e?.transport)!==null&&l!==void 0?l:hi.getWebSocketConstructor(),p.params=e?.params,p.logger=e?.logger,p.heartbeatCallback=this._wrapHeartbeatCallback(e?.heartbeatCallback),p.sessionStorage=(c=e?.sessionStorage)!==null&&c!==void 0?c:ea(),p.reconnectAfterMs=(u=e?.reconnectAfterMs)!==null&&u!==void 0?u:(v=>Xi[v-1]||Zi);let g,m;const y=(d=e?.vsn)!==null&&d!==void 0?d:mi;switch(y){case gi:g=(v,w)=>w(JSON.stringify(v)),m=(v,w)=>w(JSON.parse(v));break;case Nr:g=this.serializer.encode.bind(this.serializer),m=this.serializer.decode.bind(this.serializer);break;default:throw new Error(`Unsupported serializer version: ${p.vsn}`)}if(p.vsn=y,p.encode=(f=e?.encode)!==null&&f!==void 0?f:g,p.decode=(h=e?.decode)!==null&&h!==void 0?h:m,p.beforeReconnect=this._reconnectAuth.bind(this),(e?.logLevel||e?.log_level)&&(this.logLevel=e.logLevel||e.log_level,p.params=Object.assign(Object.assign({},p.params),{log_level:this.logLevel})),this.worker){if(typeof window<"u"&&!window.Worker)throw new Error("Web Worker is not supported");this.workerUrl=e?.workerUrl,p.autoSendHeartbeat=!this.worker}return p}async _reconnectAuth(){await this._waitForAuthIfNeeded(),this.isConnected()||this.connect()}}var nt=class extends Error{constructor(t,e){super(t),this.name="IcebergError",this.status=e.status,this.icebergType=e.icebergType,this.icebergCode=e.icebergCode,this.details=e.details,this.isCommitStateUnknown=e.icebergType==="CommitStateUnknownException"||[500,502,504].includes(e.status)&&e.icebergType?.includes("CommitState")===!0}isNotFound(){return this.status===404}isConflict(){return this.status===409}isAuthenticationTimeout(){return this.status===419}};function ra(t,e,s){const r=new URL(e,t);if(s)for(const[n,i]of Object.entries(s))i!==void 0&&r.searchParams.set(n,i);return r.toString()}async function na(t){return!t||t.type==="none"?{}:t.type==="bearer"?{Authorization:`Bearer ${t.token}`}:t.type==="header"?{[t.name]:t.value}:t.type==="custom"?await t.getHeaders():{}}function ia(t){const e=t.fetchImpl??globalThis.fetch;return{async request({method:s,path:r,query:n,body:i,headers:a}){const o=ra(t.baseUrl,r,n),l=await na(t.auth),c=await e(o,{method:s,headers:{...i?{"Content-Type":"application/json"}:{},...l,...a},body:i?JSON.stringify(i):void 0}),u=await c.text(),d=(c.headers.get("content-type")||"").includes("application/json"),f=d&&u?JSON.parse(u):u;if(!c.ok){const h=d?f:void 0,p=h?.error;throw new nt(p?.message??`Request failed with status ${c.status}`,{status:c.status,icebergType:p?.type,icebergCode:p?.code,details:h})}return{status:c.status,headers:c.headers,data:f}}}}function wt(t){return t.join("")}var aa=class{constructor(t,e=""){this.client=t,this.prefix=e}async listNamespaces(t){const e=t?{parent:wt(t.namespace)}:void 0;return(await this.client.request({method:"GET",path:`${this.prefix}/namespaces`,query:e})).data.namespaces.map(r=>({namespace:r}))}async createNamespace(t,e){const s={namespace:t.namespace,properties:e?.properties};return(await this.client.request({method:"POST",path:`${this.prefix}/namespaces`,body:s})).data}async dropNamespace(t){await this.client.request({method:"DELETE",path:`${this.prefix}/namespaces/${wt(t.namespace)}`})}async loadNamespaceMetadata(t){return{properties:(await this.client.request({method:"GET",path:`${this.prefix}/namespaces/${wt(t.namespace)}`})).data.properties}}async namespaceExists(t){try{return await this.client.request({method:"HEAD",path:`${this.prefix}/namespaces/${wt(t.namespace)}`}),!0}catch(e){if(e instanceof nt&&e.status===404)return!1;throw e}}async createNamespaceIfNotExists(t,e){try{return await this.createNamespace(t,e)}catch(s){if(s instanceof nt&&s.status===409)return;throw s}}};function Ie(t){return t.join("")}var oa=class{constructor(t,e="",s){this.client=t,this.prefix=e,this.accessDelegation=s}async listTables(t){return(await this.client.request({method:"GET",path:`${this.prefix}/namespaces/${Ie(t.namespace)}/tables`})).data.identifiers}async createTable(t,e){const s={};return this.accessDelegation&&(s["X-Iceberg-Access-Delegation"]=this.accessDelegation),(await this.client.request({method:"POST",path:`${this.prefix}/namespaces/${Ie(t.namespace)}/tables`,body:e,headers:s})).data.metadata}async updateTable(t,e){const s=await this.client.request({method:"POST",path:`${this.prefix}/namespaces/${Ie(t.namespace)}/tables/${t.name}`,body:e});return{"metadata-location":s.data["metadata-location"],metadata:s.data.metadata}}async dropTable(t,e){await this.client.request({method:"DELETE",path:`${this.prefix}/namespaces/${Ie(t.namespace)}/tables/${t.name}`,query:{purgeRequested:String(e?.purge??!1)}})}async loadTable(t){const e={};return this.accessDelegation&&(e["X-Iceberg-Access-Delegation"]=this.accessDelegation),(await this.client.request({method:"GET",path:`${this.prefix}/namespaces/${Ie(t.namespace)}/tables/${t.name}`,headers:e})).data.metadata}async tableExists(t){const e={};this.accessDelegation&&(e["X-Iceberg-Access-Delegation"]=this.accessDelegation);try{return await this.client.request({method:"HEAD",path:`${this.prefix}/namespaces/${Ie(t.namespace)}/tables/${t.name}`,headers:e}),!0}catch(s){if(s instanceof nt&&s.status===404)return!1;throw s}}async createTableIfNotExists(t,e){try{return await this.createTable(t,e)}catch(s){if(s instanceof nt&&s.status===409)return await this.loadTable({namespace:t.namespace,name:e.name});throw s}}},la=class{constructor(t){let e="v1";t.catalogName&&(e+=`/${t.catalogName}`);const s=t.baseUrl.endsWith("/")?t.baseUrl:`${t.baseUrl}/`;this.client=ia({baseUrl:s,auth:t.auth,fetchImpl:t.fetch}),this.accessDelegation=t.accessDelegation?.join(","),this.namespaceOps=new aa(this.client,e),this.tableOps=new oa(this.client,e,this.accessDelegation)}async listNamespaces(t){return this.namespaceOps.listNamespaces(t)}async createNamespace(t,e){return this.namespaceOps.createNamespace(t,e)}async dropNamespace(t){await this.namespaceOps.dropNamespace(t)}async loadNamespaceMetadata(t){return this.namespaceOps.loadNamespaceMetadata(t)}async listTables(t){return this.tableOps.listTables(t)}async createTable(t,e){return this.tableOps.createTable(t,e)}async updateTable(t,e){return this.tableOps.updateTable(t,e)}async dropTable(t,e){await this.tableOps.dropTable(t,e)}async loadTable(t){return this.tableOps.loadTable(t)}async namespaceExists(t){return this.namespaceOps.namespaceExists(t)}async tableExists(t){return this.tableOps.tableExists(t)}async createNamespaceIfNotExists(t,e){return this.namespaceOps.createNamespaceIfNotExists(t,e)}async createTableIfNotExists(t,e){return this.tableOps.createTableIfNotExists(t,e)}};function it(t){"@babel/helpers - typeof";return it=typeof Symbol=="function"&&typeof Symbol.iterator=="symbol"?function(e){return typeof e}:function(e){return e&&typeof Symbol=="function"&&e.constructor===Symbol&&e!==Symbol.prototype?"symbol":typeof e},it(t)}function ca(t,e){if(it(t)!="object"||!t)return t;var s=t[Symbol.toPrimitive];if(s!==void 0){var r=s.call(t,e);if(it(r)!="object")return r;throw new TypeError("@@toPrimitive must return a primitive value.")}return(e==="string"?String:Number)(t)}function ua(t){var e=ca(t,"string");return it(e)=="symbol"?e:e+""}function da(t,e,s){return(e=ua(e))in t?Object.defineProperty(t,e,{value:s,enumerable:!0,configurable:!0,writable:!0}):t[e]=s,t}function qs(t,e){var s=Object.keys(t);if(Object.getOwnPropertySymbols){var r=Object.getOwnPropertySymbols(t);e&&(r=r.filter(function(n){return Object.getOwnPropertyDescriptor(t,n).enumerable})),s.push.apply(s,r)}return s}function E(t){for(var e=1;e<arguments.length;e++){var s=arguments[e]!=null?arguments[e]:{};e%2?qs(Object(s),!0).forEach(function(r){da(t,r,s[r])}):Object.getOwnPropertyDescriptors?Object.defineProperties(t,Object.getOwnPropertyDescriptors(s)):qs(Object(s)).forEach(function(r){Object.defineProperty(t,r,Object.getOwnPropertyDescriptor(s,r))})}return t}var qt=class extends Error{constructor(t,e="storage",s,r){super(t),this.__isStorageError=!0,this.namespace=e,this.name=e==="vectors"?"StorageVectorsError":"StorageError",this.status=s,this.statusCode=r}toJSON(){return{name:this.name,message:this.message,status:this.status,statusCode:this.statusCode}}};function Wt(t){return typeof t=="object"&&t!==null&&"__isStorageError"in t}var ds=class extends qt{constructor(t,e,s,r="storage",n){super(t,r,e,s),this.name=r==="vectors"?"StorageVectorsApiError":"StorageApiError",this.status=e,this.statusCode=s,this.code=n}toJSON(){return E(E({},super.toJSON()),{},{code:this.code})}},Ur=class extends qt{constructor(t,e,s="storage"){super(t,s),this.name=s==="vectors"?"StorageVectorsUnknownError":"StorageUnknownError",this.originalError=e}};function Pt(t,e,s){const r=E({},t),n=e.toLowerCase();for(const i of Object.keys(r))i.toLowerCase()===n&&delete r[i];return r[n]=s,r}function ha(t){const e={};for(const[s,r]of Object.entries(t))e[s.toLowerCase()]=r;return e}const fa=t=>t?(...e)=>t(...e):(...e)=>fetch(...e),pa=t=>{if(typeof t!="object"||t===null)return!1;const e=Object.getPrototypeOf(t);return(e===null||e===Object.prototype||Object.getPrototypeOf(e)===null)&&!(Symbol.toStringTag in t)&&!(Symbol.iterator in t)},hs=t=>{if(Array.isArray(t))return t.map(s=>hs(s));if(typeof t=="function"||t!==Object(t))return t;const e={};return Object.entries(t).forEach(([s,r])=>{const n=s.replace(/([-_][a-z])/gi,i=>i.toUpperCase().replace(/[-_]/g,""));e[n]=hs(r)}),e},ga=t=>!t||typeof t!="string"||t.length===0||t.length>100||t.trim()!==t||t.includes("/")||t.includes("\\")?!1:/^[\w!.\*'() &$@=;:+,?-]+$/.test(t),fs=t=>t.split("/").map(encodeURIComponent).join("/"),Ws=t=>{if(typeof t=="object"&&t!==null){const e=t;if(typeof e.msg=="string")return e.msg;if(typeof e.message=="string")return e.message;if(typeof e.error_description=="string")return e.error_description;if(typeof e.error=="string")return e.error;if(typeof e.error=="object"&&e.error!==null){const s=e.error;if(typeof s.message=="string")return s.message}}return JSON.stringify(t)},ma=async(t,e,s,r)=>{if(t!==null&&typeof t=="object"&&"json"in t&&typeof t.json=="function"){const n=t;let i=parseInt(String(n.status),10);Number.isFinite(i)||(i=500),n.json().then(a=>{const o=a?.statusCode||a?.code||i+"";e(new ds(Ws(a),i,o,r,a?.code))}).catch(()=>{const a=i+"";e(new ds(n.statusText||`HTTP ${i} error`,i,a,r))})}else e(new Ur(Ws(t),t,r))},ya=(t,e,s,r)=>{const n={method:t,headers:e?.headers||{}};if(t==="GET"||t==="HEAD"||!r)return E(E({},n),s);if(pa(r)){var i;const a=e?.headers||{};let o;for(const[l,c]of Object.entries(a))l.toLowerCase()==="content-type"&&(o=c);n.headers=Pt(a,"Content-Type",(i=o)!==null&&i!==void 0?i:"application/json"),n.body=JSON.stringify(r)}else n.body=r;return e?.duplex&&(n.duplex=e.duplex),E(E({},n),s)};async function qe(t,e,s,r,n,i,a){return new Promise((o,l)=>{t(s,ya(e,r,n,i)).then(c=>{if(!c.ok)throw c;if(r?.noResolveJson)return c;if(a==="vectors"){const u=c.headers.get("content-type");if(c.headers.get("content-length")==="0"||c.status===204)return{};if(!u||!u.includes("application/json"))return{}}return c.json()}).then(c=>o(c)).catch(c=>ma(c,l,r,a))})}function Br(t="storage"){return{get:async(e,s,r,n)=>qe(e,"GET",s,r,n,void 0,t),post:async(e,s,r,n,i)=>qe(e,"POST",s,n,i,r,t),put:async(e,s,r,n,i)=>qe(e,"PUT",s,n,i,r,t),head:async(e,s,r,n)=>qe(e,"HEAD",s,E(E({},r),{},{noResolveJson:!0}),n,void 0,t),remove:async(e,s,r,n,i)=>qe(e,"DELETE",s,n,i,r,t)}}const va=Br("storage"),{get:Be,post:ee,put:It,head:wa,remove:Me}=va,G=Br("vectors");var ze=class{constructor(t,e={},s,r="storage"){this.shouldThrowOnError=!1,this.url=t,this.headers=ha(e),this.fetch=fa(s),this.namespace=r}throwOnError(){return this.shouldThrowOnError=!0,this}setHeader(t,e){return this.headers=Pt(this.headers,t,e),this}async handleOperation(t){var e=this;try{return{data:await t(),error:null}}catch(s){if(e.shouldThrowOnError)throw s;if(Wt(s))return{data:null,error:s};throw s}}};let Mr;Mr=Symbol.toStringTag;var ba=class{constructor(t,e){this.downloadFn=t,this.shouldThrowOnError=e,this[Mr]="StreamDownloadBuilder",this.promise=null}then(t,e){return this.getPromise().then(t,e)}catch(t){return this.getPromise().catch(t)}finally(t){return this.getPromise().finally(t)}getPromise(){return this.promise||(this.promise=this.execute()),this.promise}async execute(){var t=this;try{return{data:(await t.downloadFn()).body,error:null}}catch(e){if(t.shouldThrowOnError)throw e;if(Wt(e))return{data:null,error:e};throw e}}};let Hr;Hr=Symbol.toStringTag;var _a=class{constructor(t,e){this.downloadFn=t,this.shouldThrowOnError=e,this[Hr]="BlobDownloadBuilder",this.promise=null}asStream(){return new ba(this.downloadFn,this.shouldThrowOnError)}then(t,e){return this.getPromise().then(t,e)}catch(t){return this.getPromise().catch(t)}finally(t){return this.getPromise().finally(t)}getPromise(){return this.promise||(this.promise=this.execute()),this.promise}async execute(){var t=this;try{return{data:await(await t.downloadFn()).blob(),error:null}}catch(e){if(t.shouldThrowOnError)throw e;if(Wt(e))return{data:null,error:e};throw e}}};const Xt={limit:100,offset:0,sortBy:{column:"name",order:"asc"}},Gs={cacheControl:"3600",contentType:"text/plain;charset=UTF-8",upsert:!1};var ka=class extends ze{constructor(t,e={},s,r){super(t,e,r,"storage"),this.bucketId=s}async uploadOrUpdate(t,e,s,r){var n=this;return n.handleOperation(async()=>{let i;const a=E(E({},Gs),r);let o=E(E({},n.headers),t==="POST"&&{"x-upsert":String(a.upsert)});const l=a.metadata;if(typeof Blob<"u"&&s instanceof Blob||typeof FormData<"u"&&s instanceof FormData?i=n.prepareUploadFormData(s,a):(i=s,o["cache-control"]=`max-age=${a.cacheControl}`,o["content-type"]=a.contentType,l&&(o["x-metadata"]=n.toBase64(n.encodeMetadata(l))),(typeof ReadableStream<"u"&&i instanceof ReadableStream||i&&typeof i=="object"&&"pipe"in i&&typeof i.pipe=="function")&&!a.duplex&&(a.duplex="half")),r?.headers)for(const[f,h]of Object.entries(r.headers))o=Pt(o,f,h);const c=n._removeEmptyFolders(e),u=n._getFinalPath(c),d=await(t=="PUT"?It:ee)(n.fetch,`${n.url}/object/${u}`,i,E({headers:o},a?.duplex?{duplex:a.duplex}:{}));return{path:c,id:d.Id,fullPath:d.Key}})}async upload(t,e,s){return this.uploadOrUpdate("POST",t,e,s)}async uploadToSignedUrl(t,e,s,r){var n=this;const i=n._removeEmptyFolders(t),a=n._getFinalPath(i),o=new URL(n.url+`/object/upload/sign/${a}`);return o.searchParams.set("token",e),n.handleOperation(async()=>{let l;const c=E(E({},Gs),r);let u=E(E({},n.headers),{"x-upsert":String(c.upsert)});const d=c.metadata;if(typeof Blob<"u"&&s instanceof Blob||typeof FormData<"u"&&s instanceof FormData?l=n.prepareUploadFormData(s,c):(l=s,u["cache-control"]=`max-age=${c.cacheControl}`,u["content-type"]=c.contentType,d&&(u["x-metadata"]=n.toBase64(n.encodeMetadata(d))),(typeof ReadableStream<"u"&&l instanceof ReadableStream||l&&typeof l=="object"&&"pipe"in l&&typeof l.pipe=="function")&&!c.duplex&&(c.duplex="half")),r?.headers)for(const[f,h]of Object.entries(r.headers))u=Pt(u,f,h);return{path:i,fullPath:(await It(n.fetch,o.toString(),l,E({headers:u},c?.duplex?{duplex:c.duplex}:{}))).Key}})}async createSignedUploadUrl(t,e){var s=this;return s.handleOperation(async()=>{let r=s._getFinalPath(t);const n=E({},s.headers);e?.upsert&&(n["x-upsert"]="true");const i=await ee(s.fetch,`${s.url}/object/upload/sign/${r}`,{},{headers:n}),a=new URL(s.url+i.url),o=a.searchParams.get("token");if(!o)throw new qt("No token returned by API");return{signedUrl:a.toString(),path:t,token:o}})}async update(t,e,s){return this.uploadOrUpdate("PUT",t,e,s)}async move(t,e,s){var r=this;return r.handleOperation(async()=>await ee(r.fetch,`${r.url}/object/move`,{bucketId:r.bucketId,sourceKey:t,destinationKey:e,destinationBucket:s?.destinationBucket,sourceVersionId:s?.sourceVersionId},{headers:r.headers}))}async copy(t,e,s){var r=this;return r.handleOperation(async()=>({path:(await ee(r.fetch,`${r.url}/object/copy`,{bucketId:r.bucketId,sourceKey:t,destinationKey:e,destinationBucket:s?.destinationBucket,sourceVersionId:s?.sourceVersionId},{headers:r.headers})).Key}))}async createSignedUrl(t,e,s){var r=this;return r.handleOperation(async()=>{let n=r._getFinalPath(t);const i=typeof s?.transform=="object"&&s.transform!==null&&Object.keys(s.transform).length>0;let a=await ee(r.fetch,`${r.url}/object/sign/${n}`,E(E({expiresIn:e},i?{transform:s.transform}:{}),s?.versionId!=null?{versionId:s.versionId}:{}),{headers:r.headers});const o=new URLSearchParams;s?.download&&o.set("download",s.download===!0?"":s.download),s?.cacheNonce!=null&&o.set("cacheNonce",String(s.cacheNonce));const l=o.toString();return{signedUrl:encodeURI(`${r.url}${a.signedURL}${l?`&${l}`:""}`)}})}async createSignedUrls(t,e,s){var r=this;return r.handleOperation(async()=>{const n=await ee(r.fetch,`${r.url}/object/sign/${r.bucketId}`,{expiresIn:e,paths:t},{headers:r.headers}),i=new URLSearchParams;s?.download&&i.set("download",s.download===!0?"":s.download),s?.cacheNonce!=null&&i.set("cacheNonce",String(s.cacheNonce));const a=i.toString();return n.map(o=>E(E({},o),{},{signedUrl:o.signedURL?encodeURI(`${r.url}${o.signedURL}${a?`&${a}`:""}`):null}))})}download(t,e,s){const r=typeof e?.transform=="object"&&e.transform!==null&&Object.keys(e.transform).length>0?"render/image/authenticated":"object",n=new URLSearchParams;e?.transform&&this.applyTransformOptsToQuery(n,e.transform),e?.cacheNonce!=null&&n.set("cacheNonce",String(e.cacheNonce)),e?.versionId!=null&&n.set("versionId",String(e.versionId));const i=n.toString(),a=this._getFinalPath(t),o=()=>Be(this.fetch,`${this.url}/${r}/${a}${i?`?${i}`:""}`,{headers:this.headers,noResolveJson:!0},s);return new _a(o,this.shouldThrowOnError)}async info(t,e){var s=this;const r=s._getFinalPath(t),n=new URLSearchParams;e?.versionId!=null&&n.set("versionId",String(e.versionId));const i=n.toString();return s.handleOperation(async()=>hs(await Be(s.fetch,`${s.url}/object/info/${r}${i?`?${i}`:""}`,{headers:s.headers})))}async exists(t){var e=this;const s=e._getFinalPath(t);try{return await wa(e.fetch,`${e.url}/object/${s}`,{headers:e.headers}),{data:!0,error:null}}catch(n){if(e.shouldThrowOnError)throw n;if(Wt(n)){var r;const i=n instanceof ds?n.status:n instanceof Ur?(r=n.originalError)===null||r===void 0?void 0:r.status:void 0;if(i!==void 0&&[400,404].includes(i))return{data:!1,error:n}}throw n}}getPublicUrl(t,e){const s=this._getFinalPath(t),r=new URLSearchParams;e?.download&&r.set("download",e.download===!0?"":e.download),e?.transform&&this.applyTransformOptsToQuery(r,e.transform),e?.cacheNonce!=null&&r.set("cacheNonce",String(e.cacheNonce)),e?.versionId!=null&&r.set("versionId",String(e.versionId));const n=r.toString(),i=typeof e?.transform=="object"&&e.transform!==null&&Object.keys(e.transform).length>0?"render/image":"object";return{data:{publicUrl:encodeURI(`${this.url}/${i}/public/${s}`)+(n?`?${n}`:"")}}}async remove(t){var e=this;return e.handleOperation(async()=>await Me(e.fetch,`${e.url}/object/${e.bucketId}`,{prefixes:t},{headers:e.headers}))}async purgeCache(t,e,s){var r=this;return r.handleOperation(async()=>{const n=fs(r._getFinalPath(t)),i=new URLSearchParams;e?.transformations&&i.set("transformations","true");const a=i.toString();return await Me(r.fetch,`${r.url}/cdn/${n}${a?`?${a}`:""}`,{},{headers:r.headers},s)})}async list(t,e,s){var r=this;return r.handleOperation(async()=>{const n=e?.sortBy?E(E({},Xt.sortBy),e.sortBy):Xt.sortBy,i=E(E(E({},Xt),e),{},{sortBy:n,prefix:t||""});return await ee(r.fetch,`${r.url}/object/list/${r.bucketId}`,i,{headers:r.headers},s)})}async listV2(t,e){var s=this;return s.handleOperation(async()=>{const r=E({},t);return await ee(s.fetch,`${s.url}/object/list-v2/${s.bucketId}`,r,{headers:s.headers},e)})}prepareUploadFormData(t,e){const s=new FormData,r=[];t instanceof FormData?t.forEach((n,i)=>{typeof n=="string"?s.append(i,n):r.push([i,n])}):r.push(["",t]),s.has("cacheControl")||s.append("cacheControl",e.cacheControl),e.metadata&&!s.has("metadata")&&s.append("metadata",this.encodeMetadata(e.metadata));for(const[n,i]of r)s.append(n,i);return s}encodeMetadata(t){return JSON.stringify(t)}toBase64(t){return typeof Buffer<"u"?Buffer.from(t).toString("base64"):btoa(t)}_getFinalPath(t){return`${this.bucketId}/${t.replace(/^\/+/,"")}`}_removeEmptyFolders(t){return t.replace(/^\/|\/$/g,"").replace(/\/+/g,"/")}applyTransformOptsToQuery(t,e){return e.width&&t.set("width",e.width.toString()),e.height&&t.set("height",e.height.toString()),e.resize&&t.set("resize",e.resize),e.format&&t.set("format",e.format),e.quality&&t.set("quality",e.quality.toString()),t}};const Sa="2.117.3",ft={"X-Client-Info":`storage-js/${Sa}`};var Ea=class extends ze{constructor(t,e={},s,r){const n=new URL(t);r?.useNewHostname&&/supabase\.(co|in|red)$/.test(n.hostname)&&!n.hostname.includes("storage.supabase.")&&(n.hostname=n.hostname.replace("supabase.","storage.supabase."));const i=n.href.replace(/\/$/,""),a=E(E({},ft),e);super(i,a,s,"storage")}async listBuckets(t){var e=this;return e.handleOperation(async()=>{const s=e.listBucketOptionsToQueryString(t);return await Be(e.fetch,`${e.url}/bucket${s}`,{headers:e.headers})})}async getBucket(t){var e=this;return e.handleOperation(async()=>await Be(e.fetch,`${e.url}/bucket/${t}`,{headers:e.headers}))}async createBucket(t,e={public:!1}){var s=this;return s.handleOperation(async()=>await ee(s.fetch,`${s.url}/bucket`,{id:t,name:t,type:e.type,public:e.public,file_size_limit:e.fileSizeLimit,allowed_mime_types:e.allowedMimeTypes,versioning_status:e.versioningStatus},{headers:s.headers}))}async updateBucket(t,e){var s=this;return s.handleOperation(async()=>await It(s.fetch,`${s.url}/bucket/${t}`,{id:t,name:t,public:e.public,file_size_limit:e.fileSizeLimit,allowed_mime_types:e.allowedMimeTypes,versioning_status:e.versioningStatus},{headers:s.headers}))}async emptyBucket(t){var e=this;return e.handleOperation(async()=>await ee(e.fetch,`${e.url}/bucket/${t}/empty`,{},{headers:e.headers}))}async deleteBucket(t){var e=this;return e.handleOperation(async()=>await Me(e.fetch,`${e.url}/bucket/${t}`,{},{headers:e.headers}))}async getBucketLifecycle(t){var e=this;return e.handleOperation(async()=>await Be(e.fetch,e.bucketLifecycleUrl(t),{headers:e.headers}))}async updateBucketLifecycle(t,e){var s=this;return s.handleOperation(async()=>await It(s.fetch,s.bucketLifecycleUrl(t),e,{headers:s.headers}))}async deleteBucketLifecycle(t){var e=this;return e.handleOperation(async()=>await Me(e.fetch,e.bucketLifecycleUrl(t),{},{headers:e.headers}))}async purgeBucketCache(t,e,s){var r=this;return r.handleOperation(async()=>{const n=new URLSearchParams;e?.transformations&&n.set("transformations","true");const i=n.toString();return await Me(r.fetch,`${r.url}/cdn/${fs(t)}${i?`?${i}`:""}`,{},{headers:r.headers},s)})}bucketLifecycleUrl(t){return`${this.url}/bucket/${fs(t)}/lifecycle`}listBucketOptionsToQueryString(t){const e={};return t&&("limit"in t&&(e.limit=String(t.limit)),"offset"in t&&(e.offset=String(t.offset)),t.search&&(e.search=t.search),t.sortColumn&&(e.sortColumn=t.sortColumn),t.sortOrder&&(e.sortOrder=t.sortOrder)),Object.keys(e).length>0?"?"+new URLSearchParams(e).toString():""}},Ta=class extends ze{constructor(t,e={},s){const r=t.replace(/\/$/,""),n=E(E({},ft),e);super(r,n,s,"storage")}async createBucket(t){var e=this;return e.handleOperation(async()=>await ee(e.fetch,`${e.url}/bucket`,{name:t},{headers:e.headers}))}async listBuckets(t){var e=this;return e.handleOperation(async()=>{const s=new URLSearchParams;t?.limit!==void 0&&s.set("limit",t.limit.toString()),t?.offset!==void 0&&s.set("offset",t.offset.toString()),t?.sortColumn&&s.set("sortColumn",t.sortColumn),t?.sortOrder&&s.set("sortOrder",t.sortOrder),t?.search&&s.set("search",t.search);const r=s.toString(),n=r?`${e.url}/bucket?${r}`:`${e.url}/bucket`;return await Be(e.fetch,n,{headers:e.headers})})}async deleteBucket(t){var e=this;return e.handleOperation(async()=>await Me(e.fetch,`${e.url}/bucket/${t}`,{},{headers:e.headers}))}from(t){var e=this;if(!ga(t))throw new qt("Invalid bucket name: File, folder, and bucket names must follow AWS object key naming guidelines and should avoid the use of any other characters.");const s=new la({baseUrl:this.url,catalogName:t,auth:{type:"custom",getHeaders:async()=>e.headers},fetch:this.fetch}),r=this.shouldThrowOnError;return new Proxy(s,{get(n,i){const a=n[i];return typeof a!="function"?a:async(...o)=>{try{return{data:await a.apply(n,o),error:null}}catch(l){if(r)throw l;return{data:null,error:l}}}}})}},Aa=class extends ze{constructor(t,e={},s){const r=t.replace(/\/$/,""),n=E(E({},ft),{},{"Content-Type":"application/json"},e);super(r,n,s,"vectors")}async createIndex(t){var e=this;return e.handleOperation(async()=>await G.post(e.fetch,`${e.url}/CreateIndex`,t,{headers:e.headers})||{})}async getIndex(t,e){var s=this;return s.handleOperation(async()=>await G.post(s.fetch,`${s.url}/GetIndex`,{vectorBucketName:t,indexName:e},{headers:s.headers}))}async listIndexes(t){var e=this;return e.handleOperation(async()=>await G.post(e.fetch,`${e.url}/ListIndexes`,t,{headers:e.headers}))}async deleteIndex(t,e){var s=this;return s.handleOperation(async()=>await G.post(s.fetch,`${s.url}/DeleteIndex`,{vectorBucketName:t,indexName:e},{headers:s.headers})||{})}},Ra=class extends ze{constructor(t,e={},s){const r=t.replace(/\/$/,""),n=E(E({},ft),{},{"Content-Type":"application/json"},e);super(r,n,s,"vectors")}async putVectors(t){var e=this;if(t.vectors.length<1||t.vectors.length>500)throw new Error("Vector batch size must be between 1 and 500 items");return e.handleOperation(async()=>await G.post(e.fetch,`${e.url}/PutVectors`,t,{headers:e.headers})||{})}async getVectors(t){var e=this;return e.handleOperation(async()=>await G.post(e.fetch,`${e.url}/GetVectors`,t,{headers:e.headers}))}async listVectors(t){var e=this;if(t.segmentCount!==void 0){if(t.segmentCount<1||t.segmentCount>16)throw new Error("segmentCount must be between 1 and 16");if(t.segmentIndex!==void 0&&(t.segmentIndex<0||t.segmentIndex>=t.segmentCount))throw new Error(`segmentIndex must be between 0 and ${t.segmentCount-1}`)}return e.handleOperation(async()=>await G.post(e.fetch,`${e.url}/ListVectors`,t,{headers:e.headers}))}async queryVectors(t){var e=this;return e.handleOperation(async()=>await G.post(e.fetch,`${e.url}/QueryVectors`,t,{headers:e.headers}))}async deleteVectors(t){var e=this;if(t.keys.length<1||t.keys.length>500)throw new Error("Keys batch size must be between 1 and 500 items");return e.handleOperation(async()=>await G.post(e.fetch,`${e.url}/DeleteVectors`,t,{headers:e.headers})||{})}},Ca=class extends ze{constructor(t,e={},s){const r=t.replace(/\/$/,""),n=E(E({},ft),{},{"Content-Type":"application/json"},e);super(r,n,s,"vectors")}async createBucket(t){var e=this;return e.handleOperation(async()=>await G.post(e.fetch,`${e.url}/CreateVectorBucket`,{vectorBucketName:t},{headers:e.headers})||{})}async getBucket(t){var e=this;return e.handleOperation(async()=>await G.post(e.fetch,`${e.url}/GetVectorBucket`,{vectorBucketName:t},{headers:e.headers}))}async listBuckets(t={}){var e=this;return e.handleOperation(async()=>await G.post(e.fetch,`${e.url}/ListVectorBuckets`,t,{headers:e.headers}))}async deleteBucket(t){var e=this;return e.handleOperation(async()=>await G.post(e.fetch,`${e.url}/DeleteVectorBucket`,{vectorBucketName:t},{headers:e.headers})||{})}},$a=class extends Ca{constructor(t,e={}){super(t,e.headers||{},e.fetch)}from(t){return new Oa(this.url,this.headers,t,this.fetch)}async createBucket(t){var e=()=>super.createBucket,s=this;return e().call(s,t)}async getBucket(t){var e=()=>super.getBucket,s=this;return e().call(s,t)}async listBuckets(t={}){var e=()=>super.listBuckets,s=this;return e().call(s,t)}async deleteBucket(t){var e=()=>super.deleteBucket,s=this;return e().call(s,t)}},Oa=class extends Aa{constructor(t,e,s,r){super(t,e,r),this.vectorBucketName=s}async createIndex(t){var e=()=>super.createIndex,s=this;return e().call(s,E(E({},t),{},{vectorBucketName:s.vectorBucketName}))}async listIndexes(t={}){var e=()=>super.listIndexes,s=this;return e().call(s,E(E({},t),{},{vectorBucketName:s.vectorBucketName}))}async getIndex(t){var e=()=>super.getIndex,s=this;return e().call(s,s.vectorBucketName,t)}async deleteIndex(t){var e=()=>super.deleteIndex,s=this;return e().call(s,s.vectorBucketName,t)}index(t){return new Pa(this.url,this.headers,this.vectorBucketName,t,this.fetch)}},Pa=class extends Ra{constructor(t,e,s,r,n){super(t,e,n),this.vectorBucketName=s,this.indexName=r}async putVectors(t){var e=()=>super.putVectors,s=this;return e().call(s,E(E({},t),{},{vectorBucketName:s.vectorBucketName,indexName:s.indexName}))}async getVectors(t){var e=()=>super.getVectors,s=this;return e().call(s,E(E({},t),{},{vectorBucketName:s.vectorBucketName,indexName:s.indexName}))}async listVectors(t={}){var e=()=>super.listVectors,s=this;return e().call(s,E(E({},t),{},{vectorBucketName:s.vectorBucketName,indexName:s.indexName}))}async queryVectors(t){var e=()=>super.queryVectors,s=this;return e().call(s,E(E({},t),{},{vectorBucketName:s.vectorBucketName,indexName:s.indexName}))}async deleteVectors(t){var e=()=>super.deleteVectors,s=this;return e().call(s,E(E({},t),{},{vectorBucketName:s.vectorBucketName,indexName:s.indexName}))}},Ia=class extends Ea{constructor(t,e={},s,r){super(t,e,s,r)}from(t){return new ka(this.url,this.headers,t,this.fetch)}get vectors(){return new $a(this.url+"/vector",{headers:this.headers,fetch:this.fetch})}get analytics(){return new Ta(this.url+"/iceberg",this.headers,this.fetch)}};const Fr="2.117.3",fe=30*1e3,Je=3,Zt=Je*fe,Na=2*fe,La="http://localhost:9999",ja="supabase.auth.token",xa={"X-Client-Info":`gotrue-js/${Fr}`},ps="X-Supabase-Api-Version",zr={"2024-01-01":{timestamp:Date.parse("2024-01-01T00:00:00.0Z"),name:"2024-01-01"}},Da=/^([a-z0-9_-]{4})*($|[a-z0-9_-]{3}$|[a-z0-9_-]{2}$)$/i,Re="sb_flow_id",Ua=5,Ba=600*1e3;class at extends Error{constructor(e,s,r){super(e),this.__isAuthError=!0,this.name="AuthError",this.status=s,this.code=r}toJSON(){return{name:this.name,message:this.message,status:this.status,code:this.code}}}function b(t){return typeof t=="object"&&t!==null&&"__isAuthError"in t}class Ma extends at{constructor(e,s,r){super(e,s,r),this.name="AuthApiError",this.status=s,this.code=r}}function Vs(t){return b(t)&&t.name==="AuthApiError"}class se extends at{constructor(e,s){super(e),this.name="AuthUnknownError",this.originalError=s}}class le extends at{constructor(e,s,r,n){super(e,r,n),this.name=s,this.status=r}}class H extends le{constructor(){super("Auth session missing!","AuthSessionMissingError",400,void 0)}}function bt(t){return b(t)&&t.name==="AuthSessionMissingError"}class Ne extends le{constructor(){super("Auth session or user missing","AuthInvalidTokenResponseError",500,void 0)}}class _t extends le{constructor(e){super(e,"AuthInvalidCredentialsError",400,void 0)}}class kt extends le{constructor(e,s=null){super(e,"AuthImplicitGrantRedirectError",500,void 0),this.details=null,this.details=s}toJSON(){return Object.assign(Object.assign({},super.toJSON()),{details:this.details})}}function Ha(t){return b(t)&&t.name==="AuthImplicitGrantRedirectError"}class Js extends le{constructor(e,s=null){super(e,"AuthPKCEGrantCodeExchangeError",500,void 0),this.details=null,this.details=s}toJSON(){return Object.assign(Object.assign({},super.toJSON()),{details:this.details})}}class Fa extends le{constructor(){super("PKCE code verifier not found in storage. This can happen if the auth flow was initiated in a different browser or device, or if the storage was cleared. For SSR frameworks (Next.js, SvelteKit, etc.), use @supabase/ssr on both the server and client to store the code verifier in cookies.","AuthPKCECodeVerifierMissingError",400,"pkce_code_verifier_not_found")}}class At extends le{constructor(e,s){super(e,"AuthRetryableFetchError",s,void 0)}}function St(t){return b(t)&&t.name==="AuthRetryableFetchError"}class Ys extends le{constructor(e="Refresh result discarded: session state changed mid-flight (e.g., concurrent signOut)"){super(e,"AuthRefreshDiscardedError",409,void 0)}}function Xs(t){return b(t)&&t.name==="AuthRefreshDiscardedError"}class Zs extends le{constructor(e,s,r){super(e,"AuthWeakPasswordError",s,"weak_password"),this.reasons=r}toJSON(){return Object.assign(Object.assign({},super.toJSON()),{reasons:this.reasons})}}class Nt extends le{constructor(e){super(e,"AuthInvalidJwtError",400,"invalid_jwt")}}const Lt="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_".split(""),Qs=` 	
+\r=`.split(""),za=(()=>{const t=new Array(128);for(let e=0;e<t.length;e+=1)t[e]=-1;for(let e=0;e<Qs.length;e+=1)t[Qs[e].charCodeAt(0)]=-2;for(let e=0;e<Lt.length;e+=1)t[Lt[e].charCodeAt(0)]=e;return t})();function er(t,e,s){if(t!==null)for(e.queue=e.queue<<8|t,e.queuedBits+=8;e.queuedBits>=6;){const r=e.queue>>e.queuedBits-6&63;s(Lt[r]),e.queuedBits-=6}else if(e.queuedBits>0)for(e.queue=e.queue<<6-e.queuedBits,e.queuedBits=6;e.queuedBits>=6;){const r=e.queue>>e.queuedBits-6&63;s(Lt[r]),e.queuedBits-=6}}function Kr(t,e,s){const r=za[t];if(r>-1)for(e.queue=e.queue<<6|r,e.queuedBits+=6;e.queuedBits>=8;)s(e.queue>>e.queuedBits-8&255),e.queuedBits-=8;else{if(r===-2)return;throw new Error(`Invalid Base64-URL character "${String.fromCharCode(t)}"`)}}function tr(t){const e=[],s=a=>{e.push(String.fromCodePoint(a))},r={utf8seq:0,codepoint:0},n={queue:0,queuedBits:0},i=a=>{Wa(a,r,s)};for(let a=0;a<t.length;a+=1)Kr(t.charCodeAt(a),n,i);return e.join("")}function Ka(t,e){if(t<=127){e(t);return}else if(t<=2047){e(192|t>>6),e(128|t&63);return}else if(t<=65535){e(224|t>>12),e(128|t>>6&63),e(128|t&63);return}else if(t<=1114111){e(240|t>>18),e(128|t>>12&63),e(128|t>>6&63),e(128|t&63);return}throw new Error(`Unrecognized Unicode codepoint: ${t.toString(16)}`)}function qa(t,e){for(let s=0;s<t.length;s+=1){let r=t.charCodeAt(s);if(r>55295&&r<=56319){const n=(r-55296)*1024&65535;r=(t.charCodeAt(s+1)-56320&65535|n)+65536,s+=1}Ka(r,e)}}function Wa(t,e,s){if(e.utf8seq===0){if(t<=127){s(t);return}for(let r=1;r<6;r+=1)if((t>>7-r&1)===0){e.utf8seq=r;break}if(e.utf8seq===2)e.codepoint=t&31;else if(e.utf8seq===3)e.codepoint=t&15;else if(e.utf8seq===4)e.codepoint=t&7;else throw new Error("Invalid UTF-8 sequence");e.utf8seq-=1}else if(e.utf8seq>0){if(t<=127)throw new Error("Invalid UTF-8 sequence");e.codepoint=e.codepoint<<6|t&63,e.utf8seq-=1,e.utf8seq===0&&s(e.codepoint)}}function He(t){const e=[],s={queue:0,queuedBits:0},r=n=>{e.push(n)};for(let n=0;n<t.length;n+=1)Kr(t.charCodeAt(n),s,r);return new Uint8Array(e)}function Ga(t){const e=[];return qa(t,s=>e.push(s)),new Uint8Array(e)}function Ce(t){const e=[],s={queue:0,queuedBits:0},r=n=>{e.push(n)};return t.forEach(n=>er(n,s,r)),er(null,s,r),e.join("")}function qr(t){return Math.round(Date.now()/1e3)+t}function Va(){return Symbol("auth-callback")}const F=()=>typeof window<"u"&&typeof document<"u",_e={tested:!1,writable:!1},Wr=()=>{if(!F())return!1;try{if(typeof globalThis.localStorage!="object")return!1}catch{return!1}if(_e.tested)return _e.writable;const t=`lswt-${Math.random()}${Math.random()}`;try{globalThis.localStorage.setItem(t,t),globalThis.localStorage.removeItem(t),_e.tested=!0,_e.writable=!0}catch{_e.tested=!0,_e.writable=!1}return _e.writable};function sr(t){const e={},s=new URL(t);if(s.hash&&s.hash[0]==="#")try{new URLSearchParams(s.hash.substring(1)).forEach((n,i)=>{e[i]=n})}catch{}return s.searchParams.forEach((r,n)=>{e[n]=r}),e}const Gr=t=>t?(...e)=>t(...e):(...e)=>fetch(...e),Ja=t=>typeof t=="object"&&t!==null&&"status"in t&&"ok"in t&&"json"in t&&typeof t.json=="function",pe=async(t,e,s)=>{await t.setItem(e,JSON.stringify(s))},z=async(t,e)=>{const s=await t.getItem(e);if(!s)return null;try{return JSON.parse(s)}catch{return null}},q=async(t,e)=>{await t.removeItem(e)};class Gt{constructor(){this.promise=new Gt.promiseConstructor((e,s)=>{this.resolve=e,this.reject=s})}}Gt.promiseConstructor=Promise;function Et(t){const e=t.split(".");if(e.length!==3)throw new Nt("Invalid JWT structure");for(let r=0;r<e.length;r++)if(!Da.test(e[r]))throw new Nt("JWT not in base64url format");return{header:JSON.parse(tr(e[0])),payload:JSON.parse(tr(e[1])),signature:He(e[2]),raw:{header:e[0],payload:e[1]}}}async function Ya(t){return await new Promise(e=>{setTimeout(()=>e(null),t)})}function Xa(t,e){return new Promise((r,n)=>{(async()=>{for(let i=0;i<1/0;i++)try{const a=await t(i);if(!e(i,null,a)){r(a);return}}catch(a){if(!e(i,a)){n(a);return}}})()})}function Vr(t){return("0"+t.toString(16)).substr(-2)}function Za(){const e=new Uint32Array(56);if(typeof crypto>"u"){const s="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~",r=s.length;let n="";for(let i=0;i<56;i++)n+=s.charAt(Math.floor(Math.random()*r));return n}return crypto.getRandomValues(e),Array.from(e,Vr).join("")}async function Qa(t){const s=new TextEncoder().encode(t),r=await crypto.subtle.digest("SHA-256",s),n=new Uint8Array(r);return Array.from(n).map(i=>String.fromCharCode(i)).join("")}async function eo(t){if(!(typeof crypto<"u"&&typeof crypto.subtle<"u"&&typeof TextEncoder<"u"))return console.warn("WebCrypto API is not supported. Code challenge method will default to use plain instead of sha256."),t;const s=await Qa(t);return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")}const to=/^[a-zA-Z0-9_-]{8,64}$/;function Rt(t){return typeof t=="string"&&to.test(t)?t:null}function so(){if(typeof crypto<"u"&&typeof crypto.getRandomValues=="function"){const e=new Uint8Array(16);return crypto.getRandomValues(e),Array.from(e,Vr).join("")}let t="";for(let e=0;e<32;e++)t+=Math.floor(Math.random()*16).toString(16);return t}const Fe=(t,e)=>`${t}-flow-${e}-code-verifier`,ot=t=>`${t}-flows-code-verifier`;async function ks(t,e){const s=await z(t,ot(e));return Array.isArray(s)?s.filter(r=>Rt(r)!==null):[]}async function ro(t,e,s,r,n){await pe(t,Fe(e,s),r);const i=(await ks(t,e)).filter(a=>a!==s);for(i.push(s);i.length>Ua;){const a=i.shift();await q(t,Fe(e,a)),n?.(a)}await pe(t,ot(e),i),await pe(t,`${e}-code-verifier`,r)}async function no(t,e,s){if(s){const n=await z(t,Fe(e,s));return{verifier:typeof n=="string"?n:null,flowId:s}}const r=await z(t,`${e}-code-verifier`);return{verifier:typeof r=="string"?r:null,flowId:null}}async function Q(t,e,s){const r=`${e}-code-verifier`;if(!s){await q(t,r);return}const n=Fe(e,s),i=await z(t,n);await q(t,n);const a=await ks(t,e),o=a.filter(l=>l!==s);o.length!==a.length&&(o.length>0?await pe(t,ot(e),o):await q(t,ot(e))),i!=null&&i===await z(t,r)&&await q(t,r)}async function io(t,e){const s=await ks(t,e);for(const r of s)await q(t,Fe(e,r));await q(t,ot(e)),await q(t,`${e}-code-verifier`)}function ao(t,e){const s=t.indexOf("#");let r=s===-1?t:t.slice(0,s);const n=s===-1?"":t.slice(s),i=r.indexOf("?");if(i!==-1){const o=r.slice(0,i),l=r.slice(i+1).split("&").filter(c=>c!==""&&c!==Re&&!c.startsWith(`${Re}=`));r=l.length>0?`${o}?${l.join("&")}`:o}const a=r.includes("?")?"&":"?";return`${r}${a}${Re}=${encodeURIComponent(e)}${n}`}async function oo(t,e,s=!1,r){const n=Za();let i=n;s&&(i+="/recovery");const a=so();await ro(t,e,a,i,r);const o=await eo(n);return[o,n===o?"plain":"s256",a]}const lo=/^2[0-9]{3}-(0[1-9]|1[0-2])-(0[1-9]|1[0-9]|2[0-9]|3[0-1])$/i;function co(t){const e=t.headers.get(ps);if(!e||!e.match(lo))return null;try{return new Date(`${e}T00:00:00.0Z`)}catch{return null}}function uo(t){if(!t)throw new Error("Missing exp claim");const e=Math.floor(Date.now()/1e3);if(t<=e)throw new Error("JWT has expired")}function ho(t){switch(t){case"RS256":return{name:"RSASSA-PKCS1-v1_5",hash:{name:"SHA-256"}};case"ES256":return{name:"ECDSA",namedCurve:"P-256",hash:{name:"SHA-256"}};default:throw new Error("Invalid alg claim")}}const fo=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;function ce(t){if(!fo.test(t))throw new Error("@supabase/auth-js: Expected parameter to be UUID but is not")}function We(t){if(!t.recoveryCodes)throw new Error("@supabase/auth-js: the MFA recovery codes API is experimental and disabled by default. Enable it by passing `auth: { experimental: { recoveryCodes: true } }` to createClient (or to the GoTrueClient constructor).")}function Qt(){const t={};return new Proxy(t,{get:(e,s)=>{if(s==="__isUserNotAvailableProxy")return!0;if(typeof s=="symbol"){const r=s.toString();if(r==="Symbol(Symbol.toPrimitive)"||r==="Symbol(Symbol.toStringTag)"||r==="Symbol(util.inspect.custom)")return}throw new Error(`@supabase/auth-js: client was created with userStorage option and there was no user stored in the user storage. Accessing the "${s}" property of the session object is not supported. Please use getUser() instead.`)},set:(e,s)=>{throw new Error(`@supabase/auth-js: client was created with userStorage option and there was no user stored in the user storage. Setting the "${s}" property of the session object is not supported. Please use getUser() to fetch a user object you can manipulate.`)},deleteProperty:(e,s)=>{throw new Error(`@supabase/auth-js: client was created with userStorage option and there was no user stored in the user storage. Deleting the "${s}" property of the session object is not supported. Please use getUser() to fetch a user object you can manipulate.`)}})}function po(t,e){return new Proxy(t,{get:(s,r,n)=>{if(r==="__isInsecureUserWarningProxy")return!0;if(typeof r=="symbol"){const i=r.toString();if(i==="Symbol(Symbol.toPrimitive)"||i==="Symbol(Symbol.toStringTag)"||i==="Symbol(util.inspect.custom)"||i==="Symbol(nodejs.util.inspect.custom)")return Reflect.get(s,r,n)}return!e.value&&typeof r=="string"&&(console.warn("Using the user object as returned from supabase.auth.getSession() or from some supabase.auth.onAuthStateChange() events could be insecure! This value comes directly from the storage medium (usually cookies on the server) and may not be authentic. Use supabase.auth.getUser() instead which authenticates the data by contacting the Supabase Auth server."),e.value=!0),Reflect.get(s,r,n)}})}function rr(t){return JSON.parse(JSON.stringify(t))}const ke=t=>{if(typeof t=="object"&&t!==null){const e=t;if(typeof e.msg=="string")return e.msg;if(typeof e.message=="string")return e.message;if(typeof e.error_description=="string")return e.error_description;if(typeof e.error=="string")return e.error}return JSON.stringify(t)},nr=[500,501,502,503,504,520,521,522,523,524,525,526,527,528,529,530];async function ir(t){var e;if(!Ja(t))throw new At(ke(t),0);let s;try{s=await t.json()}catch(i){throw nr.includes(t.status)?new At(t.statusText||`HTTP ${t.status}`,t.status):new se(ke(i),i)}if(nr.includes(t.status))throw new At(ke(s),t.status);let r;const n=co(t);if(n&&n.getTime()>=zr["2024-01-01"].timestamp&&typeof s=="object"&&s&&typeof s.code=="string"?r=s.code:typeof s=="object"&&s&&typeof s.error_code=="string"&&(r=s.error_code),r){if(r==="weak_password")throw new Zs(ke(s),t.status,((e=s.weak_password)===null||e===void 0?void 0:e.reasons)||[]);if(r==="session_not_found")throw new H}else if(typeof s=="object"&&s&&typeof s.weak_password=="object"&&s.weak_password&&Array.isArray(s.weak_password.reasons)&&s.weak_password.reasons.length&&s.weak_password.reasons.reduce((i,a)=>i&&typeof a=="string",!0))throw new Zs(ke(s),t.status,s.weak_password.reasons);throw new Ma(ke(s),t.status||500,r)}const go=(t,e,s,r)=>{const n={method:t,headers:e?.headers||{}};return t==="GET"?n:(n.headers=Object.assign({"Content-Type":"application/json;charset=UTF-8"},e?.headers),n.body=JSON.stringify(r),Object.assign(Object.assign({},n),s))};async function _(t,e,s,r){var n;const i=Object.assign({},r?.headers);i[ps]||(i[ps]=zr["2024-01-01"].name),r?.jwt&&(i.Authorization=`Bearer ${r.jwt}`);const a=(n=r?.query)!==null&&n!==void 0?n:{};r?.redirectTo&&(a.redirect_to=r.redirectTo);const o=Object.keys(a).length?"?"+new URLSearchParams(a).toString():"",l=await mo(t,e,s+o,{headers:i,noResolveJson:r?.noResolveJson},{},r?.body);return r?.xform?r?.xform(l):{data:Object.assign({},l),error:null}}async function mo(t,e,s,r,n,i){const a=go(e,r,n,i);let o;try{o=await t(s,Object.assign({},a))}catch(l){throw new At(ke(l),0)}if(o.ok||await ir(o),r?.noResolveJson)return o;try{return await o.json()}catch(l){await ir(l)}}function J(t){var e;let s=null;wo(t)&&(s=Object.assign({},t),t.expires_at||(s.expires_at=qr(t.expires_in)));const r=(e=t.user)!==null&&e!==void 0?e:typeof t?.id=="string"?t:null;return{data:{session:s,user:r},error:null}}function ar(t){const e=J(t);return!e.error&&t.weak_password&&typeof t.weak_password=="object"&&Array.isArray(t.weak_password.reasons)&&t.weak_password.reasons.length&&t.weak_password.message&&typeof t.weak_password.message=="string"&&t.weak_password.reasons.reduce((s,r)=>s&&typeof r=="string",!0)&&(e.data.weak_password=t.weak_password),e}function ve(t){var e;return{data:{user:(e=t.user)!==null&&e!==void 0?e:t},error:null}}function yo(t){return{data:t,error:null}}function vo(t){const{action_link:e,email_otp:s,hashed_token:r,redirect_to:n,verification_type:i}=t,a=Kt(t,["action_link","email_otp","hashed_token","redirect_to","verification_type"]),o={action_link:e,email_otp:s,hashed_token:r,redirect_to:n,verification_type:i},l=Object.assign({},a);return{data:{properties:o,user:l},error:null}}function or(t){return t}function wo(t){return!!t.access_token&&!!t.refresh_token&&!!t.expires_in}const es=["global","local","others"];class bo{constructor({url:e="",headers:s={},fetch:r,experimental:n}){this.url=e,this.headers=s,this.fetch=Gr(r),this.experimental=n??{},this.mfa={listFactors:this._listFactors.bind(this),deleteFactor:this._deleteFactor.bind(this)},this.oauth={listClients:this._listOAuthClients.bind(this),createClient:this._createOAuthClient.bind(this),getClient:this._getOAuthClient.bind(this),updateClient:this._updateOAuthClient.bind(this),deleteClient:this._deleteOAuthClient.bind(this),regenerateClientSecret:this._regenerateOAuthClientSecret.bind(this)},this.customProviders={listProviders:this._listCustomProviders.bind(this),createProvider:this._createCustomProvider.bind(this),getProvider:this._getCustomProvider.bind(this),updateProvider:this._updateCustomProvider.bind(this),deleteProvider:this._deleteCustomProvider.bind(this)},this.passkey={listPasskeys:this._adminListPasskeys.bind(this),deletePasskey:this._adminDeletePasskey.bind(this)}}async signOut(e,s=es[0]){if(es.indexOf(s)<0)throw new Error(`@supabase/auth-js: Parameter scope must be one of ${es.join(", ")}`);try{return await _(this.fetch,"POST",`${this.url}/logout?scope=${s}`,{headers:this.headers,jwt:e,noResolveJson:!0}),{data:null,error:null}}catch(r){if(b(r))return{data:null,error:r};throw r}}async inviteUserByEmail(e,s={}){try{return await _(this.fetch,"POST",`${this.url}/invite`,{body:{email:e,data:s.data},headers:this.headers,redirectTo:s.redirectTo,xform:ve})}catch(r){if(b(r))return{data:{user:null},error:r};throw r}}async generateLink(e){try{const{options:s}=e,r=Kt(e,["options"]),n=Object.assign(Object.assign({},r),s);return"newEmail"in r&&(n.new_email=r?.newEmail,delete n.newEmail),await _(this.fetch,"POST",`${this.url}/admin/generate_link`,{body:n,headers:this.headers,xform:vo,redirectTo:s?.redirectTo})}catch(s){if(b(s))return{data:{properties:null,user:null},error:s};throw s}}async createUser(e){try{return await _(this.fetch,"POST",`${this.url}/admin/users`,{body:e,headers:this.headers,xform:ve})}catch(s){if(b(s))return{data:{user:null},error:s};throw s}}async listUsers(e){var s,r,n,i,a,o,l;try{const c={nextPage:null,lastPage:0,total:0},u=await _(this.fetch,"GET",`${this.url}/admin/users`,{headers:this.headers,noResolveJson:!0,query:{page:(r=(s=e?.page)===null||s===void 0?void 0:s.toString())!==null&&r!==void 0?r:"",per_page:(i=(n=e?.perPage)===null||n===void 0?void 0:n.toString())!==null&&i!==void 0?i:""},xform:or});if(u.error)throw u.error;const d=await u.json(),f=(a=u.headers.get("x-total-count"))!==null&&a!==void 0?a:0,h=(l=(o=u.headers.get("link"))===null||o===void 0?void 0:o.split(","))!==null&&l!==void 0?l:[];return h.length>0&&(h.forEach(p=>{const g=parseInt(p.split(";")[0].split("=")[1].substring(0,1)),m=JSON.parse(p.split(";")[1].split("=")[1]);c[`${m}Page`]=g}),c.total=parseInt(f)),{data:Object.assign(Object.assign({},d),c),error:null}}catch(c){if(b(c))return{data:{users:[]},error:c};throw c}}async getUserById(e){ce(e);try{return await _(this.fetch,"GET",`${this.url}/admin/users/${e}`,{headers:this.headers,xform:ve})}catch(s){if(b(s))return{data:{user:null},error:s};throw s}}async updateUserById(e,s){ce(e);try{return await _(this.fetch,"PUT",`${this.url}/admin/users/${e}`,{body:s,headers:this.headers,xform:ve})}catch(r){if(b(r))return{data:{user:null},error:r};throw r}}async deleteUser(e,s=!1){ce(e);try{return await _(this.fetch,"DELETE",`${this.url}/admin/users/${e}`,{headers:this.headers,body:{should_soft_delete:s},xform:ve})}catch(r){if(b(r))return{data:{user:null},error:r};throw r}}async _listFactors(e){ce(e.userId);try{const{data:s,error:r}=await _(this.fetch,"GET",`${this.url}/admin/users/${e.userId}/factors`,{headers:this.headers,xform:n=>({data:{factors:n},error:null})});return{data:s,error:r}}catch(s){if(b(s))return{data:null,error:s};throw s}}async _deleteFactor(e){ce(e.userId),ce(e.id);try{return{data:await _(this.fetch,"DELETE",`${this.url}/admin/users/${e.userId}/factors/${e.id}`,{headers:this.headers}),error:null}}catch(s){if(b(s))return{data:null,error:s};throw s}}async _listOAuthClients(e){var s,r,n,i,a,o,l;try{const c={nextPage:null,lastPage:0,total:0},u=await _(this.fetch,"GET",`${this.url}/admin/oauth/clients`,{headers:this.headers,noResolveJson:!0,query:{page:(r=(s=e?.page)===null||s===void 0?void 0:s.toString())!==null&&r!==void 0?r:"",per_page:(i=(n=e?.perPage)===null||n===void 0?void 0:n.toString())!==null&&i!==void 0?i:""},xform:or});if(u.error)throw u.error;const d=await u.json(),f=(a=u.headers.get("x-total-count"))!==null&&a!==void 0?a:0,h=(l=(o=u.headers.get("link"))===null||o===void 0?void 0:o.split(","))!==null&&l!==void 0?l:[];return h.length>0&&(h.forEach(p=>{const g=parseInt(p.split(";")[0].split("=")[1].substring(0,1)),m=JSON.parse(p.split(";")[1].split("=")[1]);c[`${m}Page`]=g}),c.total=parseInt(f)),{data:Object.assign(Object.assign({},d),c),error:null}}catch(c){if(b(c))return{data:{clients:[]},error:c};throw c}}async _createOAuthClient(e){try{return await _(this.fetch,"POST",`${this.url}/admin/oauth/clients`,{body:e,headers:this.headers,xform:s=>({data:s,error:null})})}catch(s){if(b(s))return{data:null,error:s};throw s}}async _getOAuthClient(e){try{return await _(this.fetch,"GET",`${this.url}/admin/oauth/clients/${e}`,{headers:this.headers,xform:s=>({data:s,error:null})})}catch(s){if(b(s))return{data:null,error:s};throw s}}async _updateOAuthClient(e,s){try{return await _(this.fetch,"PUT",`${this.url}/admin/oauth/clients/${e}`,{body:s,headers:this.headers,xform:r=>({data:r,error:null})})}catch(r){if(b(r))return{data:null,error:r};throw r}}async _deleteOAuthClient(e){try{return await _(this.fetch,"DELETE",`${this.url}/admin/oauth/clients/${e}`,{headers:this.headers,noResolveJson:!0}),{data:null,error:null}}catch(s){if(b(s))return{data:null,error:s};throw s}}async _regenerateOAuthClientSecret(e){try{return await _(this.fetch,"POST",`${this.url}/admin/oauth/clients/${e}/regenerate_secret`,{headers:this.headers,xform:s=>({data:s,error:null})})}catch(s){if(b(s))return{data:null,error:s};throw s}}async _listCustomProviders(e){try{const s={};return e?.type&&(s.type=e.type),await _(this.fetch,"GET",`${this.url}/admin/custom-providers`,{headers:this.headers,query:s,xform:r=>{var n;return{data:{providers:(n=r?.providers)!==null&&n!==void 0?n:[]},error:null}}})}catch(s){if(b(s))return{data:{providers:[]},error:s};throw s}}async _createCustomProvider(e){try{return await _(this.fetch,"POST",`${this.url}/admin/custom-providers`,{body:e,headers:this.headers,xform:s=>({data:s,error:null})})}catch(s){if(b(s))return{data:null,error:s};throw s}}async _getCustomProvider(e){try{return await _(this.fetch,"GET",`${this.url}/admin/custom-providers/${e}`,{headers:this.headers,xform:s=>({data:s,error:null})})}catch(s){if(b(s))return{data:null,error:s};throw s}}async _updateCustomProvider(e,s){try{return await _(this.fetch,"PUT",`${this.url}/admin/custom-providers/${e}`,{body:s,headers:this.headers,xform:r=>({data:r,error:null})})}catch(r){if(b(r))return{data:null,error:r};throw r}}async _deleteCustomProvider(e){try{return await _(this.fetch,"DELETE",`${this.url}/admin/custom-providers/${e}`,{headers:this.headers,noResolveJson:!0}),{data:null,error:null}}catch(s){if(b(s))return{data:null,error:s};throw s}}async _adminListPasskeys(e){ce(e.userId);try{return await _(this.fetch,"GET",`${this.url}/admin/users/${e.userId}/passkeys`,{headers:this.headers,xform:s=>({data:s,error:null})})}catch(s){if(b(s))return{data:null,error:s};throw s}}async _adminDeletePasskey(e){ce(e.userId),ce(e.passkeyId);try{return await _(this.fetch,"DELETE",`${this.url}/admin/users/${e.userId}/passkeys/${e.passkeyId}`,{headers:this.headers,noResolveJson:!0}),{data:null,error:null}}catch(s){if(b(s))return{data:null,error:s};throw s}}}function lr(t={}){return{getItem:e=>t[e]||null,setItem:(e,s)=>{t[e]=s},removeItem:e=>{delete t[e]}}}globalThis&&Wr()&&globalThis.localStorage&&globalThis.localStorage.getItem("supabase.gotrue-js.locks.debug");class _o extends Error{constructor(e){super(e),this.isAcquireTimeout=!0}}function ko(){if(typeof globalThis!="object")try{Object.defineProperty(Object.prototype,"__magic__",{get:function(){return this},configurable:!0}),__magic__.globalThis=__magic__,delete Object.prototype.__magic__}catch{typeof self<"u"&&(self.globalThis=self)}}function Jr(t){if(!/^0x[a-fA-F0-9]{40}$/.test(t))throw new Error(`@supabase/auth-js: Address "${t}" is invalid.`);return t.toLowerCase()}function So(t){return parseInt(t,16)}function Eo(t){const e=new TextEncoder().encode(t);return"0x"+Array.from(e,r=>r.toString(16).padStart(2,"0")).join("")}function To(t){var e;const{chainId:s,domain:r,expirationTime:n,issuedAt:i=new Date,nonce:a,notBefore:o,requestId:l,resources:c,scheme:u,uri:d,version:f}=t;{if(!Number.isInteger(s))throw new Error(`@supabase/auth-js: Invalid SIWE message field "chainId". Chain ID must be a EIP-155 chain ID. Provided value: ${s}`);if(!r)throw new Error('@supabase/auth-js: Invalid SIWE message field "domain". Domain must be provided.');if(a&&a.length<8)throw new Error(`@supabase/auth-js: Invalid SIWE message field "nonce". Nonce must be at least 8 characters. Provided value: ${a}`);if(!d)throw new Error('@supabase/auth-js: Invalid SIWE message field "uri". URI must be provided.');if(f!=="1")throw new Error(`@supabase/auth-js: Invalid SIWE message field "version". Version must be '1'. Provided value: ${f}`);if(!((e=t.statement)===null||e===void 0)&&e.includes(`
+`))throw new Error(`@supabase/auth-js: Invalid SIWE message field "statement". Statement must not include '\\n'. Provided value: ${t.statement}`)}const h=Jr(t.address),p=u?`${u}://${r}`:r,g=t.statement?`${t.statement}
+`:"",m=`${p} wants you to sign in with your Ethereum account:
+${h}
 
-function toast(msg){
-  const t=$("toast"); t.textContent=msg; t.classList.remove("hidden");
-  clearTimeout(toast.timer); toast.timer=setTimeout(()=>t.classList.add("hidden"),3000);
-}
-function loginMsg(msg, type="error"){
-  const e=$("loginMessage"); e.textContent=msg; e.className=`notice ${type}`; e.classList.remove("hidden");
-}
-function revealPassword(id){
-  const el=$(id);if(!el)return;
-  clearTimeout(el._hideTimer);
-  el.type="text";
-  el._hideTimer=setTimeout(()=>{el.type="password"},1000);
-}
-function cleanRpcError(err){
-  if(typeof navigator!=="undefined"&&!navigator.onLine) return "İnternet bağlantısı yok.";
-  let m=err?.message || "İşlem başarısız.";
-  m=m.replace(/^.*?P0001[: ]*/i,"").replace(/^.*?message[: ]*/i,"");
-  return m;
-}
-async function rpc(name, params={}){
-  const client=await getSupabaseClient();
-  const {data,error}=await client.rpc(name,params);
-  if(error) throw new Error(cleanRpcError(error));
-  return data;
-}
-function setSession(result){
-  token=result.token;
-  app.role=result.role; app.displayName=result.displayName;
-  if(result.role==="teacher"){
-    localStorage.setItem(TEACHER_NAME_KEY,result.displayName||"");
-    localStorage.setItem(TEACHER_WEEK_UNTIL_KEY,result.teacherWeekEndsAt||result.expiresAt||"");
-  }
-}
-function rememberedTeacher(){
-  const name=localStorage.getItem(TEACHER_NAME_KEY)||"";
-  const until=localStorage.getItem(TEACHER_WEEK_UNTIL_KEY)||"";
-  const valid=name&&until&&!Number.isNaN(new Date(until).getTime())&&new Date(until).getTime()>Date.now();
-  return {name,until,valid};
-}
-function renderLoginMode(forceCredentials=false){
-  const remembered=rememberedTeacher();
-  const continueBox=$("continueLogin"),credentials=$("credentialLogin"),msg=$("loginMessage");
-  if(!continueBox||!credentials)return;
-
-  if(remembered.valid&&!forceCredentials){
-    $("continueTeacherBtn").textContent=`${remembered.name} olarak devam et`;
-    continueBox.classList.remove("hidden");
-    credentials.classList.add("hidden");
-  }else{
-    continueBox.classList.add("hidden");
-    credentials.classList.remove("hidden");
-    if(remembered.name&&!$("loginName").value)$("loginName").value=remembered.name;
-  }
-  if(msg)msg.classList.add("hidden");
-}
-async function bootstrap(){
-  const data=await rpc("app_bootstrap",{p_token:token});
-  app={...app,...data};
-  showApp(); renderCurrent();
-}
-async function logout(){
-  if(!confirm("Çıkış yapılsın mı?"))return;
-  try{
-    if(token&&active?.listId) await rpc("release_attendance",{p_token:token,p_list_id:active.listId});
-  }catch{}
-  clearInterval(attendanceLockTimer);attendanceLockTimer=null;
-  try{ if(token) await rpc("app_logout",{p_token:token}); }catch{}
-  token=""; active=null;attendanceCache={};
-  sessionStorage.removeItem("eyoklama_active");
-  localStorage.removeItem(TEACHER_NAME_KEY);
-  localStorage.removeItem(TEACHER_WEEK_UNTIL_KEY);
-  if(typeof window !== "undefined"){
-    $("appView")?.classList.add("hidden"); $("loginView")?.classList.remove("hidden");
-    if($("loginName")) $("loginName").value="";
-    if($("loginPin")) $("loginPin").value="";
-    renderLoginMode(true);
-  }
-}
-
-if(typeof window !== "undefined"){
-  $("loginBtn")?.addEventListener("click", async()=>{
-    const limit=getLoginRateLimitMsg();
-    if(limit){loginMsg(limit);return}
-    const btn=$("loginBtn");
-    try{
-      btn.disabled=true;btn.classList.add("loading");btn.textContent="Giriş yapılıyor…";
-      const name=$("loginName").value.trim(), pin=$("loginPin").value.trim();
-      if(!name){throw new Error("Hoca adını yazın.")}
-      if(!pin){throw new Error("PIN / parolayı yazın.")}
-      const r=await rpc("app_login",{p_name:name,p_pin:pin,p_device_token:deviceToken});
-      if(!r?.ok){
-        recordFailedAttempt();
-        throw new Error(r?.error||"Giriş başarısız.");
-      }
-      resetLoginAttempts();
-      setSession(r); await bootstrap();
-    }catch(e){
-      const l=getLoginRateLimitMsg();
-      loginMsg(l||e.message);
-    }finally{
-      btn.disabled=false;btn.classList.remove("loading");btn.textContent="Giriş yap";
-    }
-  });
-
-  $("continueTeacherBtn")?.addEventListener("click", async()=>{
-    const limit=getLoginRateLimitMsg();
-    if(limit){loginMsg(limit);return}
-    const btn=$("continueTeacherBtn");
-    const remembered=rememberedTeacher();
-    try{
-      btn.disabled=true;btn.classList.add("loading");btn.textContent="Giriş yapılıyor…";
-      const r=await rpc("app_login",{p_name:"",p_pin:"",p_device_token:deviceToken});
-      if(!r?.ok){
-        recordFailedAttempt();
-        if(r?.code==="WEEKLY_PIN_REQUIRED"){
-          localStorage.removeItem(TEACHER_WEEK_UNTIL_KEY);
-          renderLoginMode(true);
-          $("loginName").value=remembered.name||"";
-          $("loginPin").focus();
-          loginMsg(r.error||"Bu haftanın ilk girişinde PIN gerekli.");
-          return;
-        }
-        throw new Error(r?.error||"Giriş başarısız.");
-      }
-      resetLoginAttempts();
-      setSession(r);await bootstrap();
-    }catch(e){
-      renderLoginMode(true);
-      $("loginName").value=remembered.name||"";
-      const l=getLoginRateLimitMsg();
-      loginMsg(l||e.message);
-    }finally{
-      btn.disabled=false;btn.classList.remove("loading");
-      const nowRemembered=rememberedTeacher();
-      btn.textContent=nowRemembered.name?`${nowRemembered.name} olarak devam et`:"Hoca olarak devam et";
-    }
-  });
-
-  $("differentTeacherBtn")?.addEventListener("click", ()=>{
-    localStorage.removeItem(TEACHER_NAME_KEY);
-    localStorage.removeItem(TEACHER_WEEK_UNTIL_KEY);
-    renderLoginMode(true);
-    if($("loginName")) $("loginName").value="";
-    if($("loginPin")) $("loginPin").value="";
-    $("loginName")?.focus();
-  });
-
-  ["loginName","loginPin"].forEach(id=>$(id)?.addEventListener("keydown",e=>{if(e.key==="Enter")$("loginBtn")?.click()}));
-  if($("logoutBtn")) $("logoutBtn").onclick=logout;
-  renderLoginMode();
-
-  window.addEventListener("offline",()=>toast("İnternet bağlantısı kesildi."));
-  window.addEventListener("online",()=>toast("İnternet bağlantısı yeniden kuruldu."));
-}
-
-function updateTopBar(){
-  const todayPerms=getTodayPermissions();
-  const permCount=Object.keys(todayPerms).length;
-  const badgeEl=$("topPermBadge");
-  if(badgeEl){
-    badgeEl.textContent=permCount;
-    badgeEl.classList.toggle("hidden", permCount===0);
-  }
-  $("topAdminBtn")?.classList.toggle("hidden", app.role!=="admin");
-}
-
-function showApp(){
-  if(typeof window === "undefined") return;
-  $("loginView").classList.add("hidden");$("appView").classList.remove("hidden");
-  updateTopBar();
-  switchTab("lists");
-}
-
-function switchTab(tab){
-  if(tab!=="history" && tab!=="lists"){historyDrafts={};historyEditModes={}}
-  active=null;
-  sessionStorage.removeItem("eyoklama_active");
-  $("attendancePage")?.classList.add("hidden");
-  document.querySelectorAll(".page").forEach(x=>x.classList.add("hidden"));
-
-  const targetTab = (tab === "history" || tab === "lists") ? "lists" : tab;
-  $(`${targetTab}Page`)?.classList.remove("hidden");
-
-  if(targetTab==="lists") renderLists();
-  if(targetTab==="new") renderNewList();
-  if(targetTab==="admin") renderAdmin();
-  window.scrollTo(0,0);
-}
-function renderCurrent(){
-  try{
-    const saved=JSON.parse(sessionStorage.getItem("eyoklama_active")||"null");
-    if(saved?.listId&&saved?.students){
-      active=saved;
-      startAttendanceHeartbeat(active.listId);
-      renderAttendance();
-      return;
-    }
-  }catch{}
-  switchTab("lists");
-}
-async function refresh(){
-  const data=await rpc("app_bootstrap",{p_token:token});app={...app,...data};attendanceCache={};
-}
-
-const TODAY_PERMISSIONS_KEY="eyoklama_v3_today_permissions";
-function getTodayPermissions(){
-  try{
-    const raw=JSON.parse(localStorage.getItem(TODAY_PERMISSIONS_KEY)||"{}");
-    return raw[todayKey()]||{};
-  }catch{return {}}
-}
-function saveTodayPermissions(permMap){
-  try{
-    const raw={[todayKey()]:permMap};
-    localStorage.setItem(TODAY_PERMISSIONS_KEY,JSON.stringify(raw));
-  }catch{}
-}
-
-function startPrePermissionView(){
-  const todayPerms=getTodayPermissions();
-  const allStudents=[];
-  app.lists.forEach(l=>{
-    l.students.forEach(s=>{
-      allStudents.push({...s,listName:l.name});
-    });
-  });
-  allStudents.sort((a,b)=>fullName(a).localeCompare(fullName(b),"tr"));
-
-  const statuses={};
-  allStudents.forEach(s=>{
-    statuses[s.id]=todayPerms[s.id]?"excused":"absent";
-  });
-
-  active={
-    mode:"permission",
-    listId:null,
-    listName:"Günün İzinlilerini Seç (±)",
-    students:allStudents,
-    statuses
-  };
-  renderAttendance();
-}
-
-async function savePrePermissions(){
-  const permMap={};
-  if(active?.statuses){
-    Object.keys(active.statuses).forEach(id=>{
-      if(active.statuses[id]==="excused"){
-        permMap[id]=true;
-      }
-    });
-  }
-  saveTodayPermissions(permMap);
-  active=null;
-  sessionStorage.removeItem("eyoklama_active");
-  switchTab("lists");
-  toast("Günün izinlileri kaydedildi.");
-
-  const d=todayKey();
-  const todayHistory=app.history.filter(h=>!h.archivedAt&&dayKey(h.takenAt)===d);
-
-  if(todayHistory.length && Object.keys(permMap).length){
-    for(const h of todayHistory){
-      try{
-        const att=attendanceCache[h.id]||await rpc("get_attendance",{p_token:token,p_attendance_id:h.id});
-        const changes={};
-        att.entries.forEach(e=>{
-          const sId=e.studentId;
-          if(sId && permMap[sId] && e.status!=="excused"){
-            changes[sId]="excused";
-          }
-        });
-        if(Object.keys(changes).length){
-          await rpc("apply_attendance_changes",{p_token:token,p_attendance_id:h.id,p_changes:changes});
-          delete attendanceCache[h.id];
-        }
-      }catch{}
-    }
-    await refresh();
-  }
-}
-
-function buildHistorySectionHtml(){
-  const groups=buildHistoryGroups();
-  historyGroupCache={};
-  let lastGroupKey="";
-  const modeEmoji=historyGroupingMode==="day"?"☀️":historyGroupingMode==="week"?"📅":"🌙";
-  const modeTitle=historyGroupingMode==="day"?"Günlük Görünüm (Haftalık için tıklayın)":historyGroupingMode==="week"?"Haftalık Görünüm (Aylık için tıklayın)":"Aylık Görünüm (Günlük için tıklayın)";
-
-  const cards=groups.map((g,i)=>{
-    const key=`g${i}`;historyGroupCache[key]=g;
-    const sel=selectedHistoryItem(key), h=sel.item;
-
-    let currentGroupKey="";
-    let currentGroupLabel="";
-    let downloadOnClick="";
-
-    if(historyGroupingMode==="day"){
-      const day=dayKey(h.takenAt);
-      currentGroupKey=day;
-      currentGroupLabel=formatHistoryDay(day);
-      downloadOnClick=`downloadDayPdf('${day}')`;
-    }else if(historyGroupingMode==="week"){
-      const w=getWeekDetails(h.takenAt);
-      currentGroupKey=w.key;
-      currentGroupLabel=w.label;
-      downloadOnClick=`downloadGroupRangePdf('${w.key}')`;
-    }else{
-      const m=getMonthDetails(h.takenAt);
-      currentGroupKey=m.key;
-      currentGroupLabel=m.label;
-      downloadOnClick=`downloadGroupRangePdf('${m.key}')`;
-    }
-
-    const divider=currentGroupKey!==lastGroupKey?`<div class="history-day">
-      <div class="history-day-line"><span class="history-day-label">${escapeHtml(currentGroupLabel)}</span></div>
-      <button type="button" class="history-day-download" onclick="${downloadOnClick}" aria-label="${escapeHtml(currentGroupLabel)} PDF indir" title="PDF indir">
-        <svg viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+${g}`;let y=`URI: ${d}
+Version: ${f}
+Chain ID: ${s}${a?`
+Nonce: ${a}`:""}
+Issued At: ${i.toISOString()}`;if(n&&(y+=`
+Expiration Time: ${n.toISOString()}`),o&&(y+=`
+Not Before: ${o.toISOString()}`),l&&(y+=`
+Request ID: ${l}`),c){let v=`
+Resources:`;for(const w of c){if(!w||typeof w!="string")throw new Error(`@supabase/auth-js: Invalid SIWE message field "resources". Every resource must be a valid string. Provided value: ${w}`);v+=`
+- ${w}`}y+=v}return`${m}
+${y}`}class B extends Error{constructor({message:e,code:s,cause:r,name:n}){var i;super(e,{cause:r}),this.__isWebAuthnError=!0,this.name=(i=n??(r instanceof Error?r.name:void 0))!==null&&i!==void 0?i:"Unknown Error",this.code=s}toJSON(){return{name:this.name,message:this.message,code:this.code}}}class jt extends B{constructor(e,s){super({code:"ERROR_PASSTHROUGH_SEE_CAUSE_PROPERTY",cause:s,message:e}),this.name="WebAuthnUnknownError",this.originalError=s}}function Ao({error:t,options:e}){var s,r,n;const{publicKey:i}=e;if(!i)throw Error("options was missing required publicKey property");if(t.name==="AbortError"){if(e.signal instanceof AbortSignal)return new B({message:"Registration ceremony was sent an abort signal",code:"ERROR_CEREMONY_ABORTED",cause:t})}else if(t.name==="ConstraintError"){if(((s=i.authenticatorSelection)===null||s===void 0?void 0:s.requireResidentKey)===!0)return new B({message:"Discoverable credentials were required but no available authenticator supported it",code:"ERROR_AUTHENTICATOR_MISSING_DISCOVERABLE_CREDENTIAL_SUPPORT",cause:t});if(e.mediation==="conditional"&&((r=i.authenticatorSelection)===null||r===void 0?void 0:r.userVerification)==="required")return new B({message:"User verification was required during automatic registration but it could not be performed",code:"ERROR_AUTO_REGISTER_USER_VERIFICATION_FAILURE",cause:t});if(((n=i.authenticatorSelection)===null||n===void 0?void 0:n.userVerification)==="required")return new B({message:"User verification was required but no available authenticator supported it",code:"ERROR_AUTHENTICATOR_MISSING_USER_VERIFICATION_SUPPORT",cause:t})}else{if(t.name==="InvalidStateError")return new B({message:"The authenticator was previously registered",code:"ERROR_AUTHENTICATOR_PREVIOUSLY_REGISTERED",cause:t});if(t.name==="NotAllowedError")return new B({message:t.message,code:"ERROR_PASSTHROUGH_SEE_CAUSE_PROPERTY",cause:t});if(t.name==="NotSupportedError")return i.pubKeyCredParams.filter(o=>o.type==="public-key").length===0?new B({message:'No entry in pubKeyCredParams was of type "public-key"',code:"ERROR_MALFORMED_PUBKEYCREDPARAMS",cause:t}):new B({message:"No available authenticator supported any of the specified pubKeyCredParams algorithms",code:"ERROR_AUTHENTICATOR_NO_SUPPORTED_PUBKEYCREDPARAMS_ALG",cause:t});if(t.name==="SecurityError"){const a=window.location.hostname;if(Yr(a)){if(i.rp.id!==a)return new B({message:`The RP ID "${i.rp.id}" is invalid for this domain`,code:"ERROR_INVALID_RP_ID",cause:t})}else return new B({message:`${window.location.hostname} is an invalid domain`,code:"ERROR_INVALID_DOMAIN",cause:t})}else if(t.name==="TypeError"){if(i.user.id.byteLength<1||i.user.id.byteLength>64)return new B({message:"User ID was not between 1 and 64 characters",code:"ERROR_INVALID_USER_ID_LENGTH",cause:t})}else if(t.name==="UnknownError")return new B({message:"The authenticator was unable to process the specified options, or could not create a new credential",code:"ERROR_AUTHENTICATOR_GENERAL_ERROR",cause:t})}return new B({message:"a Non-Webauthn related error has occurred",code:"ERROR_PASSTHROUGH_SEE_CAUSE_PROPERTY",cause:t})}function Ro({error:t,options:e}){const{publicKey:s}=e;if(!s)throw Error("options was missing required publicKey property");if(t.name==="AbortError"){if(e.signal instanceof AbortSignal)return new B({message:"Authentication ceremony was sent an abort signal",code:"ERROR_CEREMONY_ABORTED",cause:t})}else{if(t.name==="NotAllowedError")return new B({message:t.message,code:"ERROR_PASSTHROUGH_SEE_CAUSE_PROPERTY",cause:t});if(t.name==="SecurityError"){const r=window.location.hostname;if(Yr(r)){if(s.rpId!==r)return new B({message:`The RP ID "${s.rpId}" is invalid for this domain`,code:"ERROR_INVALID_RP_ID",cause:t})}else return new B({message:`${window.location.hostname} is an invalid domain`,code:"ERROR_INVALID_DOMAIN",cause:t})}else if(t.name==="UnknownError")return new B({message:"The authenticator was unable to process the specified options, or could not create a new assertion signature",code:"ERROR_AUTHENTICATOR_GENERAL_ERROR",cause:t})}return new B({message:"a Non-Webauthn related error has occurred",code:"ERROR_PASSTHROUGH_SEE_CAUSE_PROPERTY",cause:t})}class Co{createNewAbortSignal(){if(this.controller){const s=new Error("Cancelling existing WebAuthn API call for new one");s.name="AbortError",this.controller.abort(s)}const e=new AbortController;return this.controller=e,e.signal}cancelCeremony(){if(this.controller){const e=new Error("Manually cancelling existing WebAuthn API call");e.name="AbortError",this.controller.abort(e),this.controller=void 0}}}const gs=new Co;function cr(t){if(!t)throw new Error("Credential creation options are required");if(typeof PublicKeyCredential<"u"&&"parseCreationOptionsFromJSON"in PublicKeyCredential&&typeof PublicKeyCredential.parseCreationOptionsFromJSON=="function")return PublicKeyCredential.parseCreationOptionsFromJSON(t);const{challenge:e,user:s,excludeCredentials:r}=t,n=Kt(t,["challenge","user","excludeCredentials"]),i=He(e).buffer,a=Object.assign(Object.assign({},s),{id:He(s.id).buffer}),o=Object.assign(Object.assign({},n),{challenge:i,user:a});if(r&&r.length>0){o.excludeCredentials=new Array(r.length);for(let l=0;l<r.length;l++){const c=r[l];o.excludeCredentials[l]=Object.assign(Object.assign({},c),{id:He(c.id).buffer,type:c.type||"public-key",transports:c.transports})}}return o}function ur(t){if(!t)throw new Error("Credential request options are required");if(typeof PublicKeyCredential<"u"&&"parseRequestOptionsFromJSON"in PublicKeyCredential&&typeof PublicKeyCredential.parseRequestOptionsFromJSON=="function")return PublicKeyCredential.parseRequestOptionsFromJSON(t);const{challenge:e,allowCredentials:s}=t,r=Kt(t,["challenge","allowCredentials"]),n=He(e).buffer,i=Object.assign(Object.assign({},r),{challenge:n});if(s&&s.length>0){i.allowCredentials=new Array(s.length);for(let a=0;a<s.length;a++){const o=s[a];i.allowCredentials[a]=Object.assign(Object.assign({},o),{id:He(o.id).buffer,type:o.type||"public-key",transports:o.transports})}}return i}function dr(t){var e;if("toJSON"in t&&typeof t.toJSON=="function")return t.toJSON();const s=t;return{id:t.id,rawId:t.id,response:{attestationObject:Ce(new Uint8Array(t.response.attestationObject)),clientDataJSON:Ce(new Uint8Array(t.response.clientDataJSON))},type:"public-key",clientExtensionResults:t.getClientExtensionResults(),authenticatorAttachment:(e=s.authenticatorAttachment)!==null&&e!==void 0?e:void 0}}function hr(t){var e;if("toJSON"in t&&typeof t.toJSON=="function")return t.toJSON();const s=t,r=t.getClientExtensionResults(),n=t.response;return{id:t.id,rawId:t.id,response:{authenticatorData:Ce(new Uint8Array(n.authenticatorData)),clientDataJSON:Ce(new Uint8Array(n.clientDataJSON)),signature:Ce(new Uint8Array(n.signature)),userHandle:n.userHandle?Ce(new Uint8Array(n.userHandle)):void 0},type:"public-key",clientExtensionResults:r,authenticatorAttachment:(e=s.authenticatorAttachment)!==null&&e!==void 0?e:void 0}}function Yr(t){return t==="localhost"||/^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/i.test(t)}function xt(){var t,e;return!!(F()&&"PublicKeyCredential"in window&&window.PublicKeyCredential&&"credentials"in navigator&&typeof((t=navigator?.credentials)===null||t===void 0?void 0:t.create)=="function"&&typeof((e=navigator?.credentials)===null||e===void 0?void 0:e.get)=="function")}async function Xr(t){try{const e=await navigator.credentials.create(t);return e?e instanceof PublicKeyCredential?{data:e,error:null}:{data:null,error:new jt("Browser returned unexpected credential type",e)}:{data:null,error:new jt("Empty credential response",e)}}catch(e){return{data:null,error:Ao({error:e,options:t})}}}async function Zr(t){try{const e=await navigator.credentials.get(t);return e?e instanceof PublicKeyCredential?{data:e,error:null}:{data:null,error:new jt("Browser returned unexpected credential type",e)}:{data:null,error:new jt("Empty credential response",e)}}catch(e){return{data:null,error:Ro({error:e,options:t})}}}const $o={hints:["security-key"],authenticatorSelection:{authenticatorAttachment:"cross-platform",requireResidentKey:!1,userVerification:"preferred",residentKey:"discouraged"},attestation:"direct"},Oo={userVerification:"preferred",hints:["security-key"],attestation:"direct"};function Dt(...t){const e=n=>n!==null&&typeof n=="object"&&!Array.isArray(n),s=n=>n instanceof ArrayBuffer||ArrayBuffer.isView(n),r={};for(const n of t)if(n)for(const i in n){const a=n[i];if(a!==void 0)if(Array.isArray(a))r[i]=a;else if(s(a))r[i]=a;else if(e(a)){const o=r[i];e(o)?r[i]=Dt(o,a):r[i]=Dt(a)}else r[i]=a}return r}function Po(t,e){return Dt($o,t,e||{})}function Io(t,e){return Dt(Oo,t,e||{})}class No{constructor(e){this.client=e,this.enroll=this._enroll.bind(this),this.challenge=this._challenge.bind(this),this.verify=this._verify.bind(this),this.authenticate=this._authenticate.bind(this),this.register=this._register.bind(this)}async _enroll(e){return this.client.mfa.enroll(Object.assign(Object.assign({},e),{factorType:"webauthn"}))}async _challenge({factorId:e,webauthn:s,friendlyName:r,signal:n},i){var a;try{const{data:o,error:l}=await this.client.mfa.challenge({factorId:e,webauthn:s});if(!o)return{data:null,error:l};const c=n??gs.createNewAbortSignal();if(o.webauthn.type==="create"){const{user:u}=o.webauthn.credential_options.publicKey;if(!u.name){const d=r;if(d)u.name=`${u.id}:${d}`;else{const h=(await this.client.getUser()).data.user,p=((a=h?.user_metadata)===null||a===void 0?void 0:a.name)||h?.email||h?.id||"User";u.name=`${u.id}:${p}`}}u.displayName||(u.displayName=u.name)}switch(o.webauthn.type){case"create":{const u=Po(o.webauthn.credential_options.publicKey,i?.create),{data:d,error:f}=await Xr({publicKey:u,signal:c});return d?{data:{factorId:e,challengeId:o.id,webauthn:{type:o.webauthn.type,credential_response:d}},error:null}:{data:null,error:f}}case"request":{const u=Io(o.webauthn.credential_options.publicKey,i?.request),{data:d,error:f}=await Zr(Object.assign(Object.assign({},o.webauthn.credential_options),{publicKey:u,signal:c}));return d?{data:{factorId:e,challengeId:o.id,webauthn:{type:o.webauthn.type,credential_response:d}},error:null}:{data:null,error:f}}}}catch(o){return b(o)?{data:null,error:o}:{data:null,error:new se("Unexpected error in challenge",o)}}}async _verify({challengeId:e,factorId:s,webauthn:r}){return this.client.mfa.verify({factorId:s,challengeId:e,webauthn:r})}async _authenticate({factorId:e,webauthn:{rpId:s=typeof window<"u"?window.location.hostname:void 0,rpOrigins:r=typeof window<"u"?[window.location.origin]:void 0,signal:n}={}},i){if(!s)return{data:null,error:new at("rpId is required for WebAuthn authentication")};try{if(!xt())return{data:null,error:new se("Browser does not support WebAuthn",null)};const{data:a,error:o}=await this.challenge({factorId:e,webauthn:{rpId:s,rpOrigins:r},signal:n},{request:i});if(!a)return{data:null,error:o};const{webauthn:l}=a;return this._verify({factorId:e,challengeId:a.challengeId,webauthn:{type:l.type,rpId:s,rpOrigins:r,credential_response:l.credential_response}})}catch(a){return b(a)?{data:null,error:a}:{data:null,error:new se("Unexpected error in authenticate",a)}}}async _register({friendlyName:e,webauthn:{rpId:s=typeof window<"u"?window.location.hostname:void 0,rpOrigins:r=typeof window<"u"?[window.location.origin]:void 0,signal:n}={}},i){if(!s)return{data:null,error:new at("rpId is required for WebAuthn registration")};try{if(!xt())return{data:null,error:new se("Browser does not support WebAuthn",null)};const{data:a,error:o}=await this._enroll({friendlyName:e});if(!a)return await this.client.mfa.listFactors().then(u=>{var d;return(d=u.data)===null||d===void 0?void 0:d.all.find(f=>f.factor_type==="webauthn"&&f.friendly_name===e&&f.status==="unverified")}).then(u=>u?this.client.mfa.unenroll({factorId:u?.id}):void 0),{data:null,error:o};const{data:l,error:c}=await this._challenge({factorId:a.id,friendlyName:a.friendly_name,webauthn:{rpId:s,rpOrigins:r},signal:n},{create:i});return l?this._verify({factorId:a.id,challengeId:l.challengeId,webauthn:{rpId:s,rpOrigins:r,type:l.webauthn.type,credential_response:l.webauthn.credential_response}}):{data:null,error:c}}catch(a){return b(a)?{data:null,error:a}:{data:null,error:new se("Unexpected error in register",a)}}}}ko();const Lo={url:La,storageKey:ja,autoRefreshToken:!0,persistSession:!0,detectSessionInUrl:!0,headers:xa,flowType:"implicit",debug:!1,hasCustomAuthorizationHeader:!1,throwOnError:!1,lockAcquireTimeout:5e3,skipAutoInitialize:!1,experimental:{}},Le={};let fr=!1;class lt{get jwks(){var e,s;return(s=(e=Le[this.storageKey])===null||e===void 0?void 0:e.jwks)!==null&&s!==void 0?s:{keys:[]}}set jwks(e){Le[this.storageKey]=Object.assign(Object.assign({},Le[this.storageKey]),{jwks:e})}get jwks_cached_at(){var e,s;return(s=(e=Le[this.storageKey])===null||e===void 0?void 0:e.cachedAt)!==null&&s!==void 0?s:Number.MIN_SAFE_INTEGER}set jwks_cached_at(e){Le[this.storageKey]=Object.assign(Object.assign({},Le[this.storageKey]),{cachedAt:e})}constructor(e){var s,r,n;this.userStorage=null,this.memoryStorage=null,this.stateChangeEmitters=new Map,this.autoRefreshTicker=null,this.autoRefreshTickTimeout=null,this.visibilityChangedCallback=null,this.refreshingDeferred=null,this.lastRefreshFailure=null,this._sessionRemovalEpoch=0,this.initializePromise=null,this._pendingInitNotifications=null,this.detectSessionInUrl=!0,this.hasCustomAuthorizationHeader=!1,this.suppressGetSessionWarning=!1,this.lock=null,this.lockAcquired=!1,this.pendingInLock=[],this.broadcastChannel=null,this.logger=console.log;const i=Object.assign(Object.assign({},Lo),e);if(this.storageKey=i.storageKey,this.instanceID=(s=lt.nextInstanceID[this.storageKey])!==null&&s!==void 0?s:0,lt.nextInstanceID[this.storageKey]=this.instanceID+1,this.logDebugMessages=!!i.debug,typeof i.debug=="function"&&(this.logger=i.debug),this.instanceID>0&&F()){const a=`${this._logPrefix()} Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key.`;console.warn(a),this.logDebugMessages&&console.trace(a)}if(this.persistSession=i.persistSession,this.autoRefreshToken=i.autoRefreshToken,this.experimental=(r=i.experimental)!==null&&r!==void 0?r:{},this.admin=new bo({url:i.url,headers:i.headers,fetch:i.fetch,experimental:this.experimental}),this.url=i.url,this.headers=i.headers,this.fetch=Gr(i.fetch),this.detectSessionInUrl=i.detectSessionInUrl,this.flowType=i.flowType,this.hasCustomAuthorizationHeader=i.hasCustomAuthorizationHeader,this.throwOnError=i.throwOnError,this.lockAcquireTimeout=i.lockAcquireTimeout,i.lock!=null&&(this.lock=i.lock,fr||(fr=!0,console.warn(`${this._logPrefix()} The "lock" option is deprecated and will be removed in v3. The client now coordinates session refreshes without a lock, so most apps can drop the option. See https://github.com/supabase/supabase-js/blob/master/packages/core/auth-js/migrations/lockless-coordination.md`))),this.jwks||(this.jwks={keys:[]},this.jwks_cached_at=Number.MIN_SAFE_INTEGER),this.mfa={verify:this._verify.bind(this),enroll:this._enroll.bind(this),unenroll:this._unenroll.bind(this),challenge:this._challenge.bind(this),listFactors:this._listFactors.bind(this),challengeAndVerify:this._challengeAndVerify.bind(this),getAuthenticatorAssuranceLevel:this._getAuthenticatorAssuranceLevel.bind(this),webauthn:new No(this),recoveryCodes:{getStatus:this._getRecoveryCodesStatus.bind(this),generate:this._generateRecoveryCodes.bind(this),verify:this._verifyRecoveryCode.bind(this),regenerate:this._regenerateRecoveryCodes.bind(this),unenroll:this._unenrollRecoveryCodes.bind(this)}},this.oauth={getAuthorizationDetails:this._getAuthorizationDetails.bind(this),approveAuthorization:this._approveAuthorization.bind(this),denyAuthorization:this._denyAuthorization.bind(this),listGrants:this._listOAuthGrants.bind(this),revokeGrant:this._revokeOAuthGrant.bind(this)},this.passkey={startRegistration:this._startPasskeyRegistration.bind(this),verifyRegistration:this._verifyPasskeyRegistration.bind(this),startAuthentication:this._startPasskeyAuthentication.bind(this),verifyAuthentication:this._verifyPasskeyAuthentication.bind(this),list:this._listPasskeys.bind(this),update:this._updatePasskey.bind(this),delete:this._deletePasskey.bind(this)},this.persistSession?(i.storage?this.storage=i.storage:Wr()?this.storage=globalThis.localStorage:(this.memoryStorage={},this.storage=lr(this.memoryStorage)),i.userStorage&&(this.userStorage=i.userStorage)):(this.memoryStorage={},this.storage=lr(this.memoryStorage)),F()&&globalThis.BroadcastChannel&&this.persistSession&&this.storageKey){try{this.broadcastChannel=new globalThis.BroadcastChannel(this.storageKey)}catch(a){console.error("Failed to create a new BroadcastChannel, multi-tab state changes will not be available",a)}(n=this.broadcastChannel)===null||n===void 0||n.addEventListener("message",async a=>{this._debug("received broadcast notification from other tab or client",a),(a.data.event==="TOKEN_REFRESHED"||a.data.event==="SIGNED_IN")&&(this.lastRefreshFailure=null);try{await this._notifyAllSubscribers(a.data.event,a.data.session,!1)}catch(o){this._debug("#broadcastChannel","error",o)}})}i.skipAutoInitialize||this.initialize().catch(a=>{this._debug("#initialize()","error",a)})}isThrowOnErrorEnabled(){return this.throwOnError}_returnResult(e){if(this.throwOnError&&e&&e.error)throw e.error;return e}_logPrefix(){return`GoTrueClient@${this.storageKey}:${this.instanceID} (${Fr}) ${new Date().toISOString()}`}_debug(...e){return this.logDebugMessages&&this.logger(this._logPrefix(),...e),this}async initialize(){var e;if(this.initializePromise)return await this.initializePromise;this._pendingInitNotifications=[],this.initializePromise=(async()=>this.lock!=null?await this._acquireLock(this.lockAcquireTimeout,async()=>await this._initialize()):await this._initialize())();const s=await this.initializePromise,r=(e=this._pendingInitNotifications)!==null&&e!==void 0?e:[];this._pendingInitNotifications=null;for(const n of r)await this._notifyAllSubscribers(n.event,n.session,n.broadcast);return s}async _initialize(){var e;try{let s={},r="none";if(F()&&(s=sr(window.location.href),this._isImplicitGrantCallback(s)?r="implicit":await this._isPKCECallback(s)&&(r="pkce")),F()&&this.detectSessionInUrl&&r!=="none"){const{data:n,error:i}=await this._getSessionFromURL(s,r);if(i){if(this._debug("#_initialize()","error detecting session from URL",i),Ha(i)){const l=(e=i.details)===null||e===void 0?void 0:e.code;if(l==="identity_already_exists"||l==="identity_not_found"||l==="single_identity_not_deletable")return{error:i}}return{error:i}}const{session:a,redirectType:o}=n;return this._debug("#_initialize()","detected session in URL",a,"redirect type",o),await this._saveSession(a),setTimeout(async()=>{o==="recovery"?await this._notifyAllSubscribers("PASSWORD_RECOVERY",a):await this._notifyAllSubscribers("SIGNED_IN",a)},0),{error:null}}return await this._recoverAndRefresh(),{error:null}}catch(s){return b(s)?this._returnResult({error:s}):this._returnResult({error:new se("Unexpected error during initialization",s)})}finally{await this._handleVisibilityChange(),this._debug("#_initialize()","end")}}async signInAnonymously(e){var s,r,n;try{const i=await _(this.fetch,"POST",`${this.url}/signup`,{headers:this.headers,body:{data:(r=(s=e?.options)===null||s===void 0?void 0:s.data)!==null&&r!==void 0?r:{},gotrue_meta_security:{captcha_token:(n=e?.options)===null||n===void 0?void 0:n.captchaToken}},xform:J}),{data:a,error:o}=i;if(o||!a)return this._returnResult({data:{user:null,session:null},error:o});const l=a.session,c=a.user;return a.session&&(await this._saveSession(a.session),await this._notifyAllSubscribers("SIGNED_IN",l)),this._returnResult({data:{user:c,session:l},error:null})}catch(i){if(b(i))return this._returnResult({data:{user:null,session:null},error:i});throw i}}async signUp(e){var s,r,n;let i=null;try{let a;if("email"in e){const{email:d,password:f,options:h}=e;let p=null,g=null;this.flowType==="pkce"&&([p,g,i]=await this._getCodeChallengeAndMethod()),a=await _(this.fetch,"POST",`${this.url}/signup`,{headers:this.headers,redirectTo:this._maybeAppendFlowIdToRedirect(h?.emailRedirectTo,i),body:{email:d,password:f,data:(s=h?.data)!==null&&s!==void 0?s:{},gotrue_meta_security:{captcha_token:h?.captchaToken},code_challenge:p,code_challenge_method:g},xform:J})}else if("phone"in e){const{phone:d,password:f,options:h}=e;a=await _(this.fetch,"POST",`${this.url}/signup`,{headers:this.headers,body:{phone:d,password:f,data:(r=h?.data)!==null&&r!==void 0?r:{},channel:(n=h?.channel)!==null&&n!==void 0?n:"sms",gotrue_meta_security:{captcha_token:h?.captchaToken}},xform:J})}else throw new _t("You must provide either an email or phone number and a password");const{data:o,error:l}=a;if(l||!o)return await Q(this.storage,this.storageKey,i),this._returnResult({data:{user:null,session:null},error:l});const c=o.session,u=o.user;return o.session&&(await this._saveSession(o.session),await this._notifyAllSubscribers("SIGNED_IN",c)),this._returnResult({data:{user:u,session:c},error:null})}catch(a){if(await Q(this.storage,this.storageKey,i),b(a))return this._returnResult({data:{user:null,session:null},error:a});throw a}}async signInWithPassword(e){try{let s;if("email"in e){const{email:i,password:a,options:o}=e;s=await _(this.fetch,"POST",`${this.url}/token?grant_type=password`,{headers:this.headers,body:{email:i,password:a,gotrue_meta_security:{captcha_token:o?.captchaToken}},xform:ar})}else if("phone"in e){const{phone:i,password:a,options:o}=e;s=await _(this.fetch,"POST",`${this.url}/token?grant_type=password`,{headers:this.headers,body:{phone:i,password:a,gotrue_meta_security:{captcha_token:o?.captchaToken}},xform:ar})}else throw new _t("You must provide either an email or phone number and a password");const{data:r,error:n}=s;if(n)return this._returnResult({data:{user:null,session:null},error:n});if(!r||!r.session||!r.user){const i=new Ne;return this._returnResult({data:{user:null,session:null},error:i})}return r.session&&(await this._saveSession(r.session),await this._notifyAllSubscribers("SIGNED_IN",r.session)),this._returnResult({data:Object.assign({user:r.user,session:r.session},r.weak_password?{weakPassword:r.weak_password}:null),error:n})}catch(s){if(b(s))return this._returnResult({data:{user:null,session:null},error:s});throw s}}async signInWithOAuth(e){var s,r,n,i;return await this._handleProviderSignIn(e.provider,{redirectTo:(s=e.options)===null||s===void 0?void 0:s.redirectTo,scopes:(r=e.options)===null||r===void 0?void 0:r.scopes,queryParams:(n=e.options)===null||n===void 0?void 0:n.queryParams,skipBrowserRedirect:(i=e.options)===null||i===void 0?void 0:i.skipBrowserRedirect})}async exchangeCodeForSession(e,s){return await this.initializePromise,this.lock!=null?this._acquireLock(this.lockAcquireTimeout,async()=>this._exchangeCodeForSession(e,s)):this._exchangeCodeForSession(e,s)}async signInWithWeb3(e){const{chain:s}=e;switch(s){case"ethereum":return await this.signInWithEthereum(e);case"solana":return await this.signInWithSolana(e);default:throw new Error(`@supabase/auth-js: Unsupported chain "${s}"`)}}async signInWithEthereum(e){var s,r,n,i,a,o,l,c,u,d,f;let h,p;if("message"in e)h=e.message,p=e.signature;else{const{chain:g,wallet:m,statement:y,options:v}=e;let w;if(F())if(typeof m=="object")w=m;else{const C=window;if("ethereum"in C&&typeof C.ethereum=="object"&&"request"in C.ethereum&&typeof C.ethereum.request=="function")w=C.ethereum;else throw new Error("@supabase/auth-js: No compatible Ethereum wallet interface on the window object (window.ethereum) detected. Make sure the user already has a wallet installed and connected for this app. Prefer passing the wallet interface object directly to signInWithWeb3({ chain: 'ethereum', wallet: resolvedUserWallet }) instead.")}else{if(typeof m!="object"||!v?.url)throw new Error("@supabase/auth-js: Both wallet and url must be specified in non-browser environments.");w=m}const R=new URL((s=v?.url)!==null&&s!==void 0?s:window.location.href),O=await w.request({method:"eth_requestAccounts"}).then(C=>C).catch(()=>{throw new Error("@supabase/auth-js: Wallet method eth_requestAccounts is missing or invalid")});if(!O||O.length===0)throw new Error("@supabase/auth-js: No accounts available. Please ensure the wallet is connected.");const P=Jr(O[0]);let L=(r=v?.signInWithEthereum)===null||r===void 0?void 0:r.chainId;if(!L){const C=await w.request({method:"eth_chainId"});L=So(C)}const A={domain:R.host,address:P,statement:y,uri:R.href,version:"1",chainId:L,nonce:(n=v?.signInWithEthereum)===null||n===void 0?void 0:n.nonce,issuedAt:(a=(i=v?.signInWithEthereum)===null||i===void 0?void 0:i.issuedAt)!==null&&a!==void 0?a:new Date,expirationTime:(o=v?.signInWithEthereum)===null||o===void 0?void 0:o.expirationTime,notBefore:(l=v?.signInWithEthereum)===null||l===void 0?void 0:l.notBefore,requestId:(c=v?.signInWithEthereum)===null||c===void 0?void 0:c.requestId,resources:(u=v?.signInWithEthereum)===null||u===void 0?void 0:u.resources};h=To(A),p=await w.request({method:"personal_sign",params:[Eo(h),P]})}try{const{data:g,error:m}=await _(this.fetch,"POST",`${this.url}/token?grant_type=web3`,{headers:this.headers,body:Object.assign({chain:"ethereum",message:h,signature:p},!((d=e.options)===null||d===void 0)&&d.captchaToken?{gotrue_meta_security:{captcha_token:(f=e.options)===null||f===void 0?void 0:f.captchaToken}}:null),xform:J});if(m)throw m;if(!g||!g.session||!g.user){const y=new Ne;return this._returnResult({data:{user:null,session:null},error:y})}return g.session&&(await this._saveSession(g.session),await this._notifyAllSubscribers("SIGNED_IN",g.session)),this._returnResult({data:Object.assign({},g),error:m})}catch(g){if(b(g))return this._returnResult({data:{user:null,session:null},error:g});throw g}}async signInWithSolana(e){var s,r,n,i,a,o,l,c,u,d,f,h;let p,g;if("message"in e)p=e.message,g=e.signature;else{const{chain:m,wallet:y,statement:v,options:w}=e;let R;if(F())if(typeof y=="object")R=y;else{const P=window;if("solana"in P&&typeof P.solana=="object"&&("signIn"in P.solana&&typeof P.solana.signIn=="function"||"signMessage"in P.solana&&typeof P.solana.signMessage=="function"))R=P.solana;else throw new Error("@supabase/auth-js: No compatible Solana wallet interface on the window object (window.solana) detected. Make sure the user already has a wallet installed and connected for this app. Prefer passing the wallet interface object directly to signInWithWeb3({ chain: 'solana', wallet: resolvedUserWallet }) instead.")}else{if(typeof y!="object"||!w?.url)throw new Error("@supabase/auth-js: Both wallet and url must be specified in non-browser environments.");R=y}const O=new URL((s=w?.url)!==null&&s!==void 0?s:window.location.href);if("signIn"in R&&R.signIn){const P=await R.signIn(Object.assign(Object.assign(Object.assign({issuedAt:new Date().toISOString()},w?.signInWithSolana),{version:"1",domain:O.host,uri:O.href}),v?{statement:v}:null));let L;if(Array.isArray(P)&&P[0]&&typeof P[0]=="object")L=P[0];else if(P&&typeof P=="object"&&"signedMessage"in P&&"signature"in P)L=P;else throw new Error("@supabase/auth-js: Wallet method signIn() returned unrecognized value");if("signedMessage"in L&&"signature"in L&&(typeof L.signedMessage=="string"||L.signedMessage instanceof Uint8Array)&&L.signature instanceof Uint8Array)p=typeof L.signedMessage=="string"?L.signedMessage:new TextDecoder().decode(L.signedMessage),g=L.signature;else throw new Error("@supabase/auth-js: Wallet method signIn() API returned object without signedMessage and signature fields")}else{if(!("signMessage"in R)||typeof R.signMessage!="function"||!("publicKey"in R)||typeof R!="object"||!R.publicKey||!("toBase58"in R.publicKey)||typeof R.publicKey.toBase58!="function")throw new Error("@supabase/auth-js: Wallet does not have a compatible signMessage() and publicKey.toBase58() API");p=[`${O.host} wants you to sign in with your Solana account:`,R.publicKey.toBase58(),...v?["",v,""]:[""],"Version: 1",`URI: ${O.href}`,`Issued At: ${(n=(r=w?.signInWithSolana)===null||r===void 0?void 0:r.issuedAt)!==null&&n!==void 0?n:new Date().toISOString()}`,...!((i=w?.signInWithSolana)===null||i===void 0)&&i.notBefore?[`Not Before: ${w.signInWithSolana.notBefore}`]:[],...!((a=w?.signInWithSolana)===null||a===void 0)&&a.expirationTime?[`Expiration Time: ${w.signInWithSolana.expirationTime}`]:[],...!((o=w?.signInWithSolana)===null||o===void 0)&&o.chainId?[`Chain ID: ${w.signInWithSolana.chainId}`]:[],...!((l=w?.signInWithSolana)===null||l===void 0)&&l.nonce?[`Nonce: ${w.signInWithSolana.nonce}`]:[],...!((c=w?.signInWithSolana)===null||c===void 0)&&c.requestId?[`Request ID: ${w.signInWithSolana.requestId}`]:[],...!((d=(u=w?.signInWithSolana)===null||u===void 0?void 0:u.resources)===null||d===void 0)&&d.length?["Resources",...w.signInWithSolana.resources.map(L=>`- ${L}`)]:[]].join(`
+`);const P=await R.signMessage(new TextEncoder().encode(p),"utf8");if(!P||!(P instanceof Uint8Array))throw new Error("@supabase/auth-js: Wallet signMessage() API returned an recognized value");g=P}}try{const{data:m,error:y}=await _(this.fetch,"POST",`${this.url}/token?grant_type=web3`,{headers:this.headers,body:Object.assign({chain:"solana",message:p,signature:Ce(g)},!((f=e.options)===null||f===void 0)&&f.captchaToken?{gotrue_meta_security:{captcha_token:(h=e.options)===null||h===void 0?void 0:h.captchaToken}}:null),xform:J});if(y)throw y;if(!m||!m.session||!m.user){const v=new Ne;return this._returnResult({data:{user:null,session:null},error:v})}return m.session&&(await this._saveSession(m.session),await this._notifyAllSubscribers("SIGNED_IN",m.session)),this._returnResult({data:Object.assign({},m),error:y})}catch(m){if(b(m))return this._returnResult({data:{user:null,session:null},error:m});throw m}}async _exchangeCodeForSession(e,s){const r=s?.flowId!=null,n=r?Rt(s?.flowId):F()?Rt(sr(window.location.href)[Re]):null;r&&!n&&this._debug("#_exchangeCodeForSession()","provided flowId is not a valid flow id",s?.flowId);const{verifier:i,flowId:a}=r&&!n?{verifier:null,flowId:null}:await no(this.storage,this.storageKey,n),[o,l]=(i??"").split("/");try{if(!o&&this.flowType==="pkce")throw new Fa;const{data:c,error:u}=await _(this.fetch,"POST",`${this.url}/token?grant_type=pkce`,{headers:this.headers,body:{auth_code:e,code_verifier:o},xform:J});if(await Q(this.storage,this.storageKey,a),u)throw u;if(!c||!c.session||!c.user){const d=new Ne;return this._returnResult({data:{user:null,session:null,redirectType:null},error:d})}return c.session&&(await this._saveSession(c.session),await this._notifyAllSubscribers(l==="recovery"?"PASSWORD_RECOVERY":"SIGNED_IN",c.session)),this._returnResult({data:Object.assign(Object.assign({},c),{redirectType:l??null}),error:u})}catch(c){if(await Q(this.storage,this.storageKey,a),b(c))return this._returnResult({data:{user:null,session:null,redirectType:null},error:c});throw c}}async signInWithIdToken(e){try{const{options:s,provider:r,token:n,access_token:i,nonce:a}=e,o=await _(this.fetch,"POST",`${this.url}/token?grant_type=id_token`,{headers:this.headers,body:{provider:r,id_token:n,access_token:i,nonce:a,gotrue_meta_security:{captcha_token:s?.captchaToken}},xform:J}),{data:l,error:c}=o;if(c)return this._returnResult({data:{user:null,session:null},error:c});if(!l||!l.session||!l.user){const u=new Ne;return this._returnResult({data:{user:null,session:null},error:u})}return l.session&&(await this._saveSession(l.session),await this._notifyAllSubscribers("SIGNED_IN",l.session)),this._returnResult({data:l,error:c})}catch(s){if(b(s))return this._returnResult({data:{user:null,session:null},error:s});throw s}}async signInWithOtp(e){var s,r,n,i,a;let o=null;try{if("email"in e){const{email:l,options:c}=e;let u=null,d=null;this.flowType==="pkce"&&([u,d,o]=await this._getCodeChallengeAndMethod());const{error:f}=await _(this.fetch,"POST",`${this.url}/otp`,{headers:this.headers,body:{email:l,data:(s=c?.data)!==null&&s!==void 0?s:{},create_user:(r=c?.shouldCreateUser)!==null&&r!==void 0?r:!0,gotrue_meta_security:{captcha_token:c?.captchaToken},code_challenge:u,code_challenge_method:d},redirectTo:this._maybeAppendFlowIdToRedirect(c?.emailRedirectTo,o)});return this._returnResult({data:{user:null,session:null},error:f})}if("phone"in e){const{phone:l,options:c}=e,{data:u,error:d}=await _(this.fetch,"POST",`${this.url}/otp`,{headers:this.headers,body:{phone:l,data:(n=c?.data)!==null&&n!==void 0?n:{},create_user:(i=c?.shouldCreateUser)!==null&&i!==void 0?i:!0,gotrue_meta_security:{captcha_token:c?.captchaToken},channel:(a=c?.channel)!==null&&a!==void 0?a:"sms"}});return this._returnResult({data:{user:null,session:null,messageId:u?.message_id},error:d})}throw new _t("You must provide either an email or phone number.")}catch(l){if(await Q(this.storage,this.storageKey,o),b(l))return this._returnResult({data:{user:null,session:null},error:l});throw l}}async verifyOtp(e){var s,r;try{let n,i;"options"in e&&(n=(s=e.options)===null||s===void 0?void 0:s.redirectTo,i=(r=e.options)===null||r===void 0?void 0:r.captchaToken);const{data:a,error:o}=await _(this.fetch,"POST",`${this.url}/verify`,{headers:this.headers,body:Object.assign(Object.assign({},e),{gotrue_meta_security:{captcha_token:i}}),redirectTo:n,xform:J});if(o)throw o;if(!a)throw new Error("An error occurred on token verification.");const l=a.session,c=a.user;return l?.access_token&&(await this._saveSession(l),await this._notifyAllSubscribers(e.type=="recovery"?"PASSWORD_RECOVERY":"SIGNED_IN",l)),this._returnResult({data:{user:c,session:l},error:null})}catch(n){if(b(n))return this._returnResult({data:{user:null,session:null},error:n});throw n}}async signInWithSSO(e){var s,r,n,i;let a=null;try{let o=null,l=null;this.flowType==="pkce"&&([o,l,a]=await this._getCodeChallengeAndMethod());const c=await _(this.fetch,"POST",`${this.url}/sso`,{body:Object.assign(Object.assign(Object.assign(Object.assign(Object.assign({},"providerId"in e?{provider_id:e.providerId}:null),"domain"in e?{domain:e.domain}:null),{redirect_to:this._maybeAppendFlowIdToRedirect((s=e.options)===null||s===void 0?void 0:s.redirectTo,a)}),!((r=e?.options)===null||r===void 0)&&r.captchaToken?{gotrue_meta_security:{captcha_token:e.options.captchaToken}}:null),{skip_http_redirect:!0,code_challenge:o,code_challenge_method:l}),headers:this.headers,xform:yo});return!((n=c.data)===null||n===void 0)&&n.url&&F()&&!(!((i=e.options)===null||i===void 0)&&i.skipBrowserRedirect)&&window.location.assign(c.data.url),this._returnResult(c)}catch(o){if(await Q(this.storage,this.storageKey,a),b(o))return this._returnResult({data:null,error:o});throw o}}async reauthenticate(){return await this.initializePromise,this.lock!=null?await this._acquireLock(this.lockAcquireTimeout,async()=>await this._reauthenticate()):await this._reauthenticate()}async _reauthenticate(){try{return await this._useSession(async e=>{const{data:{session:s},error:r}=e;if(r)throw r;if(!s)throw new H;const{error:n}=await _(this.fetch,"GET",`${this.url}/reauthenticate`,{headers:this.headers,jwt:s.access_token});return this._returnResult({data:{user:null,session:null},error:n})})}catch(e){if(b(e))return this._returnResult({data:{user:null,session:null},error:e});throw e}}async resend(e){let s=null;try{const r=`${this.url}/resend`;if("email"in e){const{email:n,type:i,options:a}=e;let o=null,l=null;this.flowType==="pkce"&&([o,l,s]=await this._getCodeChallengeAndMethod());const{error:c}=await _(this.fetch,"POST",r,{headers:this.headers,body:{email:n,type:i,gotrue_meta_security:{captcha_token:a?.captchaToken},code_challenge:o,code_challenge_method:l},redirectTo:this._maybeAppendFlowIdToRedirect(a?.emailRedirectTo,s)});return c&&await Q(this.storage,this.storageKey,s),this._returnResult({data:{user:null,session:null},error:c})}else if("phone"in e){const{phone:n,type:i,options:a}=e,{data:o,error:l}=await _(this.fetch,"POST",r,{headers:this.headers,body:{phone:n,type:i,gotrue_meta_security:{captcha_token:a?.captchaToken}}});return this._returnResult({data:{user:null,session:null,messageId:o?.message_id},error:l})}throw new _t("You must provide either an email or phone number and a type")}catch(r){if(await Q(this.storage,this.storageKey,s),b(r))return this._returnResult({data:{user:null,session:null},error:r});throw r}}async getSession(){return await this.initializePromise,this.lock!=null?await this._acquireLock(this.lockAcquireTimeout,async()=>this._useSession(async e=>e)):await this._useSession(async e=>e)}async _acquireLock(e,s){this._debug("#_acquireLock","begin",e);try{if(this.lockAcquired){const r=this.pendingInLock.length?this.pendingInLock[this.pendingInLock.length-1]:Promise.resolve(),n=(async()=>(await r,await s()))();return this.pendingInLock.push((async()=>{try{await n}catch{}})()),n}return await this.lock(`lock:${this.storageKey}`,e,async()=>{this._debug("#_acquireLock","lock acquired for storage key",this.storageKey);try{this.lockAcquired=!0;const r=s();for(this.pendingInLock.push((async()=>{try{await r}catch{}})()),await r;this.pendingInLock.length;){const n=[...this.pendingInLock];await Promise.all(n),this.pendingInLock.splice(0,n.length)}return await r}finally{this._debug("#_acquireLock","lock released for storage key",this.storageKey),this.lockAcquired=!1}})}finally{this._debug("#_acquireLock","end")}}async _useSession(e){this._debug("#_useSession","begin");try{const s=await this.__loadSession();return await e(s)}finally{this._debug("#_useSession","end")}}async __loadSession(){this._debug("#__loadSession()","begin"),this.lock!=null&&!this.lockAcquired&&this._debug("#__loadSession()","used outside of an acquired lock!",new Error().stack);try{let e=null;const s=await z(this.storage,this.storageKey);if(this._debug("#getSession()","session from storage",s),s!==null&&(this._isValidSession(s)?e=s:(this._debug("#getSession()","session from storage is not valid"),await this._removeSession())),!e)return{data:{session:null},error:null};const r=e.expires_at?e.expires_at*1e3-Date.now()<Zt:!1;if(this._debug("#__loadSession()",`session has${r?"":" not"} expired`,"expires_at",e.expires_at),!r)return{data:{session:await this._hydrateSessionUser(e)},error:null};const{data:n,error:i}=await this._callRefreshToken(e.refresh_token);if(i){const a=await z(this.storage,this.storageKey);return a&&this._isValidSession(a)&&a.expires_at&&a.expires_at*1e3>Date.now()?this._returnResult({data:{session:await this._hydrateSessionUser(a)},error:null}):this._returnResult({data:{session:null},error:i})}return this._returnResult({data:{session:n},error:null})}finally{this._debug("#__loadSession()","end")}}async _hydrateSessionUser(e){if(this.userStorage){const s=await z(this.userStorage,this.storageKey+"-user");e.user=s?.user?s.user:Qt()}if(this.storage.isServer&&e.user&&!e.user.__isUserNotAvailableProxy){const s={value:this.suppressGetSessionWarning};e.user=po(e.user,s),s.value&&(this.suppressGetSessionWarning=!0)}return e}async getUser(e){if(e)return await this._getUser(e);await this.initializePromise;let s;return this.lock!=null?s=await this._acquireLock(this.lockAcquireTimeout,async()=>await this._getUser()):s=await this._getUser(),s.data.user&&(this.suppressGetSessionWarning=!0),s}async _getUser(e){try{return e?await _(this.fetch,"GET",`${this.url}/user`,{headers:this.headers,jwt:e,xform:ve}):await this._useSession(async s=>{var r,n,i;const{data:a,error:o}=s;if(o)throw o;return!(!((r=a.session)===null||r===void 0)&&r.access_token)&&!this.hasCustomAuthorizationHeader?{data:{user:null},error:new H}:await _(this.fetch,"GET",`${this.url}/user`,{headers:this.headers,jwt:(i=(n=a.session)===null||n===void 0?void 0:n.access_token)!==null&&i!==void 0?i:void 0,xform:ve})})}catch(s){if(b(s))return bt(s)&&await this._removeSession(),this._returnResult({data:{user:null},error:s});throw s}}async updateUser(e,s={}){return await this.initializePromise,this.lock!=null?await this._acquireLock(this.lockAcquireTimeout,async()=>await this._updateUser(e,s)):await this._updateUser(e,s)}async _updateUser(e,s={}){let r=null;try{return await this._useSession(async n=>{const{data:i,error:a}=n;if(a)throw a;if(!i.session)throw new H;const o=i.session;let l=null,c=null;this.flowType==="pkce"&&e.email!=null&&([l,c,r]=await this._getCodeChallengeAndMethod());const{data:u,error:d}=await _(this.fetch,"PUT",`${this.url}/user`,{headers:this.headers,redirectTo:this._maybeAppendFlowIdToRedirect(s?.emailRedirectTo,r),body:Object.assign(Object.assign({},e),{code_challenge:l,code_challenge_method:c}),jwt:o.access_token,xform:ve});if(d)throw d;return o.user=u.user,await this._saveSession(o),await this._notifyAllSubscribers("USER_UPDATED",o),this._returnResult({data:{user:o.user},error:null})})}catch(n){if(await Q(this.storage,this.storageKey,r),b(n))return this._returnResult({data:{user:null},error:n});throw n}}async setSession(e){return await this.initializePromise,this.lock!=null?await this._acquireLock(this.lockAcquireTimeout,async()=>await this._setSession(e)):await this._setSession(e)}async _setSession(e){try{if(!e.access_token||!e.refresh_token)throw new H;const s=Date.now()/1e3;let r=s,n=!0,i=null;const{payload:a}=Et(e.access_token);if(a.exp&&(r=a.exp,n=r<=s),n){const{data:o,error:l}=await this._callRefreshToken(e.refresh_token);if(l)return this._returnResult({data:{user:null,session:null},error:l});if(!o)return{data:{user:null,session:null},error:null};i=o}else{const{data:o,error:l}=await this._getUser(e.access_token);if(l)return this._returnResult({data:{user:null,session:null},error:l});i={access_token:e.access_token,refresh_token:e.refresh_token,user:o.user,token_type:"bearer",expires_in:r-s,expires_at:r},await this._saveSession(i),await this._notifyAllSubscribers("SIGNED_IN",i)}return this._returnResult({data:{user:i.user,session:i},error:null})}catch(s){if(b(s))return this._returnResult({data:{session:null,user:null},error:s});throw s}}async refreshSession(e){return await this.initializePromise,this.lock!=null?await this._acquireLock(this.lockAcquireTimeout,async()=>await this._refreshSession(e)):await this._refreshSession(e)}async _refreshSession(e){try{return await this._useSession(async s=>{var r;if(!e){const{data:a,error:o}=s;if(o)throw o;e=(r=a.session)!==null&&r!==void 0?r:void 0}if(!e?.refresh_token)throw new H;const{data:n,error:i}=await this._callRefreshToken(e.refresh_token);return i?this._returnResult({data:{user:null,session:null},error:i}):n?this._returnResult({data:{user:n.user,session:n},error:null}):this._returnResult({data:{user:null,session:null},error:null})})}catch(s){if(b(s))return this._returnResult({data:{user:null,session:null},error:s});throw s}}async _getSessionFromURL(e,s){var r;try{if(!F())throw new kt("No browser detected.");if(e.error||e.error_description||e.error_code)throw new kt(e.error_description||"Error in URL with unspecified error_description",{error:e.error||"unspecified_error",code:e.error_code||"unspecified_code"});switch(s){case"implicit":if(this.flowType==="pkce")throw new Js("Not a valid PKCE flow url.");break;case"pkce":if(this.flowType==="implicit")throw new kt("Not a valid implicit grant flow url.");break;default:}if(s==="pkce"){if(this._debug("#_initialize()","begin","is PKCE flow",!0),!e.code)throw new Js("No code detected.");const{data:w,error:R}=await this._exchangeCodeForSession(e.code,{flowId:e[Re]});if(R)throw R;const O=new URL(window.location.href);return O.searchParams.delete("code"),O.searchParams.delete(Re),window.history.replaceState(window.history.state,"",O.toString()),{data:{session:w.session,redirectType:(r=w.redirectType)!==null&&r!==void 0?r:null},error:null}}const{provider_token:n,provider_refresh_token:i,access_token:a,refresh_token:o,expires_in:l,expires_at:c,token_type:u}=e;if(!a||!l||!o||!u)throw new kt("No session defined in URL");const d=Math.round(Date.now()/1e3),f=parseInt(l);let h=d+f;c&&(h=parseInt(c));const p=h-d;p*1e3<=fe&&console.warn(`@supabase/gotrue-js: Session as retrieved from URL expires in ${p}s, should have been closer to ${f}s`);const g=h-f;d-g>=120?console.warn("@supabase/gotrue-js: Session as retrieved from URL was issued over 120s ago, URL could be stale",g,h,d):d-g<0&&console.warn("@supabase/gotrue-js: Session as retrieved from URL was issued in the future? Check the device clock for skew",g,h,d);const{data:m,error:y}=await this._getUser(a);if(y)throw y;const v={provider_token:n,provider_refresh_token:i,access_token:a,expires_in:f,expires_at:h,refresh_token:o,token_type:u,user:m.user};return window.location.hash="",this._debug("#_getSessionFromURL()","clearing window.location.hash"),this._returnResult({data:{session:v,redirectType:e.type},error:null})}catch(n){if(b(n))return this._returnResult({data:{session:null,redirectType:null},error:n});throw n}}_isImplicitGrantCallback(e){return typeof this.detectSessionInUrl=="function"?this.detectSessionInUrl(new URL(window.location.href),e):!!(e.access_token||e.error||e.error_description||e.error_code)}async _isPKCECallback(e){if(!e.code)return!1;const s=Rt(e[Re]);return s&&await z(this.storage,Fe(this.storageKey,s))?!0:!!await z(this.storage,`${this.storageKey}-code-verifier`)}async signOut(e={scope:"global"}){return await this.initializePromise,this.lock!=null?await this._acquireLock(this.lockAcquireTimeout,async()=>await this._signOut(e)):await this._signOut(e)}async _signOut({scope:e}={scope:"global"}){return await this._useSession(async s=>{var r;const n=async()=>{await this._removeSession()},{data:i,error:a}=s;if(a&&!bt(a))return this._returnResult({error:a});const o=(r=i.session)===null||r===void 0?void 0:r.access_token;if(o){const{error:l}=await this.admin.signOut(o,e);if(l&&!(Vs(l)&&(l.status===404||l.status===401||l.status===403)||bt(l)))return e!=="others"&&await n(),this._returnResult({error:l})}return e!=="others"&&await n(),this._returnResult({error:null})})}onAuthStateChange(e){const s=Va(),r={id:s,callback:e,unsubscribe:()=>{this._debug("#unsubscribe()","state change callback with id removed",s),this.stateChangeEmitters.delete(s)}};return this._debug("#onAuthStateChange()","registered callback with id",s),this.stateChangeEmitters.set(s,r),(async()=>(await this.initializePromise,this.lock!=null?await this._acquireLock(this.lockAcquireTimeout,async()=>{this._emitInitialSession(s)}):await this._emitInitialSession(s)))(),{data:{subscription:r}}}async _emitInitialSession(e){return await this._useSession(async s=>{var r,n;try{const{data:{session:i},error:a}=s;if(a)throw a;await((r=this.stateChangeEmitters.get(e))===null||r===void 0?void 0:r.callback("INITIAL_SESSION",i)),this._debug("INITIAL_SESSION","callback id",e,"session",i)}catch(i){if(await((n=this.stateChangeEmitters.get(e))===null||n===void 0?void 0:n.callback("INITIAL_SESSION",null)),this._debug("INITIAL_SESSION","callback id",e,"error",i),Xs(i))return;bt(i)||St(i)||Vs(i)&&(i.code==="refresh_token_not_found"||i.code==="refresh_token_already_used"||i.code==="session_expired")?console.warn(i):console.error(i)}})}async resetPasswordForEmail(e,s={}){let r=null,n=null,i=null;this.flowType==="pkce"&&([r,n,i]=await this._getCodeChallengeAndMethod(!0));try{return await _(this.fetch,"POST",`${this.url}/recover`,{body:{email:e,code_challenge:r,code_challenge_method:n,gotrue_meta_security:{captcha_token:s.captchaToken}},headers:this.headers,redirectTo:this._maybeAppendFlowIdToRedirect(s.redirectTo,i)})}catch(a){if(await Q(this.storage,this.storageKey,i),b(a))return this._returnResult({data:null,error:a});throw a}}async getUserIdentities(){var e;try{const{data:s,error:r}=await this.getUser();if(r)throw r;return this._returnResult({data:{identities:(e=s.user.identities)!==null&&e!==void 0?e:[]},error:null})}catch(s){if(b(s))return this._returnResult({data:null,error:s});throw s}}async linkIdentity(e){return"token"in e?this.linkIdentityIdToken(e):this.linkIdentityOAuth(e)}async linkIdentityOAuth(e){var s;let r=null;try{const{data:n,error:i}=await this._useSession(async a=>{var o,l,c,u,d;const{data:f,error:h}=a;if(h)throw h;const{url:p,flowId:g}=await this._getUrlForProvider(`${this.url}/user/identities/authorize`,e.provider,{redirectTo:(o=e.options)===null||o===void 0?void 0:o.redirectTo,scopes:(l=e.options)===null||l===void 0?void 0:l.scopes,queryParams:(c=e.options)===null||c===void 0?void 0:c.queryParams,skipBrowserRedirect:!0});return r=g,await _(this.fetch,"GET",p,{headers:this.headers,jwt:(d=(u=f.session)===null||u===void 0?void 0:u.access_token)!==null&&d!==void 0?d:void 0})});if(i)throw i;return F()&&!(!((s=e.options)===null||s===void 0)&&s.skipBrowserRedirect)&&window.location.assign(n?.url),this._returnResult({data:{provider:e.provider,url:n?.url,flowId:r},error:null})}catch(n){if(b(n))return this._returnResult({data:{provider:e.provider,url:null,flowId:r},error:n});throw n}}async linkIdentityIdToken(e){return await this._useSession(async s=>{var r;try{const{error:n,data:{session:i}}=s;if(n)throw n;const{options:a,provider:o,token:l,access_token:c,nonce:u}=e,d=await _(this.fetch,"POST",`${this.url}/token?grant_type=id_token`,{headers:this.headers,jwt:(r=i?.access_token)!==null&&r!==void 0?r:void 0,body:{provider:o,id_token:l,access_token:c,nonce:u,link_identity:!0,gotrue_meta_security:{captcha_token:a?.captchaToken}},xform:J}),{data:f,error:h}=d;return h?this._returnResult({data:{user:null,session:null},error:h}):!f||!f.session||!f.user?this._returnResult({data:{user:null,session:null},error:new Ne}):(f.session&&(await this._saveSession(f.session),await this._notifyAllSubscribers("USER_UPDATED",f.session)),this._returnResult({data:f,error:h}))}catch(n){if(await Q(this.storage,this.storageKey,null),b(n))return this._returnResult({data:{user:null,session:null},error:n});throw n}})}async unlinkIdentity(e){try{return await this._useSession(async s=>{var r,n;const{data:i,error:a}=s;if(a)throw a;return await _(this.fetch,"DELETE",`${this.url}/user/identities/${e.identity_id}`,{headers:this.headers,jwt:(n=(r=i.session)===null||r===void 0?void 0:r.access_token)!==null&&n!==void 0?n:void 0})})}catch(s){if(b(s))return this._returnResult({data:null,error:s});throw s}}async _refreshAccessToken(e){const s="#_refreshAccessToken()";this._debug(s,"begin");try{const r=Date.now();return await Xa(async n=>(n>0&&await Ya(200*Math.pow(2,n-1)),this._debug(s,"refreshing attempt",n),await _(this.fetch,"POST",`${this.url}/token?grant_type=refresh_token`,{body:{refresh_token:e},headers:this.headers,xform:J})),(n,i)=>{const a=200*Math.pow(2,n);return i&&St(i)&&Date.now()+a-r<fe})}catch(r){if(this._debug(s,"error",r),b(r))return this._returnResult({data:{session:null,user:null},error:r});throw r}finally{this._debug(s,"end")}}_isValidSession(e){return typeof e=="object"&&e!==null&&"access_token"in e&&"refresh_token"in e&&"expires_at"in e}async _handleProviderSignIn(e,s){const{url:r,flowId:n}=await this._getUrlForProvider(`${this.url}/authorize`,e,{redirectTo:s.redirectTo,scopes:s.scopes,queryParams:s.queryParams});return this._debug("#_handleProviderSignIn()","provider",e,"options",s,"url",r),F()&&!s.skipBrowserRedirect&&window.location.assign(r),{data:{provider:e,url:r,flowId:n},error:null}}async _recoverAndRefresh(){var e,s;const r="#_recoverAndRefresh()";this._debug(r,"begin");try{const n=await z(this.storage,this.storageKey);if(n&&this.userStorage){let a=await z(this.userStorage,this.storageKey+"-user");!this.storage.isServer&&Object.is(this.storage,this.userStorage)&&!a&&(a={user:n.user},await pe(this.userStorage,this.storageKey+"-user",a)),n.user=(e=a?.user)!==null&&e!==void 0?e:Qt()}else if(n&&!n.user&&!n.user){const a=await z(this.storage,this.storageKey+"-user");a&&a?.user?(n.user=a.user,await q(this.storage,this.storageKey+"-user"),await pe(this.storage,this.storageKey,n)):n.user=Qt()}if(this._debug(r,"session from storage",n),!this._isValidSession(n)){this._debug(r,"session is not valid"),n!==null&&await this._removeSession();return}const i=((s=n.expires_at)!==null&&s!==void 0?s:1/0)*1e3-Date.now()<Zt;if(this._debug(r,`session has${i?"":" not"} expired with margin of ${Zt}s`),i){if(this.autoRefreshToken&&n.refresh_token){const{error:a}=await this._callRefreshToken(n.refresh_token);a&&(Xs(a)?this._debug(r,"refresh discarded by commit guard",a):this._debug(r,"refresh failed",a))}}else if(n.user&&n.user.__isUserNotAvailableProxy===!0)try{const{data:a,error:o}=await this._getUser(n.access_token);!o&&a?.user?(n.user=a.user,await this._saveSession(n),await this._notifyAllSubscribers("SIGNED_IN",n)):this._debug(r,"could not get user data, skipping SIGNED_IN notification")}catch(a){console.error("Error getting user data:",a),this._debug(r,"error getting user data, skipping SIGNED_IN notification",a)}else await this._notifyAllSubscribers("SIGNED_IN",n)}catch(n){this._debug(r,"error",n),St(n)?console.warn(n):console.error(n);return}finally{this._debug(r,"end")}}async _callRefreshToken(e){var s,r;if(!e)throw new H;if(this.refreshingDeferred)return this.refreshingDeferred.promise;if(this.lastRefreshFailure&&this.lastRefreshFailure.refreshToken===e&&Date.now()<this.lastRefreshFailure.expiresAt)return this._debug("#_callRefreshToken()","returning cached failure (cooldown active)"),this.lastRefreshFailure.result;const n="#_callRefreshToken()";this._debug(n,"begin");try{this.refreshingDeferred=new Gt,this.refreshingDeferred.promise.then(void 0,()=>{});const i=await z(this.storage,this.storageKey),{data:a,error:o}=await this._refreshAccessToken(e);if(o)throw o;if(!a.session)throw new H;const l=await z(this.storage,this.storageKey);if(i!==null&&(l===null||l.refresh_token!==i.refresh_token)){this._debug(n,"commit guard: storage changed since refresh started, discarding rotated tokens",{startedWith:"present",nowHolds:l?"replaced":"cleared"});const f={data:null,error:new Ys};return this.refreshingDeferred.resolve(f),f}const u=this._sessionRemovalEpoch;if(await this._saveSession(a.session),this._sessionRemovalEpoch!==u){this._debug(n,"commit guard (post-save): _removeSession ran during _saveSession, undoing write"),await q(this.storage,this.storageKey),this.userStorage&&await q(this.userStorage,this.storageKey+"-user");const f={data:null,error:new Ys};return this.refreshingDeferred.resolve(f),f}await this._notifyAllSubscribers("TOKEN_REFRESHED",a.session);const d={data:a.session,error:null};return this.lastRefreshFailure=null,this.refreshingDeferred.resolve(d),d}catch(i){if(this._debug(n,"error",i),b(i)){const a={data:null,error:i};if(!St(i)){const o=await z(this.storage,this.storageKey);!!(o?.expires_at&&o.expires_at*1e3>Date.now())?this._debug(n,"proactive refresh failed, access token still valid — preserving session"):await this._removeSession()}return this.lastRefreshFailure={refreshToken:e,result:a,expiresAt:Date.now()+Na},(s=this.refreshingDeferred)===null||s===void 0||s.resolve(a),a}throw(r=this.refreshingDeferred)===null||r===void 0||r.reject(i),i}finally{this.refreshingDeferred=null,this._debug(n,"end")}}async _notifyAllSubscribers(e,s,r=!0){if(this._pendingInitNotifications!==null&&r){this._pendingInitNotifications.push({event:e,session:s,broadcast:r});return}const n=`#_notifyAllSubscribers(${e})`;this._debug(n,"begin",s,`broadcast = ${r}`);try{this.broadcastChannel&&r&&this.broadcastChannel.postMessage({event:e,session:s});const i=[],a=Array.from(this.stateChangeEmitters.values()).map(async o=>{try{await o.callback(e,s)}catch(l){i.push(l)}});if(await Promise.all(a),i.length>0){for(let o=0;o<i.length;o+=1)console.error(i[o]);throw i[0]}}finally{this._debug(n,"end")}}async _saveSession(e){this._debug("#_saveSession()",e),this.suppressGetSessionWarning=!0;const s=Object.assign({},e),r=s.user&&s.user.__isUserNotAvailableProxy===!0;if(this.userStorage){!r&&s.user&&await pe(this.userStorage,this.storageKey+"-user",{user:s.user});const n=Object.assign({},s);delete n.user;const i=rr(n);await pe(this.storage,this.storageKey,i)}else{const n=rr(s);await pe(this.storage,this.storageKey,n)}}async _removeSession(){this._sessionRemovalEpoch+=1,this._debug("#_removeSession()"),this.lastRefreshFailure=null,this.suppressGetSessionWarning=!1,await q(this.storage,this.storageKey),await io(this.storage,this.storageKey),await q(this.storage,this.storageKey+"-user"),this.userStorage&&await q(this.userStorage,this.storageKey+"-user"),await this._notifyAllSubscribers("SIGNED_OUT",null)}_removeVisibilityChangedCallback(){this._debug("#_removeVisibilityChangedCallback()");const e=this.visibilityChangedCallback;this.visibilityChangedCallback=null;try{e&&F()&&window?.removeEventListener&&window.removeEventListener("visibilitychange",e)}catch(s){console.error("removing visibilitychange callback failed",s)}}async _startAutoRefresh(){await this._stopAutoRefresh(),this._debug("#_startAutoRefresh()");const e=setInterval(()=>this._autoRefreshTokenTick(),fe);this.autoRefreshTicker=e,e&&typeof e=="object"&&typeof e.unref=="function"?e.unref():typeof Deno<"u"&&typeof Deno.unrefTimer=="function"&&Deno.unrefTimer(e);const s=setTimeout(async()=>{await this.initializePromise,await this._autoRefreshTokenTick()},0);this.autoRefreshTickTimeout=s,s&&typeof s=="object"&&typeof s.unref=="function"?s.unref():typeof Deno<"u"&&typeof Deno.unrefTimer=="function"&&Deno.unrefTimer(s)}async _stopAutoRefresh(){this._debug("#_stopAutoRefresh()");const e=this.autoRefreshTicker;this.autoRefreshTicker=null,e&&clearInterval(e);const s=this.autoRefreshTickTimeout;this.autoRefreshTickTimeout=null,s&&clearTimeout(s)}async startAutoRefresh(){this._removeVisibilityChangedCallback(),await this._startAutoRefresh()}async stopAutoRefresh(){this._removeVisibilityChangedCallback(),await this._stopAutoRefresh()}async dispose(){var e;this._removeVisibilityChangedCallback(),await this._stopAutoRefresh(),(e=this.broadcastChannel)===null||e===void 0||e.close(),this.broadcastChannel=null,this.stateChangeEmitters.clear()}async _autoRefreshTokenTick(){if(this._debug("#_autoRefreshTokenTick()","begin"),this.lock!=null){try{await this._acquireLock(0,async()=>{try{const e=Date.now();try{return await this._useSession(async s=>{const{data:{session:r}}=s;if(!r||!r.refresh_token||!r.expires_at){this._debug("#_autoRefreshTokenTick()","no session");return}const n=Math.floor((r.expires_at*1e3-e)/fe);this._debug("#_autoRefreshTokenTick()",`access token expires in ${n} ticks, a tick lasts ${fe}ms, refresh threshold is ${Je} ticks`),n<=Je&&await this._callRefreshToken(r.refresh_token)})}catch(s){console.error("Auto refresh tick failed with error. This is likely a transient error.",s)}}finally{this._debug("#_autoRefreshTokenTick()","end")}})}catch(e){if(e instanceof _o)this._debug("auto refresh token tick lock not available");else throw e}return}if(this.refreshingDeferred!==null){this._debug("#_autoRefreshTokenTick()","refresh already in flight, skipping");return}try{const e=Date.now();try{await this._useSession(async s=>{const{data:{session:r}}=s;if(!r||!r.refresh_token||!r.expires_at){this._debug("#_autoRefreshTokenTick()","no session");return}const n=Math.floor((r.expires_at*1e3-e)/fe);this._debug("#_autoRefreshTokenTick()",`access token expires in ${n} ticks, a tick lasts ${fe}ms, refresh threshold is ${Je} ticks`),n<=Je&&await this._callRefreshToken(r.refresh_token)})}catch(s){console.error("Auto refresh tick failed with error. This is likely a transient error.",s)}}finally{this._debug("#_autoRefreshTokenTick()","end")}}async _handleVisibilityChange(){if(this._debug("#_handleVisibilityChange()"),!F()||!window?.addEventListener)return this.autoRefreshToken&&this.startAutoRefresh(),!1;try{this.visibilityChangedCallback=async()=>{try{await this._onVisibilityChanged(!1)}catch(e){this._debug("#visibilityChangedCallback","error",e)}},window?.addEventListener("visibilitychange",this.visibilityChangedCallback),await this._onVisibilityChanged(!0)}catch(e){console.error("_handleVisibilityChange",e)}}async _onVisibilityChanged(e){const s=`#_onVisibilityChanged(${e})`;if(this._debug(s,"visibilityState",document.visibilityState),document.visibilityState==="visible"){if(this.autoRefreshToken&&this._startAutoRefresh(),!e)if(await this.initializePromise,this.lock!=null)await this._acquireLock(this.lockAcquireTimeout,async()=>{if(document.visibilityState!=="visible"){this._debug(s,"acquired the lock to recover the session, but the browser visibilityState is no longer visible, aborting");return}await this._recoverAndRefresh()});else{if(document.visibilityState!=="visible"){this._debug(s,"visibilityState is no longer visible, skipping recovery");return}await this._recoverAndRefresh()}}else document.visibilityState==="hidden"&&this.autoRefreshToken&&this._stopAutoRefresh()}async _getUrlForProvider(e,s,r){let n=r?.redirectTo,i=null,a=null,o=null;this.flowType==="pkce"&&([i,a,o]=await this._getCodeChallengeAndMethod(),n=this._maybeAppendFlowIdToRedirect(n,o));const l=[`provider=${encodeURIComponent(s)}`];if(n&&l.push(`redirect_to=${encodeURIComponent(n)}`),r?.scopes&&l.push(`scopes=${encodeURIComponent(r.scopes)}`),i!=null&&a!=null){const c=new URLSearchParams({code_challenge:`${encodeURIComponent(i)}`,code_challenge_method:`${encodeURIComponent(a)}`});l.push(c.toString())}if(r?.queryParams){const c=new URLSearchParams(r.queryParams);l.push(c.toString())}return r?.skipBrowserRedirect&&l.push(`skip_http_redirect=${r.skipBrowserRedirect}`),{url:`${e}?${l.join("&")}`,flowId:o}}_maybeAppendFlowIdToRedirect(e,s){return!e||!s||!this.experimental.appendPkceFlowIdToRedirects?e??void 0:ao(e,s)}async _getCodeChallengeAndMethod(e=!1){return oo(this.storage,this.storageKey,e,s=>this._debug("#_getCodeChallengeAndMethod()","evicted oldest pending PKCE verifier slot",s))}async _unenroll(e){try{return await this._useSession(async s=>{var r;const{data:n,error:i}=s;return i?this._returnResult({data:null,error:i}):await _(this.fetch,"DELETE",`${this.url}/factors/${e.factorId}`,{headers:this.headers,jwt:(r=n?.session)===null||r===void 0?void 0:r.access_token})})}catch(s){if(b(s))return this._returnResult({data:null,error:s});throw s}}async _enroll(e){try{return await this._useSession(async s=>{var r,n;const{data:i,error:a}=s;if(a)return this._returnResult({data:null,error:a});const o=Object.assign({friendly_name:e.friendlyName,factor_type:e.factorType},e.factorType==="phone"?{phone:e.phone}:e.factorType==="totp"?{issuer:e.issuer}:{}),{data:l,error:c}=await _(this.fetch,"POST",`${this.url}/factors`,{body:o,headers:this.headers,jwt:(r=i?.session)===null||r===void 0?void 0:r.access_token});return c?this._returnResult({data:null,error:c}):(e.factorType==="totp"&&l.type==="totp"&&(!((n=l?.totp)===null||n===void 0)&&n.qr_code)&&(l.totp.qr_code=`data:image/svg+xml;utf-8,${l.totp.qr_code}`),this._returnResult({data:l,error:null}))})}catch(s){if(b(s))return this._returnResult({data:null,error:s});throw s}}async _verify(e){const s=async()=>{try{return await this._useSession(async r=>{var n;const{data:i,error:a}=r;if(a)return this._returnResult({data:null,error:a});const o=Object.assign({challenge_id:e.challengeId},"webauthn"in e?{webauthn:Object.assign(Object.assign({},e.webauthn),{credential_response:e.webauthn.type==="create"?dr(e.webauthn.credential_response):hr(e.webauthn.credential_response)})}:{code:e.code}),{data:l,error:c}=await _(this.fetch,"POST",`${this.url}/factors/${e.factorId}/verify`,{body:o,headers:this.headers,jwt:(n=i?.session)===null||n===void 0?void 0:n.access_token});return c?this._returnResult({data:null,error:c}):(await this._saveSession(Object.assign({expires_at:Math.round(Date.now()/1e3)+l.expires_in},l)),await this._notifyAllSubscribers("MFA_CHALLENGE_VERIFIED",l),this._returnResult({data:l,error:c}))})}catch(r){if(b(r))return this._returnResult({data:null,error:r});throw r}};return this.lock!=null?this._acquireLock(this.lockAcquireTimeout,s):s()}async _challenge(e){const s=async()=>{try{return await this._useSession(async r=>{var n;const{data:i,error:a}=r;if(a)return this._returnResult({data:null,error:a});const o=await _(this.fetch,"POST",`${this.url}/factors/${e.factorId}/challenge`,{body:e,headers:this.headers,jwt:(n=i?.session)===null||n===void 0?void 0:n.access_token});if(o.error)return o;const{data:l}=o;if(l.type!=="webauthn")return{data:l,error:null};switch(l.webauthn.type){case"create":return{data:Object.assign(Object.assign({},l),{webauthn:Object.assign(Object.assign({},l.webauthn),{credential_options:Object.assign(Object.assign({},l.webauthn.credential_options),{publicKey:cr(l.webauthn.credential_options.publicKey)})})}),error:null};case"request":return{data:Object.assign(Object.assign({},l),{webauthn:Object.assign(Object.assign({},l.webauthn),{credential_options:Object.assign(Object.assign({},l.webauthn.credential_options),{publicKey:ur(l.webauthn.credential_options.publicKey)})})}),error:null}}})}catch(r){if(b(r))return this._returnResult({data:null,error:r});throw r}};return this.lock!=null?this._acquireLock(this.lockAcquireTimeout,s):s()}async _challengeAndVerify(e){const{data:s,error:r}=await this._challenge({factorId:e.factorId});return r?this._returnResult({data:null,error:r}):await this._verify({factorId:e.factorId,challengeId:s.id,code:e.code})}async _listFactors(){var e;const{data:{user:s},error:r}=await this.getUser();if(r)return{data:null,error:r};const n={all:[],phone:[],totp:[],webauthn:[],recovery_code:[]};for(const i of(e=s?.factors)!==null&&e!==void 0?e:[])n.all.push(i),i.status==="verified"&&i.factor_type in n&&Array.isArray(n[i.factor_type])&&n[i.factor_type].push(i);return{data:n,error:null}}async _getAuthenticatorAssuranceLevel(e){var s,r,n,i;if(e)try{const{payload:h}=Et(e);let p=null;h.aal&&(p=h.aal);let g=p;const{data:{user:m},error:y}=await this.getUser(e);if(y)return this._returnResult({data:null,error:y});((r=(s=m?.factors)===null||s===void 0?void 0:s.filter(R=>R.status==="verified"))!==null&&r!==void 0?r:[]).length>0&&(g="aal2");const w=h.amr||[];return{data:{currentLevel:p,nextLevel:g,currentAuthenticationMethods:w},error:null}}catch(h){if(b(h))return this._returnResult({data:null,error:h});throw h}const{data:{session:a},error:o}=await this.getSession();if(o)return this._returnResult({data:null,error:o});if(!a)return{data:{currentLevel:null,nextLevel:null,currentAuthenticationMethods:[]},error:null};const{payload:l}=Et(a.access_token);let c=null;l.aal&&(c=l.aal);let u=c;((i=(n=a.user.factors)===null||n===void 0?void 0:n.filter(h=>h.status==="verified"))!==null&&i!==void 0?i:[]).length>0&&(u="aal2");const f=l.amr||[];return{data:{currentLevel:c,nextLevel:u,currentAuthenticationMethods:f},error:null}}async _getRecoveryCodesStatus(){We(this.experimental);try{return await this._useSession(async e=>{var s;const{data:r,error:n}=e;if(n)return this._returnResult({data:null,error:n});const{data:i,error:a}=await _(this.fetch,"GET",`${this.url}/factors/recovery-codes`,{headers:this.headers,jwt:(s=r?.session)===null||s===void 0?void 0:s.access_token});return a?this._returnResult({data:null,error:a}):this._returnResult({data:i,error:null})})}catch(e){if(b(e))return this._returnResult({data:null,error:e});throw e}}async _generateRecoveryCodes(e){We(this.experimental);try{return await this._useSession(async s=>{var r;const{data:n,error:i}=s;if(i)return this._returnResult({data:null,error:i});const{data:a,error:o}=await _(this.fetch,"POST",`${this.url}/factors/recovery-codes`,{body:e?.friendlyName?{friendly_name:e.friendlyName}:void 0,headers:this.headers,jwt:(r=n?.session)===null||r===void 0?void 0:r.access_token});return o?this._returnResult({data:null,error:o}):this._returnResult({data:a,error:null})})}catch(s){if(b(s))return this._returnResult({data:null,error:s});throw s}}async _verifyRecoveryCode(e){We(this.experimental);const s=async()=>{try{return await this._useSession(async r=>{var n;const{data:i,error:a}=r;if(a)return this._returnResult({data:null,error:a});const{data:o,error:l}=await _(this.fetch,"POST",`${this.url}/factors/recovery-codes/verify`,{body:{code:e.code},headers:this.headers,jwt:(n=i?.session)===null||n===void 0?void 0:n.access_token});if(l)return this._returnResult({data:null,error:l});const c=Object.assign({expires_at:qr(o.expires_in)},o);return await this._saveSession(c),await this._notifyAllSubscribers("MFA_CHALLENGE_VERIFIED",c),this._returnResult({data:o,error:null})})}catch(r){if(b(r))return this._returnResult({data:null,error:r});throw r}};return this.lock!=null?this._acquireLock(this.lockAcquireTimeout,s):s()}async _regenerateRecoveryCodes(){We(this.experimental);try{return await this._useSession(async e=>{var s;const{data:r,error:n}=e;if(n)return this._returnResult({data:null,error:n});const{data:i,error:a}=await _(this.fetch,"POST",`${this.url}/factors/recovery-codes/regenerate`,{headers:this.headers,jwt:(s=r?.session)===null||s===void 0?void 0:s.access_token});return a?this._returnResult({data:null,error:a}):this._returnResult({data:i,error:null})})}catch(e){if(b(e))return this._returnResult({data:null,error:e});throw e}}async _unenrollRecoveryCodes(){We(this.experimental);try{return await this._useSession(async e=>{var s;const{data:r,error:n}=e;if(n)return this._returnResult({data:null,error:n});const{data:i,error:a}=await _(this.fetch,"DELETE",`${this.url}/factors/recovery-codes`,{headers:this.headers,jwt:(s=r?.session)===null||s===void 0?void 0:s.access_token});return a?this._returnResult({data:null,error:a}):this._returnResult({data:i,error:null})})}catch(e){if(b(e))return this._returnResult({data:null,error:e});throw e}}async _getAuthorizationDetails(e){try{return await this._useSession(async s=>{const{data:{session:r},error:n}=s;return n?this._returnResult({data:null,error:n}):r?await _(this.fetch,"GET",`${this.url}/oauth/authorizations/${e}`,{headers:this.headers,jwt:r.access_token,xform:i=>({data:i,error:null})}):this._returnResult({data:null,error:new H})})}catch(s){if(b(s))return this._returnResult({data:null,error:s});throw s}}async _approveAuthorization(e,s){try{return await this._useSession(async r=>{const{data:{session:n},error:i}=r;if(i)return this._returnResult({data:null,error:i});if(!n)return this._returnResult({data:null,error:new H});const a=await _(this.fetch,"POST",`${this.url}/oauth/authorizations/${e}/consent`,{headers:this.headers,jwt:n.access_token,body:{action:"approve"},xform:o=>({data:o,error:null})});return a.data&&a.data.redirect_url&&F()&&!s?.skipBrowserRedirect&&window.location.assign(a.data.redirect_url),a})}catch(r){if(b(r))return this._returnResult({data:null,error:r});throw r}}async _denyAuthorization(e,s){try{return await this._useSession(async r=>{const{data:{session:n},error:i}=r;if(i)return this._returnResult({data:null,error:i});if(!n)return this._returnResult({data:null,error:new H});const a=await _(this.fetch,"POST",`${this.url}/oauth/authorizations/${e}/consent`,{headers:this.headers,jwt:n.access_token,body:{action:"deny"},xform:o=>({data:o,error:null})});return a.data&&a.data.redirect_url&&F()&&!s?.skipBrowserRedirect&&window.location.assign(a.data.redirect_url),a})}catch(r){if(b(r))return this._returnResult({data:null,error:r});throw r}}async _listOAuthGrants(){try{return await this._useSession(async e=>{const{data:{session:s},error:r}=e;return r?this._returnResult({data:null,error:r}):s?await _(this.fetch,"GET",`${this.url}/user/oauth/grants`,{headers:this.headers,jwt:s.access_token,xform:n=>({data:n,error:null})}):this._returnResult({data:null,error:new H})})}catch(e){if(b(e))return this._returnResult({data:null,error:e});throw e}}async _revokeOAuthGrant(e){try{return await this._useSession(async s=>{const{data:{session:r},error:n}=s;return n?this._returnResult({data:null,error:n}):r?(await _(this.fetch,"DELETE",`${this.url}/user/oauth/grants`,{headers:this.headers,jwt:r.access_token,query:{client_id:e.clientId},noResolveJson:!0}),{data:{},error:null}):this._returnResult({data:null,error:new H})})}catch(s){if(b(s))return this._returnResult({data:null,error:s});throw s}}async fetchJwk(e,s={keys:[]}){let r=s.keys.find(o=>o.kid===e);if(r)return r;const n=Date.now();if(r=this.jwks.keys.find(o=>o.kid===e),r&&this.jwks_cached_at+Ba>n)return r;const{data:i,error:a}=await _(this.fetch,"GET",`${this.url}/.well-known/jwks.json`,{headers:this.headers});if(a)throw a;return!i.keys||i.keys.length===0||(this.jwks=i,this.jwks_cached_at=n,r=i.keys.find(o=>o.kid===e),!r)?null:r}async getClaims(e,s={}){try{let r=e;if(!r){const{data:h,error:p}=await this.getSession();if(p||!h.session)return this._returnResult({data:null,error:p});r=h.session.access_token}const{header:n,payload:i,signature:a,raw:{header:o,payload:l}}=Et(r);if(!s?.allowExpired)try{uo(i.exp)}catch(h){throw new Nt(h instanceof Error?h.message:"JWT validation failed")}const c=!n.alg||n.alg.startsWith("HS")||!n.kid||!("crypto"in globalThis&&"subtle"in globalThis.crypto)?null:await this.fetchJwk(n.kid,s?.keys?{keys:s.keys}:s?.jwks);if(!c){const{error:h}=await this.getUser(r);if(h)throw h;return{data:{claims:i,header:n,signature:a},error:null}}const u=ho(n.alg),d=await crypto.subtle.importKey("jwk",c,u,!0,["verify"]);if(!await crypto.subtle.verify(u,d,a,Ga(`${o}.${l}`)))throw new Nt("Invalid JWT signature");return{data:{claims:i,header:n,signature:a},error:null}}catch(r){if(b(r))return this._returnResult({data:null,error:r});throw r}}async signInWithPasskey(e){var s,r,n,i;try{if(!xt())return this._returnResult({data:null,error:new se("Browser does not support WebAuthn",null)});const{data:a,error:o}=await this._startPasskeyAuthentication({options:{captchaToken:(s=e?.options)===null||s===void 0?void 0:s.captchaToken}});if(o||!a)return this._returnResult({data:null,error:o});const l=ur(a.options),c=(n=(r=e?.options)===null||r===void 0?void 0:r.signal)!==null&&n!==void 0?n:gs.createNewAbortSignal(),{data:u,error:d}=await Zr({publicKey:l,signal:c,mediation:(i=e?.options)===null||i===void 0?void 0:i.mediation});if(d||!u)return this._returnResult({data:null,error:d??new se("WebAuthn ceremony failed",null)});const f=hr(u);return this._verifyPasskeyAuthentication({challengeId:a.challenge_id,credential:f})}catch(a){if(b(a))return this._returnResult({data:null,error:a});throw a}}async registerPasskey(e){var s,r;try{if(!xt())return this._returnResult({data:null,error:new se("Browser does not support WebAuthn",null)});const{data:n,error:i}=await this._startPasskeyRegistration();if(i||!n)return this._returnResult({data:null,error:i});const a=cr(n.options),o=(r=(s=e?.options)===null||s===void 0?void 0:s.signal)!==null&&r!==void 0?r:gs.createNewAbortSignal(),{data:l,error:c}=await Xr({publicKey:a,signal:o});if(c||!l)return this._returnResult({data:null,error:c??new se("WebAuthn ceremony failed",null)});const u=dr(l);return this._verifyPasskeyRegistration({challengeId:n.challenge_id,credential:u})}catch(n){if(b(n))return this._returnResult({data:null,error:n});throw n}}async _startPasskeyRegistration(){try{return await this._useSession(async e=>{const{data:{session:s},error:r}=e;if(r)return this._returnResult({data:null,error:r});if(!s)return this._returnResult({data:null,error:new H});const{data:n,error:i}=await _(this.fetch,"POST",`${this.url}/passkeys/registration/options`,{headers:this.headers,jwt:s.access_token,body:{}});return i?this._returnResult({data:null,error:i}):this._returnResult({data:n,error:null})})}catch(e){if(b(e))return this._returnResult({data:null,error:e});throw e}}async _verifyPasskeyRegistration(e){try{return await this._useSession(async s=>{const{data:{session:r},error:n}=s;if(n)return this._returnResult({data:null,error:n});if(!r)return this._returnResult({data:null,error:new H});const{data:i,error:a}=await _(this.fetch,"POST",`${this.url}/passkeys/registration/verify`,{headers:this.headers,jwt:r.access_token,body:{challenge_id:e.challengeId,credential:e.credential}});return a?this._returnResult({data:null,error:a}):this._returnResult({data:i,error:null})})}catch(s){if(b(s))return this._returnResult({data:null,error:s});throw s}}async _startPasskeyAuthentication(e){var s;try{const{data:r,error:n}=await _(this.fetch,"POST",`${this.url}/passkeys/authentication/options`,{headers:this.headers,body:{gotrue_meta_security:{captcha_token:(s=e?.options)===null||s===void 0?void 0:s.captchaToken}}});return n?this._returnResult({data:null,error:n}):this._returnResult({data:r,error:null})}catch(r){if(b(r))return this._returnResult({data:null,error:r});throw r}}async _verifyPasskeyAuthentication(e){try{const{data:s,error:r}=await _(this.fetch,"POST",`${this.url}/passkeys/authentication/verify`,{headers:this.headers,body:{challenge_id:e.challengeId,credential:e.credential},xform:J});return r?this._returnResult({data:null,error:r}):(s.session&&(await this._saveSession(s.session),await this._notifyAllSubscribers("SIGNED_IN",s.session)),this._returnResult({data:s,error:null}))}catch(s){if(b(s))return this._returnResult({data:null,error:s});throw s}}async _listPasskeys(){try{return await this._useSession(async e=>{const{data:{session:s},error:r}=e;if(r)return this._returnResult({data:null,error:r});if(!s)return this._returnResult({data:null,error:new H});const{data:n,error:i}=await _(this.fetch,"GET",`${this.url}/passkeys`,{headers:this.headers,jwt:s.access_token,xform:a=>({data:a,error:null})});return i?this._returnResult({data:null,error:i}):this._returnResult({data:n,error:null})})}catch(e){if(b(e))return this._returnResult({data:null,error:e});throw e}}async _updatePasskey(e){try{return await this._useSession(async s=>{const{data:{session:r},error:n}=s;if(n)return this._returnResult({data:null,error:n});if(!r)return this._returnResult({data:null,error:new H});const{data:i,error:a}=await _(this.fetch,"PATCH",`${this.url}/passkeys/${e.passkeyId}`,{headers:this.headers,jwt:r.access_token,body:{friendly_name:e.friendlyName}});return a?this._returnResult({data:null,error:a}):this._returnResult({data:i,error:null})})}catch(s){if(b(s))return this._returnResult({data:null,error:s});throw s}}async _deletePasskey(e){try{return await this._useSession(async s=>{const{data:{session:r},error:n}=s;if(n)return this._returnResult({data:null,error:n});if(!r)return this._returnResult({data:null,error:new H});const{error:i}=await _(this.fetch,"DELETE",`${this.url}/passkeys/${e.passkeyId}`,{headers:this.headers,jwt:r.access_token,noResolveJson:!0});return i?this._returnResult({data:null,error:i}):this._returnResult({data:null,error:null})})}catch(s){if(b(s))return this._returnResult({data:null,error:s});throw s}}}lt.nextInstanceID={};const jo=lt,xo="2.117.3";let Ye="",Ut;if(typeof Deno<"u"){var ts;Ye="deno",Ut=(ts=Deno.version)===null||ts===void 0?void 0:ts.deno}else if(typeof document<"u")Ye="web";else if(typeof navigator<"u"&&navigator.product==="ReactNative")Ye="react-native";else{var ss;Ye="node";const t=globalThis.process;Ut=t==null||(ss=t.version)===null||ss===void 0?void 0:ss.replace(/^v/,"")}const Qr=[`runtime=${Ye}`];Ut&&Qr.push(`runtime-version=${Ut}`);const Do={"X-Client-Info":`supabase-js/${xo}; ${Qr.join("; ")}`},Uo={headers:Do},Bo={schema:"public"},Mo={autoRefreshToken:!0,persistSession:!0,detectSessionInUrl:!0,flowType:"implicit"},Ho={},Fo={enabled:!1,respectSamplingDecision:!0};function zo(t){if(!t||typeof t!="string")return null;const e=t.split("-");if(e.length!==4)return null;const[s,r,n,i]=e;if(s.length!==2||r.length!==32||n.length!==16||i.length!==2)return null;const a=/^[0-9a-f]+$/i;return!a.test(s)||!a.test(r)||!a.test(n)||!a.test(i)||r==="00000000000000000000000000000000"||n==="0000000000000000"?null:{version:s,traceId:r,parentId:n,traceFlags:i,isSampled:(parseInt(i,16)&1)===1}}function Ko(t,e){if(!t||!e||e.length===0)return!1;let s;if(t instanceof URL)s=t;else try{s=new URL(t)}catch{return!1}for(const r of e)try{if(typeof r=="string"){if(qo(s.hostname,r))return!0}else if(r instanceof RegExp){if(r.test(s.hostname))return!0}else if(typeof r=="function"&&r(s))return!0}catch{continue}return!1}function qo(t,e){if(e===t)return!0;if(e.startsWith("*.")){const s=e.slice(2);if(t.endsWith(s)&&(t===s||t.endsWith("."+s)))return!0}return!1}function Wo(t){const e=[];try{const s=new URL(t);e.push(s.hostname)}catch{}return e.push("*.supabase.co","*.supabase.in"),e.push("localhost","127.0.0.1","[::1]"),e}function ct(t){"@babel/helpers - typeof";return ct=typeof Symbol=="function"&&typeof Symbol.iterator=="symbol"?function(e){return typeof e}:function(e){return e&&typeof Symbol=="function"&&e.constructor===Symbol&&e!==Symbol.prototype?"symbol":typeof e},ct(t)}function Go(t,e){if(ct(t)!="object"||!t)return t;var s=t[Symbol.toPrimitive];if(s!==void 0){var r=s.call(t,e);if(ct(r)!="object")return r;throw new TypeError("@@toPrimitive must return a primitive value.")}return(e==="string"?String:Number)(t)}function Vo(t){var e=Go(t,"string");return ct(e)=="symbol"?e:e+""}function Jo(t,e,s){return(e=Vo(e))in t?Object.defineProperty(t,e,{value:s,enumerable:!0,configurable:!0,writable:!0}):t[e]=s,t}function pr(t,e){var s=Object.keys(t);if(Object.getOwnPropertySymbols){var r=Object.getOwnPropertySymbols(t);e&&(r=r.filter(function(n){return Object.getOwnPropertyDescriptor(t,n).enumerable})),s.push.apply(s,r)}return s}function D(t){for(var e=1;e<arguments.length;e++){var s=arguments[e]!=null?arguments[e]:{};e%2?pr(Object(s),!0).forEach(function(r){Jo(t,r,s[r])}):Object.getOwnPropertyDescriptors?Object.defineProperties(t,Object.getOwnPropertyDescriptors(s)):pr(Object(s)).forEach(function(r){Object.defineProperty(t,r,Object.getOwnPropertyDescriptor(s,r))})}return t}const Yo=t=>t?(...e)=>t(...e):(...e)=>fetch(...e),Xo=()=>Headers,en=t=>t.startsWith("sb_publishable_")||t.startsWith("sb_secret_"),Zo="sb_temp_",gr=new Set,Qo=t=>{var e,s;if(!t.startsWith("sb_")||en(t)||t.startsWith(Zo))return;const r=(e=(s=t.match(/^sb_[a-zA-Z0-9]+_/))===null||s===void 0?void 0:s[0])!==null&&e!==void 0?e:"unknown";gr.has(r)||(gr.add(r),console.warn("@supabase/supabase-js: Unrecognized Supabase API key format. The client will proceed and send this key as-is; if you see authentication errors you may need to upgrade @supabase/supabase-js to a version that recognizes this key type."))},mr=(t,e,s,r,n,i)=>{const a=Yo(r),o=Xo(),l=n?.enabled===!0,c=n?.respectSamplingDecision!==!1,u=l?Wo(e):null,d=!(i?.omitApiKeyAsBearer&&en(t));return async(f,h)=>{const p=await s();let g=new o(h?.headers);if(g.has("apikey")||g.set("apikey",t),!g.has("Authorization")){const m=p??(d?t:null);m&&g.set("Authorization",`Bearer ${m}`)}if(u){const m=el(f,u,c);m&&(m.traceparent&&!g.has("traceparent")&&g.set("traceparent",m.traceparent),m.tracestate&&!g.has("tracestate")&&g.set("tracestate",m.tracestate),m.baggage&&!g.has("baggage")&&g.set("baggage",m.baggage))}return a(f,D(D({},h),{},{headers:g}))}};let yr=!1,vr=!1;function el(t,e,s){const r=Xn();if(!r)return yr||(yr=!0,console.warn("@supabase/supabase-js: tracePropagation is enabled but the tracing runtime is not loaded, so trace headers will not be attached. Add `import '@supabase/supabase-js/tracing'` at your application entry point (requires the OpenTelemetry API package to be installed). The CDN/UMD build does not support trace propagation.")),null;if(!Ko(typeof t=="string"||t instanceof URL?t:t.url,e))return null;const n=r();if(!n||!n.traceparent){var i;if(!(n==null||(i=n.carrierKeys)===null||i===void 0)&&i.length&&!vr){vr=!0;const a=n.carrierKeys.includes("sentry-trace")?" Sentry detected: set `propagateTraceparent: true` in Sentry.init() to emit it.":" Configure your tracing SDK to emit W3C trace context on outgoing requests.";console.warn(`@supabase/supabase-js: tracePropagation is enabled and a tracing SDK is active, but its propagator wrote [${n.carrierKeys.join(", ")}] and no W3C traceparent header, so trace headers will not be attached.`+a)}return null}if(s){const a=zo(n.traceparent);if(a&&!a.isSampled)return{traceparent:n.traceparent}}return n}function wr(t){return typeof t=="boolean"?{enabled:t}:t}function tl(t){return t.endsWith("/")?t:t+"/"}let br=!1;function sl(t){br||typeof t!="object"||t===null||!("schema"in t)||t.schema===void 0||(br=!0,console.warn(`@supabase/supabase-js: The "schema" option must be nested under "db", e.g. createClient(url, key, { db: { schema: 'myschema' } }). A top-level "schema" is ignored and queries go to the default schema.`))}function rl(t,e){var s,r,n,i,a,o;const{db:l,auth:c,realtime:u,global:d}=t,{db:f,auth:h,realtime:p,global:g}=e,m=wr(t.tracePropagation),y=wr(e.tracePropagation),v={db:D(D({},f),l),auth:D(D({},h),c),realtime:D(D({},p),u),storage:{},global:D(D(D({},g),d),{},{headers:D(D({},(s=g?.headers)!==null&&s!==void 0?s:{}),(r=d?.headers)!==null&&r!==void 0?r:{})}),tracePropagation:{enabled:(n=(i=m?.enabled)!==null&&i!==void 0?i:y?.enabled)!==null&&n!==void 0?n:!1,respectSamplingDecision:(a=(o=m?.respectSamplingDecision)!==null&&o!==void 0?o:y?.respectSamplingDecision)!==null&&a!==void 0?a:!0},accessToken:async()=>""};return t.accessToken?v.accessToken=t.accessToken:delete v.accessToken,v}function nl(t){const e=t?.trim();if(!e)throw new Error("supabaseUrl is required.");if(!e.match(/^https?:\/\//i))throw new Error("Invalid supabaseUrl: Must be a valid HTTP or HTTPS URL.");try{return new URL(tl(e))}catch{throw Error("Invalid supabaseUrl: Provided URL is malformed.")}}var il=class extends jo{constructor(t){super(t)}},al=class{constructor(t,e,s){var r,n;this.supabaseUrl=t,this.supabaseKey=e;const i=nl(t);if(!e)throw new Error("supabaseKey is required.");Qo(e),sl(s),this.realtimeUrl=new URL("realtime/v1",i),this.realtimeUrl.protocol=this.realtimeUrl.protocol.replace("http","ws"),this.authUrl=new URL("auth/v1",i),this.storageUrl=new URL("storage/v1",i),this.functionsUrl=new URL("functions/v1",i);const a=`sb-${i.hostname.split(".")[0]}-auth-token`,o={db:Bo,realtime:Ho,auth:D(D({},Mo),{},{storageKey:a}),global:Uo,tracePropagation:Fo},l=rl(s??{},o);if(this.settings=l,this.storageKey=(r=l.auth.storageKey)!==null&&r!==void 0?r:"",this.headers=(n=l.global.headers)!==null&&n!==void 0?n:{},l.accessToken)this.accessToken=l.accessToken,this.auth=new Proxy({},{get:(u,d)=>{throw new Error(`@supabase/supabase-js: Supabase Client is configured with the accessToken option, accessing supabase.auth.${String(d)} is not possible`)}});else{var c;this.auth=this._initSupabaseAuthClient((c=l.auth)!==null&&c!==void 0?c:{},this.headers,l.global.fetch)}this.fetch=mr(e,t,this._getSessionToken.bind(this),l.global.fetch,l.tracePropagation),this.functionsFetch=mr(e,t,this._getSessionToken.bind(this),l.global.fetch,l.tracePropagation,{omitApiKeyAsBearer:!0}),this.realtime=this._initRealtimeClient(D({headers:this.headers,accessToken:this._getAccessToken.bind(this),fetch:this.fetch},l.realtime)),this.accessToken&&Promise.resolve(this.accessToken()).then(u=>this.realtime.setAuth(u)).catch(u=>console.warn("Failed to set initial Realtime auth token:",u)),this.rest=new di(new URL("rest/v1",i).href,{headers:this.headers,schema:l.db.schema,fetch:this.fetch,timeout:l.db.timeout,urlLengthLimit:l.db.urlLengthLimit,retry:l.db.retry}),this.storage=new Ia(this.storageUrl.href,this.headers,this.fetch,s?.storage),l.accessToken||this._listenForAuthEvents()}get functions(){return new ti(this.functionsUrl.href,{headers:this.headers,customFetch:this.functionsFetch})}from(t){return this.rest.from(t)}schema(t){return this.rest.schema(t)}getOpenApiSpec(){return this.rest.getOpenApiSpec()}rpc(t,e={},s={head:!1,get:!1,count:void 0}){return this.rest.rpc(t,e,s)}channel(t,e={config:{}}){return this.realtime.channel(t,e)}getChannels(){return this.realtime.getChannels()}removeChannel(t){return this.realtime.removeChannel(t)}removeAllChannels(){return this.realtime.removeAllChannels()}async _getSessionToken(){var t=this,e,s;if(t.accessToken)return await t.accessToken();const{data:r}=await t.auth.getSession();return(e=(s=r.session)===null||s===void 0?void 0:s.access_token)!==null&&e!==void 0?e:null}async _getAccessToken(){var t=this,e;return(e=await t._getSessionToken())!==null&&e!==void 0?e:t.supabaseKey}_initSupabaseAuthClient({autoRefreshToken:t,persistSession:e,detectSessionInUrl:s,storage:r,userStorage:n,storageKey:i,flowType:a,lock:o,debug:l,throwOnError:c,experimental:u,lockAcquireTimeout:d,skipAutoInitialize:f},h,p){const g={Authorization:`Bearer ${this.supabaseKey}`,apikey:`${this.supabaseKey}`};return new il({url:this.authUrl.href,headers:D(D({},g),h),storageKey:i,autoRefreshToken:t,persistSession:e,detectSessionInUrl:s,storage:r,userStorage:n,flowType:a,lock:o,debug:l,throwOnError:c,experimental:u,fetch:p,lockAcquireTimeout:d,skipAutoInitialize:f,hasCustomAuthorizationHeader:Object.keys(this.headers).some(m=>m.toLowerCase()==="authorization")})}_initRealtimeClient(t){return new sa(this.realtimeUrl.href,D(D({},t),{},{params:D(D({},{apikey:this.supabaseKey}),t?.params)}))}_listenForAuthEvents(){return this.auth.onAuthStateChange((t,e)=>{this._handleTokenChanged(t,"CLIENT",e?.access_token)})}_handleTokenChanged(t,e,s){(t==="TOKEN_REFRESHED"||t==="SIGNED_IN"||t==="INITIAL_SESSION")&&this.changedAccessToken!==s?(this.changedAccessToken=s,this.realtime.setAuth(s)):t==="SIGNED_OUT"&&(this.realtime.setAuth(),e=="STORAGE"&&this.auth.signOut(),this.changedAccessToken=void 0)}};const ol=(t,e,s)=>new al(t,e,s);function ll(){if(typeof window<"u"||globalThis.Deno!==void 0)return!1;const t=globalThis.process;if(!t)return!1;const e=t.version;if(e==null)return!1;const s=e.match(/^v(\d+)\./);return s?parseInt(s[1],10)<=20:!1}ll()&&console.warn("⚠️  Node.js 20 and below are deprecated and will no longer be supported in future versions of @supabase/supabase-js. Please upgrade to Node.js 22 or later. For more information, visit: https://github.com/orgs/supabase/discussions/45715");const cl="https://pdvwyfolkyuqipfwbggb.supabase.co",ul="sb_publishable_wzer9xrRSfmFieTPg-xb1A_kg10P-pF";let rs=null;function dl(){return rs||(rs=ol(cl,ul,{auth:{persistSession:!1,autoRefreshToken:!1},realtime:{transport:typeof WebSocket<"u"?WebSocket:class{}}})),rs}function hl(t){if(typeof navigator<"u"&&!navigator.onLine)return"İnternet bağlantısı yok.";let e=t?.message||"İşlem başarısız.";return e=e.replace(/^.*?P0001[: ]*/i,"").replace(/^.*?message[: ]*/i,""),e}async function N(t,e={}){const s=dl(),{data:r,error:n}=await s.rpc(t,e);if(n)throw new Error(hl(n));return r}function fl(){let t=null;try{if(typeof sessionStorage<"u"){const e=sessionStorage.getItem("eyoklama_active");if(e){const s=JSON.parse(e);s?.students&&Array.isArray(s.students)&&(t=s)}}}catch{t=null}return{role:null,displayName:"",token:"",lists:[],history:[],teacherPin:null,teacherPinDate:null,active:t,currentTab:t?"attendance":"lists",showArchived:!1,historyGroupingMode:"day",attendanceCache:{},historyGroupIndex:{},historyDrafts:{},historyEditModes:{},historyUndoTokens:{},adminEditingListId:null,pinRevealed:!1}}let Se=fl();const pl=new Set;function oe(){return Se}function Bt(t){const e=typeof t=="function"?t(Se):t;Se={...Se,...e},typeof sessionStorage<"u"&&(Se.active?sessionStorage.setItem("eyoklama_active",JSON.stringify(Se.active)):e.active===null&&sessionStorage.removeItem("eyoklama_active")),pl.forEach(s=>{try{s(Se)}catch(r){console.error("[Store] Listener error:",r)}})}const Ge=t=>typeof document<"u"?document.getElementById(t):null;let ms=null;function tn(t){ms=t}function gl(t,e){const s=oe();t!=="attendance"&&!e?.skipClearActive&&(typeof sessionStorage<"u"&&sessionStorage.removeItem("eyoklama_active"),Bt({active:null,historyDrafts:t==="lists"||t==="history"?s.historyDrafts:{},historyEditModes:t==="lists"||t==="history"?s.historyEditModes:{}})),Bt({currentTab:t}),!(typeof document>"u")&&(t==="attendance"?(Ge("topNav")?.classList.add("hidden"),document.querySelectorAll(".page").forEach(r=>r.classList.add("hidden")),Ge("attendancePage")?.classList.remove("hidden")):(Ge("attendancePage")?.classList.add("hidden"),Ge("topNav")?.classList.remove("hidden"),document.querySelectorAll(".page").forEach(n=>n.classList.add("hidden")),Ge(`${t==="history"||t==="lists"?"lists":t}Page`)?.classList.remove("hidden")),typeof window<"u"&&window.scrollTo(0,0),ms&&ms(t))}const ut={navigate:gl,setRouteRenderer:tn};let ns;function T(t,e){if(typeof document>"u")return;const s=document.getElementById("toast");s&&(s.textContent=t,s.classList.remove("hidden"),s.classList.remove("error"),ns&&clearTimeout(ns),ns=setTimeout(()=>{s.classList.add("hidden")},3e3))}const Mt={DEVICE:"eyoklama_v3_device",TEACHER_NAME:"eyoklama_v3_teacher_name",TEACHER_WEEK_UNTIL:"eyoklama_v3_teacher_week_until",LOGIN_ATTEMPTS:"eyoklama_login_attempts",TODAY_PERMISSIONS:"eyoklama_v3_today_permissions"},Vt=Mt.TEACHER_NAME,pt=Mt.TEACHER_WEEK_UNTIL,_r="0000000000000000000000000000000000000000000000000000000000000000";function sn(){if(typeof localStorage>"u")return _r;let t=localStorage.getItem(Mt.DEVICE)||"";if(!/^[0-9a-f]{64}$/.test(t))try{const e=new Uint8Array(32);if(typeof crypto<"u"&&typeof crypto.getRandomValues=="function")crypto.getRandomValues(e);else for(let s=0;s<32;s++)e[s]=Math.floor(Math.random()*256);t=Array.from(e,s=>s.toString(16).padStart(2,"0")).join(""),localStorage.setItem(Mt.DEVICE,t)}catch{return _r}return t}const Ht="eyoklama_login_attempts";function Ft(){try{if(typeof localStorage>"u")return null;const t=localStorage.getItem(Ht);if(!t)return null;const e=JSON.parse(t),s=Date.now();if(e.blockedUntil&&e.blockedUntil>s)return`Çok fazla hatalı deneme yapıldı. Lütfen ${Math.ceil((e.blockedUntil-s)/1e3)} saniye bekleyin.`}catch{}return null}function rn(){try{if(typeof localStorage>"u")return;const t=Date.now(),e=localStorage.getItem(Ht),s=e?JSON.parse(e):{},r=(s.count||0)+1;r>=3?(s.blockedUntil=t+3e4,s.count=0):s.count=r,localStorage.setItem(Ht,JSON.stringify(s))}catch{}}function nn(){try{if(typeof localStorage>"u")return;localStorage.removeItem(Ht)}catch{}}const M=t=>typeof document<"u"?document.getElementById(t):null;function ys(){if(typeof localStorage>"u")return{name:"",until:"",valid:!1};const t=localStorage.getItem(Vt)||"",e=localStorage.getItem(pt)||"",s=!!t&&!!e&&!Number.isNaN(new Date(e).getTime())&&new Date(e).getTime()>Date.now();return{name:t,until:e,valid:s}}function Ze(t,e="error"){const s=M("loginMessage");s&&(s.textContent=t,s.className=`notice ${e}`,s.classList.remove("hidden"))}function Ss(t){const e=M(t);if(!e)return;const s=e;s._hideTimer&&clearTimeout(s._hideTimer),e.type="text",s._hideTimer=setTimeout(()=>{e.type="password"},1e3)}function dt(t=!1){const e=ys(),s=M("continueLogin"),r=M("credentialLogin"),n=M("loginMessage");if(!(!s||!r)){if(e.valid&&!t){const i=M("continueTeacherBtn");i&&(i.textContent=`${e.name} olarak devam et`),s.classList.remove("hidden"),r.classList.add("hidden")}else{s.classList.add("hidden"),r.classList.remove("hidden");const i=M("loginName");e.name&&i&&!i.value&&(i.value=e.name)}n&&n.classList.add("hidden")}}function an(t,e){e.setState({token:t.token,role:t.role,displayName:t.displayName}),t.role==="teacher"&&typeof localStorage<"u"&&(localStorage.setItem(Vt,t.displayName||""),localStorage.setItem(pt,t.teacherWeekEndsAt||t.expiresAt||""))}async function ml(t){const e=Ft();if(e){Ze(e);return}const s=M("loginBtn"),r=M("loginName"),n=M("loginPin");try{s&&(s.disabled=!0,s.classList.add("loading"),s.textContent="Giriş yapılıyor…");const i=r?.value.trim()||"",a=n?.value.trim()||"";if(!i)throw new Error("Hoca adını yazın.");if(!a)throw new Error("PIN / parolayı yazın.");const o=await sn(),l=await N("app_login",{p_name:i,p_pin:a,p_device_token:o});if(!l?.ok)throw rn(),new Error(l?.error||"Giriş başarısız.");nn(),an(l,t),await t.refresh()}catch(i){const a=Ft();Ze(a||i.message||"Giriş başarısız.")}finally{s&&(s.disabled=!1,s.classList.remove("loading"),s.textContent="Giriş yap")}}async function yl(t){const e=Ft();if(e){Ze(e);return}const s=M("continueTeacherBtn"),r=ys();try{s&&(s.disabled=!0,s.classList.add("loading"),s.textContent="Giriş yapılıyor…");const n=await sn(),i=await N("app_login",{p_name:"",p_pin:"",p_device_token:n});if(!i?.ok){if(rn(),i?.code==="WEEKLY_PIN_REQUIRED"){typeof localStorage<"u"&&localStorage.removeItem(pt),dt(!0);const a=M("loginName");a&&(a.value=r.name||""),M("loginPin")?.focus(),Ze(i.error||"Bu haftanın ilk girişinde PIN gerekli.");return}throw new Error(i?.error||"Giriş başarısız.")}nn(),an(i,t),await t.refresh()}catch(n){dt(!0);const i=M("loginName");i&&(i.value=r.name||"");const a=Ft();Ze(a||n.message||"Giriş başarısız.")}finally{if(s){s.disabled=!1,s.classList.remove("loading");const n=ys();s.textContent=n.name?`${n.name} olarak devam et`:"Hoca olarak devam et"}}}function vl(){typeof localStorage<"u"&&(localStorage.removeItem(Vt),localStorage.removeItem(pt)),dt(!0);const t=M("loginName"),e=M("loginPin");t&&(t.value=""),e&&(e.value=""),t?.focus()}async function Es(t){if(typeof window<"u"&&!window.confirm("Çıkış yapılsın mı?"))return;const e=t.getState();try{e.token&&e.active?.listId&&await N("release_attendance",{p_token:e.token,p_list_id:e.active.listId})}catch{}try{e.token&&await N("app_logout",{p_token:e.token})}catch{}if(typeof sessionStorage<"u"&&sessionStorage.removeItem("eyoklama_active"),typeof localStorage<"u"&&(localStorage.removeItem(Vt),localStorage.removeItem(pt)),t.setState({token:"",role:null,displayName:"",active:null,attendanceCache:{}}),typeof document<"u"){M("appView")?.classList.add("hidden"),M("loginView")?.classList.remove("hidden");const s=M("loginName"),r=M("loginPin");s&&(s.value=""),r&&(r.value=""),dt(!0)}T("Çıkış yapıldı.")}function I(t){return String(t??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}function me(t){if(!t)return"";const e=t.firstName||"",s=t.lastName||"";return`${e} ${s}`.replace(/\s+/g," ").trim()}function on(t,e=!0){return t?e?me(t):(t.lastName||"").trim()||me(t):""}function Ct(t){if(!t)return"Ders";let e=t.replace(/^[\s\-–—_]+/,"").trim();return e=e.replace(/([A-ZÇĞİÖŞÜa-zçğıöşü]+)\s*(\d+)/gi,"$1 $2"),e=e.replace(/\s+/g," ").trim(),e||"Ders"}function Ts(t){return String(t||"yoklama").trim().replace(/[\\/:*?"<>|]+/g,"-").replace(/\s+/g,"-")}function kr(t){return t?t.trim().split(/\s+/).map(e=>e?e.charAt(0).toLocaleUpperCase("tr-TR")+e.slice(1).toLocaleLowerCase("tr-TR"):"").join(" "):""}function Qe(t,e,s){const r=(t||"").normalize("NFC").replace(/[\u00a0\u180e\u2000-\u200b\u202f\u205f\u3000\ufeff]/g," ").replace(/\s+/g," ").trim().toLocaleUpperCase("tr-TR"),n=(e||"").normalize("NFC").replace(/[\u00a0\u180e\u2000-\u200b\u202f\u205f\u3000\ufeff]/g," ").replace(/\s+/g," ").trim().toLocaleUpperCase("tr-TR");let i=`${r} ${n}`.trim().replace(/\s+/g," ");return i=i.replace(/\bMAHMUD\b/gi,"MAHMUT").replace(/\bMEHMED\b/gi,"MEHMET"),i}function is(t){return t?t.normalize("NFC").replace(/[\u00a0\u180e\u2000-\u200b\u202f\u205f\u3000\ufeff]/g," ").replace(/\s+/g," ").trim().toLocaleLowerCase("tr-TR"):""}function wl(t){const{student:e,status:s,isLocked:r=!1,showFirstName:n=!0}=t,i=e.id||"",a=s==="present"?"+":s==="excused"?"±":"-",o=r?"locked":"",l=r?'<span style="font-size:0.68rem;color:#d97706;margin-left:4px" title="İdare İzni (Kilitli)">🔒</span>':"",c=e.listName?`<span class="muted tiny" style="margin-left:6px;font-weight:normal">(${I(e.listName)})</span>`:"";return`<div class="student-card ${o}" data-action="student-tap" data-student-id="${I(i)}">
+    <span class="student-bullet" aria-hidden="true">•</span>
+    <span class="student-name">${I(on(e,n))}${c}${l}</span>
+    <span class="attendance-tag ${s} ${o}">${a}</span>
+  </div>`}let Oe="";function Jt(){Oe=""}function Sr(t,e){Oe=(t||"").trim(),As(e)}function bl(t){Oe="";const e=document.getElementById("attendanceSearchInput");e&&(e.value="",e.focus()),As(t)}function As(t){if(typeof document>"u")return;const e=t.getState().active,s=document.querySelector(".student-list"),r=document.getElementById("searchClearBtn");if(!e||!s)return;r&&r.classList.toggle("hidden",!Oe);const n=is(Oe);let i=0;e.students.forEach(o=>{const l=o.id||"",c=s.querySelector(`[data-student-id="${l}"]`);if(c)if(!n)c.classList.remove("hidden"),i++;else{const u=is(me(o)),d=is(o.listName||""),f=u.includes(n)||d.includes(n);c.classList.toggle("hidden",!f),f&&i++}});let a=s.querySelector(".empty-search-notice");i===0?(a||(a=document.createElement("div"),a.className="empty-search-notice",a.textContent="Aramanızla eşleşen öğrenci veya ders bulunamadı.",s.appendChild(a)),a.classList.remove("hidden")):a&&a.classList.add("hidden")}function _l(){return`<div class="attendance-search-bar">
+    <div class="search-input-wrap">
+      <span class="search-icon-inline" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </span>
+      <input type="text" id="attendanceSearchInput" class="attendance-search-input"
+        placeholder="Öğrenci veya ders ara..." value="${I(Oe)}"
+        autocomplete="off" spellcheck="false">
+      <button type="button" id="searchClearBtn" class="search-clear-btn ${Oe?"":"hidden"}"
+        data-action="clear-attendance-search" aria-label="Aramayı temizle" title="Temizle">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
-    </div>`:"";
-    lastGroupKey=currentGroupKey;
-
-    return `${divider}<details id="historyCard-${key}" class="history-item" ontoggle="toggleHistoryGroup(this,'${key}')">
-      <summary>
-        <div class="history-summary">
-          <div id="historyInfo-${key}" style="flex:1;min-width:0">${historyInfoHtml(h,g)}</div>
-          <div class="history-summary-actions">
-            <span class="history-chevron" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
-            </span>
-          </div>
-        </div>
-      </summary>
-      <div id="historyBody-${key}" class="history-body"><div class="muted tiny">Yükleniyor…</div></div>
-    </details>`;
-  }).join("");
-
-  return `
-    <div class="history-section stack" style="margin-top:24px;padding-top:20px;border-top:1px solid var(--line)">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px">
-        <h2 class="section-title" style="margin:0;font-size:1.05rem;font-weight:800;letter-spacing:-0.01em;color:var(--text)">ALINANLAR (GEÇMİŞ)</h2>
-        <div style="display:flex;align-items:center;gap:8px">
-          <button type="button" class="top-icon-btn" onclick="cycleHistoryGroupingMode()" title="${modeTitle}" style="font-size:1.15rem;width:34px;height:34px">
-            ${modeEmoji}
-          </button>
-          <span onclick="toggleArchiveView()" style="font-size:0.76rem;color:var(--muted);cursor:pointer;user-select:none">
-            ${showArchived?"Arşivi gizle":"Arşivi göster"}
-          </span>
-        </div>
-      </div>
-      <div class="history">${cards||`<div class="card" style="text-align:center;padding:32px 16px"><p class="muted" style="margin-bottom:12px">Henüz yoklama kaydı yok.</p></div>`}</div>
     </div>
-  `;
-}
+  </div>`}function kl(t){if(typeof document>"u")return;const e=document.getElementById("attendanceSearchInput");e&&(e.addEventListener("input",()=>{Sr(e.value,t)}),e.addEventListener("keydown",s=>{s.key==="Escape"&&(e.value="",Sr("",t))}))}const vs=t=>typeof document<"u"?document.getElementById(t):null;let ie=!0;function Sl(t){ie=!ie;const e=t.getState().active;if(!e)return;const s=document.getElementById("nameToggleBtn");s&&(s.classList.toggle("active",ie),s.setAttribute("aria-pressed",String(ie)),s.title=ie?"Ad ve Soyad gösteriliyor":"Sadece Soyad gösteriliyor"),e.students.forEach(r=>{const n=r.id||"",i=document.querySelector(`[data-student-id="${n}"]`);if(!i)return;const a=i.querySelector(".student-name");if(a){const l=!!e.preExcused?.[n]?'<span style="font-size:0.68rem;color:#d97706;margin-left:4px" title="İdare İzni (Kilitli)">🔒</span>':"",c=r.listName?`<span class="muted tiny" style="margin-left:6px;font-weight:normal">(${I(r.listName)})</span>`:"";a.innerHTML=`${I(on(r,ie))}${c}${l}`}})}function gt(t){const s=t.getState().active;if(!s||typeof document>"u")return;typeof sessionStorage<"u"&&sessionStorage.setItem("eyoklama_active",JSON.stringify(s)),vs("topNav")?.classList.add("hidden"),document.querySelectorAll(".page").forEach(l=>l.classList.add("hidden"));const r=vs("attendancePage");if(!r)return;r.classList.remove("hidden");const i=s.mode==="permission"?"save-pre-permissions":"save-attendance",a=s.students.map(l=>{const c=l.id||"",u=s.statuses[c]||"absent",d=!!s.preExcused?.[c];return wl({student:l,status:u,isLocked:d,showFirstName:ie})}).join(""),o=_l();r.innerHTML=`<div class="attendance-shell">
+    <div class="attendance-top">
+      <button type="button" class="icon-btn ghost" data-action="cancel-attendance" aria-label="Geri">
+        <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="attendance-title">
+        <strong>${I(s.listName)}</strong>
+      </div>
+      <button type="button" id="nameToggleBtn" class="name-toggle-btn ${ie?"active":""}"
+        data-action="toggle-first-name" aria-pressed="${ie}"
+        title="${ie?"Ad ve Soyad gösteriliyor":"Sadece Soyad gösteriliyor"}">AD</button>
+      <div id="topCounts" class="top-counts"></div>
+    </div>
 
-function renderLists(){
-  updateTopBar();
+    ${o}
 
-  const listsHtml=`
+    <div class="student-list">${a}</div>
+
+    <button type="button" class="save-fab" data-action="${i}"
+      aria-label="Kaydet" title="Kaydet">
+      <svg viewBox="0 0 24 24"><path d="M5 12l4 4L19 6"/></svg>
+    </button>
+  </div>`,kl(t),As(t),ws(t)}function Er(t,e,s){const r=document.querySelector(`[data-student-id="${t}"]`);if(!r)return;const n=r.querySelector(".attendance-tag");n&&(n.className=`attendance-tag ${e} `,n.textContent=e==="present"?"+":e==="excused"?"±":"-")}function ln(t,e){const r=e.getState().active;if(!r)return;if(r.preExcused?.[t]){T("Bu öğrenci idare tarafından önceden İzinli (±) olarak kilitlendi.");return}if(r.mode==="permission"){const o=(r.statuses[t]||"absent")==="excused"?"absent":"excused";r.statuses[t]=o,e.setState({active:{...r}}),Er(t,o),ws(e);return}const n=r.statuses[t]||"absent",i=n==="absent"?"present":n==="present"?"excused":"absent";r.statuses[t]=i,e.setState({active:{...r}}),Er(t,i),ws(e)}function ws(t){const e=t.getState().active;if(!e)return;const s=Object.values(e.statuses),r={present:s.filter(a=>a==="present").length,absent:s.filter(a=>a==="absent").length,excused:s.filter(a=>a==="excused").length},n=vs("topCounts");n&&(e.mode==="permission"?n.innerHTML=`<span class="top-count excused" title="İzinli (±)"><b>${r.excused}</b><span>± İzinli</span></span>`:n.innerHTML=`
+        <span class="top-count present" title="Var (+)"><b>${r.present}</b><span>+</span></span>
+        <span class="top-count absent" title="Yok (-)"><b>${r.absent}</b><span>-</span></span>
+        <span class="top-count excused" title="İzinli (±)"><b>${r.excused}</b><span>±</span></span>`);const i=document.querySelector(".save-fab");if(i){const a=e.mode==="permission"?!0:r.present+r.excused>0;i.classList.toggle("dimmed",!a)}}let $t=null;function cn(t,e){et(),$t=setInterval(async()=>{const s=e.getState();if(!s.active||s.active.listId!==t){et();return}try{await N("heartbeat_attendance",{p_token:s.token,p_list_id:t})}catch{et();const r=e.getState();if(r.active&&r.active.listId)try{await N("save_attendance",{p_token:r.token,p_list_id:r.active.listId,p_statuses:r.active.statuses})}catch{}typeof sessionStorage<"u"&&sessionStorage.removeItem("eyoklama_active"),e.setState({active:null}),await e.refresh(),T("Oturum süresi doldu, yoklama kaydedilerek arşive eklendi."),e.navigate("lists")}},45e3)}function et(){$t&&(clearInterval($t),$t=null)}async function un(t,e){const s=e.getState(),r=s.lists.find(c=>c.id===t);if(!r)return;try{let c=await N("begin_attendance",{p_token:s.token,p_list_id:t});if(!c?.ok){const u=`${c?.error||"Bu sınıfta yoklama zaten alınıyor."}
+
+Eski kilidi kaldırıp yoklamaya devam etmek ister misiniz?`;if(typeof window<"u"&&window.confirm(u)){try{await N("release_attendance",{p_token:s.token,p_list_id:t})}catch{}c=await N("begin_attendance",{p_token:s.token,p_list_id:t})}if(!c?.ok){T(c?.error||"Bu sınıfta yoklama zaten alınıyor.");return}}}catch(c){T(c.message||"İşlem başarısız.");return}let n={};try{const c=JSON.parse(localStorage.getItem("eyoklama_v3_today_permissions")||"{}"),u=new Intl.DateTimeFormat("en-CA",{timeZone:"Europe/Istanbul",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date);n=c[u]||{}}catch{n={}}const i=[...r.students].sort((c,u)=>me(c).localeCompare(me(u),"tr")),a={},o={};i.forEach(c=>{const u=c.id||"";u&&n[u]?(a[u]="excused",o[u]=!0):u&&(a[u]="absent")});const l={mode:"new",listId:r.id,listName:r.name,students:i,statuses:a,preExcused:o};e.setState({active:l,currentTab:"attendance"}),cn(r.id,e),gt(e)}async function dn(t){const e=t.getState(),s=e.active;if(s&&Object.values(s.statuses||{}).some(i=>i!=="absent")&&typeof window<"u"&&!window.confirm("Değişiklikler kaydedilmedi. Çıkılsın mı?"))return;const r=s?.listId;if(et(),r&&e.token)try{await N("release_attendance",{p_token:e.token,p_list_id:r})}catch{}typeof sessionStorage<"u"&&sessionStorage.removeItem("eyoklama_active"),Jt(),t.setState({active:null}),t.navigate("lists")}async function hn(t){const e=t.getState(),s=e.active;if(!s||!s.listId)return;const r=Object.values(s.statuses),n=r.filter(o=>o==="present").length,i=r.filter(o=>o==="absent").length,a=r.filter(o=>o==="excused").length;if(!(typeof window<"u"&&!window.confirm(`Kaydet?  + ${n} · - ${i} · ± ${a}`)))try{await N("save_attendance",{p_token:e.token,p_list_id:s.listId,p_statuses:s.statuses}),et(),typeof sessionStorage<"u"&&sessionStorage.removeItem("eyoklama_active"),Jt(),t.setState({active:null}),await t.refresh(),T("Yoklama kaydedildi ve kilitlendi."),t.navigate("lists")}catch(o){T(o.message||"Kayıt başarısız.")}}function Z(t){const e=new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/Istanbul",year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(new Date(t)),s=r=>e.find(n=>n.type===r)?.value||"";return`${s("year")}-${s("month")}-${s("day")}`}function mt(){return Z(new Date().toISOString())}function fn(t){const e=new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/Istanbul",day:"2-digit",month:"2-digit"}).formatToParts(new Date(t)),s=e.find(n=>n.type==="day")?.value||"",r=e.find(n=>n.type==="month")?.value||"";return`${s}.${r}`}function El(t){const e=new Intl.DateTimeFormat("tr-TR",{day:"2-digit",month:"2-digit",year:"2-digit",timeZone:"Europe/Istanbul"}).formatToParts(new Date(t)),s=e.find(i=>i.type==="day")?.value||"",r=e.find(i=>i.type==="month")?.value||"",n=e.find(i=>i.type==="year")?.value||"";return`${s}.${r}.${n}`}function Tl(t){return new Intl.DateTimeFormat("tr-TR",{hour:"2-digit",minute:"2-digit",timeZone:"Europe/Istanbul"}).format(new Date(t))}function tt(t){const[e,s,r]=String(t).split("-").map(Number);return!e||!s||!r?t:new Intl.DateTimeFormat("tr-TR",{timeZone:"Europe/Istanbul",weekday:"long",day:"numeric",month:"long",year:"numeric"}).format(new Date(Date.UTC(e,s-1,r,9,0,0)))}function pn(t){const e=new Date(t),s=(e.getDay()+6)%7,r=new Date(e);r.setDate(e.getDate()-s);const n=new Date(r);n.setDate(r.getDate()+6);const i=Z(r.toISOString()),a=new Intl.DateTimeFormat("tr-TR",{day:"numeric",month:"short"}).format(r),o=new Intl.DateTimeFormat("tr-TR",{day:"numeric",month:"short",year:"numeric"}).format(n),l=new Date(e.valueOf()),c=(e.getDay()+6)%7;l.setDate(l.getDate()-c+3);const u=l.valueOf();l.setMonth(0,1),l.getDay()!==4&&l.setMonth(0,1+(4-l.getDay()+7)%7);const d=1+Math.round((u-l.valueOf())/6048e5);return{key:`week-${i}`,label:`${a} – ${o} (${d}. Hafta)`}}function gn(t){const e=new Date(t),s=e.getFullYear(),r=e.getMonth()+1,n=`${s}-${String(r).padStart(2,"0")}`,i=new Intl.DateTimeFormat("tr-TR",{month:"long",year:"numeric"}).format(e);return{key:`month-${n}`,label:i}}const mn="eyoklama_v3_today_permissions";function yn(){try{return typeof localStorage>"u"?{}:JSON.parse(localStorage.getItem(mn)||"{}")[mt()]||{}}catch{return{}}}function Al(t){try{if(typeof localStorage>"u")return;const e={[mt()]:t};localStorage.setItem(mn,JSON.stringify(e))}catch{}}function vn(t){const e=t.getState(),s=yn(),r=new Map;e.lists.forEach(o=>{o.students.forEach(l=>{const c=Qe(l.firstName,l.lastName,l.id),u=r.get(c);u?(u.listNames.includes(o.name)||u.listNames.push(o.name),!u.id&&l.id&&(u.id=l.id)):r.set(c,{...l,listName:o.name,listNames:[o.name]})})});const n=Array.from(r.values()).map(o=>({...o,listName:o.listNames.join(", ")}));n.sort((o,l)=>me(o).localeCompare(me(l),"tr"));const i={};n.forEach(o=>{const l=o.id||"";l&&(i[l]=s[l]?"excused":"absent")});const a={mode:"permission",listId:null,listName:"Günün İzinlilerini Seç (±)",students:n,statuses:i};Jt(),t.setState({active:a,currentTab:"attendance"}),gt(t)}async function wn(t){const e=t.getState(),s=e.active,r={},n=new Map,i=new Map;e.lists.forEach(l=>{l.students.forEach(c=>{if(c.id){const u=Qe(c.firstName,c.lastName,c.id);n.set(c.id,u),i.has(u)||i.set(u,new Set),i.get(u).add(c.id)}})}),s?.statuses&&Object.keys(s.statuses).forEach(l=>{if(s.statuses[l]==="excused"){r[l]=!0;const c=n.get(l);c&&i.get(c)?.forEach(d=>{r[d]=!0})}}),Al(r),typeof sessionStorage<"u"&&sessionStorage.removeItem("eyoklama_active"),Jt(),t.setState({active:null}),t.navigate("lists"),T("Günün izinlileri kaydedildi.");const a=mt(),o=e.history.filter(l=>!l.archivedAt&&Z(l.takenAt)===a);if(o.length&&Object.keys(r).length&&e.token){for(const l of o)try{const c=e.attendanceCache[l.id]||await N("get_attendance",{p_token:e.token,p_attendance_id:l.id}),u={};if(c&&c.entries&&c.entries.forEach(d=>{const f=d.studentId;f&&r[f]&&d.status!=="excused"&&(u[f]="excused")}),Object.keys(u).length){await N("apply_attendance_changes",{p_token:e.token,p_attendance_id:l.id,p_changes:u});const d={...e.attendanceCache};delete d[l.id],t.setState({attendanceCache:d})}}catch{}await t.refresh()}}function Rl(t){if(!t||!t.trim())return[];const e=t.split(/\r?\n/).find(c=>c.trim().length>0)||"",s=(e.match(/;/g)||[]).length,r=(e.match(/,/g)||[]).length,n=s>r?";":",",i=[];let a=[],o="",l=!1;for(let c=0;c<t.length;c++){const u=t[c],d=t[c+1];u==='"'&&l&&d==='"'?(o+='"',c++):u==='"'?l=!l:u===n&&!l?(a.push(o),o=""):(u===`
+`||u==="\r")&&!l?(u==="\r"&&d===`
+`&&c++,a.push(o),i.push(a),a=[],o=""):o+=u}return(o.length>0||a.length>0)&&(a.push(o),i.push(a)),i}const bn=t=>String(t??"").trim(),Tr=t=>bn(t).toLocaleLowerCase("tr-TR").replaceAll("ı","i").replaceAll("ş","s").replaceAll("ğ","g").replaceAll("ü","u").replaceAll("ö","o").replaceAll("ç","c");function Cl(t){let e=t.map(n=>Array.isArray(n)?n.map(bn):[]).filter(n=>n.some(i=>i!=="")).map(n=>{const i=[...n];for(;i.length>0&&i[i.length-1]==="";)i.pop();return i});if(!e.length)throw new Error("Dosyada öğrenci bulunamadı.");if(e.some(n=>n.length>2))throw new Error("Dosya reddedildi: 3. sütun bulundu.");const s=e[0]||[];if(s.length>=2&&Tr(s[0])==="isim"&&Tr(s[1])==="soyisim"&&(e=e.slice(1)),!e.length)throw new Error("Başlık dışında öğrenci bulunamadı.");const r=e.findIndex(n=>n.length!==2||!n[0]||!n[1]);if(r!==-1)throw new Error(`${r+1}. öğrenci satırında İsim veya Soyisim eksik.`);return e.map(n=>({firstName:n[0],lastName:n[1]}))}let Y=[];const X=t=>typeof document<"u"?document.getElementById(t):null;function $l(){return Y}function Ol(t){Y=t}function _n(t){const e=t==="file";X("fileMode")?.classList.toggle("hidden",!e),X("manualMode")?.classList.toggle("hidden",e),X("fileModeBtn")?.classList.toggle("active",e),X("manualModeBtn")?.classList.toggle("active",!e)}function Rs(){const t=X("manualFirst"),e=X("manualLast"),s=t?.value.trim()||"",r=e?.value.trim()||"";if(!s||!r){T("İsim ve Soyisim birlikte gerekli.");return}Y.push({firstName:s,lastName:r}),t&&(t.value=""),e&&(e.value=""),Cs(),t?.focus()}function kn(t){Y.splice(t,1),Cs()}function Cs(){const t=X("preview"),e=X("createListBtn");if(t){if(e&&(e.disabled=!Y.length),!Y.length){t.innerHTML="",X("importMessage")?.classList.add("hidden");return}Y.sort((s,r)=>me(s).localeCompare(me(r),"tr")),t.innerHTML=`<div class="preview-head">
+    <strong class="tiny">${Y.length} öğrenci hazır</strong>
+    <span class="muted tiny">önizleme</span>
+  </div>
+  <div style="overflow:auto;max-height:260px">
+    <table>
+      <thead>
+        <tr><th>İsim</th><th>Soyisim</th><th style="width:34px"></th></tr>
+      </thead>
+      <tbody>
+        ${Y.map((s,r)=>`<tr>
+              <td>${I(s.firstName)}</td>
+              <td>${I(s.lastName)}</td>
+              <td style="text-align:right">
+                <button type="button" class="icon-btn ghost" style="width:28px;height:28px;font-size:1.1rem;color:#777"
+                  data-action="remove-imported-student" data-index="${r}" aria-label="Öğrenciyi çıkar" title="Kaldır">×</button>
+              </td>
+            </tr>`).join("")}
+      </tbody>
+    </table>
+  </div>`}}async function Pl(t){const e=X("importMessage"),s=X("preview"),r=X("createListBtn");if(Y=[],s&&(s.innerHTML=""),r&&(r.disabled=!0),!!t)try{const n=t.name.split(".").pop()?.toLowerCase();let i;if(n==="csv")i=Rl(await t.text());else if(n==="xlsx"||n==="xls"){const a=typeof window<"u"?window:{};if(typeof a.XLSX>"u")throw new Error("XLSX okuyucu yüklenemedi.");const o=await t.arrayBuffer(),l=a.XLSX.read(o,{type:"array"}),c=l.Sheets[l.SheetNames[0]];i=a.XLSX.utils.sheet_to_json(c,{header:1,defval:"",raw:!1})}else throw new Error("Yalnızca CSV, XLSX veya XLS kabul edilir.");Y=Cl(i),e&&(e.textContent=`${Y.length} öğrenci dosyadan yüklendi.`,e.className="notice success",e.classList.remove("hidden")),Cs()}catch(n){const i=n;e&&(e.textContent=i.message||"Dosya okunamadı.",e.className="notice error",e.classList.remove("hidden"))}}const $e=t=>typeof document<"u"?document.getElementById(t):null;function Il(t,e){const s=mt();return e.history.filter(r=>!r.archivedAt&&r.listId===t&&Z(r.takenAt)===s).length}function Nl(t,e){const s=t.getState(),r=$e("listsPage");if(!r)return;const a=`
     <div class="lists-section stack">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
         <h2 class="section-title" style="margin:0;font-size:1.05rem;font-weight:800;letter-spacing:-0.01em;color:var(--text)">YOKLAMA PAKETLERİ</h2>
       </div>
-      <div class="grid">${app.lists.map(l=>`<article id="listCard-${l.id}" class="list-card clickable" onclick="startAttendance('${l.id}')" title="Yoklama al">
+      <div class="grid">${s.lists.map(o=>`<article id="listCard-${I(o.id)}" class="list-card clickable"
+        data-action="start-attendance" data-list-id="${I(o.id)}" title="Yoklama al">
         <div>
-          <h3 style="margin-bottom:2px">${escapeHtml(l.name)}</h3>
-          <div class="muted tiny">${l.students.length} öğrenci · Bugün ${todayAttendanceCount(l.id)} yoklama</div>
+          <h3 style="margin-bottom:2px">${I(o.name)}</h3>
+          <div class="muted tiny">${o.students.length} öğrenci · Bugün ${Il(o.id,s)} yoklama</div>
         </div>
-      </article>`).join("") || `<div class="card" style="text-align:center;padding:32px 16px"><p class="muted" style="margin-bottom:12px">Henüz sınıf eklenmemiş.</p><button class="btn small" onclick="switchTab('new')">Yeni Sınıf Ekle</button></div>`}</div>
+      </article>`).join("")||`<div class="card" style="text-align:center;padding:32px 16px">
+    <p class="muted" style="margin-bottom:12px">Henüz sınıf eklenmemiş.</p>
+    <button type="button" class="btn small" data-action="switch-tab" data-tab="new">Yeni Sınıf Ekle</button>
+  </div>`}</div>
     </div>
-  `;
-
-  const historyHtml=buildHistorySectionHtml();
-
-  $("listsPage").innerHTML=listsHtml + historyHtml;
-}
-
-function renderHistory(){
-  renderLists();
-}
-async function startAttendance(listId){
-  const list=app.lists.find(x=>x.id===listId); if(!list)return;
-  try{
-    let lock=await rpc("begin_attendance",{p_token:token,p_list_id:listId});
-    if(!lock?.ok){
-      if(confirm(`${lock?.error||"Bu sınıfta yoklama zaten alınıyor."}\n\nEski kilidi kaldırıp yoklamaya devam etmek ister misiniz?`)){
-        try{ await rpc("release_attendance",{p_token:token,p_list_id:listId}); }catch{}
-        lock=await rpc("begin_attendance",{p_token:token,p_list_id:listId});
-      }
-      if(!lock?.ok){toast(lock?.error||"Bu sınıfta yoklama zaten alınıyor.");return}
-    }
-  }catch(e){toast(e.message);return}
-
-  const todayPerms=getTodayPermissions();
-  const sortedStudents=[...list.students].sort((a,b)=>fullName(a).localeCompare(fullName(b),"tr"));
-  const statuses={};
-  const preExcused={};
-  sortedStudents.forEach(s=>{
-    if(todayPerms[s.id]){
-      statuses[s.id]="excused";
-      preExcused[s.id]=true;
-    }else{
-      statuses[s.id]="absent";
-    }
-  });
-  active={mode:"new",listId:list.id,listName:list.name,students:sortedStudents,statuses,preExcused};
-  startAttendanceHeartbeat(list.id);
-  renderAttendance();
-}
-function startAttendanceHeartbeat(listId){
-  clearInterval(attendanceLockTimer);
-  attendanceLockTimer=setInterval(async()=>{
-    if(!active||active.listId!==listId){clearInterval(attendanceLockTimer);attendanceLockTimer=null;return}
-    try{
-      await rpc("heartbeat_attendance",{p_token:token,p_list_id:listId});
-    }catch(e){
-      clearInterval(attendanceLockTimer);attendanceLockTimer=null;
-      if(active){
-        try{
-          await rpc("save_attendance",{p_token:token,p_list_id:active.listId,p_statuses:active.statuses});
-        }catch{}
-      }
-      active=null;
-      sessionStorage.removeItem("eyoklama_active");
-      await refresh();
-      toast("Oturum süresi doldu, yoklama kaydedilerek arşive eklendi.");
-      switchTab("history");
-    }
-  },45000);
-}
-function renderAttendance(){
-  sessionStorage.setItem("eyoklama_active",JSON.stringify(active));
-  $("tabs").classList.add("hidden");
-  document.querySelectorAll(".page").forEach(x=>x.classList.add("hidden"));
-  const root=$("attendancePage");root.classList.remove("hidden");
-  const isPermMode=active.mode==="permission";
-  const saveAction=isPermMode?"savePrePermissions()":"saveNewAttendance()";
-  root.innerHTML=`<div class="attendance-shell">
-    <div class="attendance-top">
-      <button class="icon-btn ghost" onclick="cancelAttendance()" aria-label="Geri">
-        <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+  `;r.innerHTML=a+e}function Ll(t){Ol([]);const e=$e("newPage");if(!e)return;e.innerHTML=`<div class="stack">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+      <button type="button" class="top-icon-btn" data-action="switch-tab" data-tab="lists" title="Geri">
+        <svg viewBox="0 0 24 24"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
       </button>
-      <div class="attendance-title">
-        <strong>${escapeHtml(active.listName)}</strong>
-      </div>
-      <div id="topCounts" class="top-counts"></div>
+      <h1 class="page-title" style="margin:0">YOKLAMA EKLE</h1>
     </div>
 
-    <div class="student-list">${active.students.map(renderStudent).join("")}</div>
-
-    <button class="save-fab" onclick="${saveAction}"
-      aria-label="Kaydet" title="Kaydet">
-      <svg viewBox="0 0 24 24"><path d="M5 12l4 4L19 6"/></svg>
-    </button>
-  </div>`;
-  updateCounts();
-}
-function renderStudent(s){
-  const st=active.statuses[s.id]||"absent";
-  const isLocked=!!active?.preExcused?.[s.id];
-  const stateLabel=st==="present"?"+":st==="excused"?"±":"-";
-  const lockedClass=isLocked?"locked":"";
-  const lockTag=isLocked?`<span style="font-size:0.68rem;color:#d97706;margin-left:4px" title="İdare İzni (Kilitli)">🔒</span>`:"";
-  const listTag=s.listName?`<span class="muted tiny" style="margin-left:6px;font-weight:normal">(${escapeHtml(s.listName)})</span>`:"";
-  return `<div class="student-card ${lockedClass}" onclick="handleStudentTap(event,'${s.id}')">
-    <span class="student-bullet" aria-hidden="true">•</span>
-    <span class="student-name">${escapeHtml(fullName(s))}${listTag}${lockTag}</span>
-    <span class="attendance-tag ${st} ${lockedClass}">${stateLabel}</span>
-  </div>`;
-}
-function handleStudentTap(ev,id){
-  ev.preventDefault();
-  ev.stopPropagation();
-  if(active?.preExcused?.[id]){
-    toast("Bu öğrenci idare tarafından önceden İzinli (±) olarak kilitlendi.");
-    return;
-  }
-  if(active?.mode==="permission"){
-    const cur=active.statuses[id]||"absent";
-    active.statuses[id]=cur==="excused"?"absent":"excused";
-    renderAttendance();
-    return;
-  }
-  const cur=active.statuses[id]||"absent";
-  active.statuses[id]=cur==="absent"?"present":cur==="present"?"excused":"absent";
-  renderAttendance();
-}
-function updateCounts(){
-  const vals=Object.values(active.statuses), c={
-    present:vals.filter(x=>x==="present").length,
-    absent:vals.filter(x=>x==="absent").length,
-    excused:vals.filter(x=>x==="excused").length
-  };
-  const el=$("topCounts");
-  if(el){
-    if(active?.mode==="permission"){
-      el.innerHTML=`<span class="top-count excused" title="İzinli (±)"><b>${c.excused}</b><span>± İzinli</span></span>`;
-    }else{
-      el.innerHTML=`
-        <span class="top-count present" title="Var (+)"><b>${c.present}</b><span>+</span></span>
-        <span class="top-count absent" title="Yok (-)"><b>${c.absent}</b><span>-</span></span>
-        <span class="top-count excused" title="İzinli (±)"><b>${c.excused}</b><span>±</span></span>`;
-    }
-  }
-
-  const fab=document.querySelector(".save-fab");
-  if(fab){
-    const hasActive=active?.mode==="permission"?true:(c.present+c.excused)>0;
-    fab.classList.toggle("dimmed",!hasActive);
-  }
-}
-async function cancelAttendance(){
-  if(active){
-    const hasChanges=Object.values(active.statuses||{}).some(st=>st!=="absent");
-    if(hasChanges&&!confirm("Değişiklikler kaydedilmedi. Çıkılsın mı?"))return;
-  }
-  const listId=active?.listId;
-  clearInterval(attendanceLockTimer);attendanceLockTimer=null;
-  if(listId){
-    try{await rpc("release_attendance",{p_token:token,p_list_id:listId})}catch{}
-  }
-  active=null;sessionStorage.removeItem("eyoklama_active");switchTab("lists");
-}
-async function saveNewAttendance(){
-  const vals=Object.values(active.statuses);
-  const p=vals.filter(x=>x==="present").length,a=vals.filter(x=>x==="absent").length,e=vals.filter(x=>x==="excused").length;
-  if(!confirm(`Kaydet?  + ${p} · - ${a} · ± ${e}`))return;
-  try{
-    await rpc("save_attendance",{p_token:token,p_list_id:active.listId,p_statuses:active.statuses});
-    clearInterval(attendanceLockTimer);attendanceLockTimer=null;
-    active=null;
-    sessionStorage.removeItem("eyoklama_active");
-    await refresh();
-    toast("Yoklama kaydedildi ve kilitlendi.");
-    switchTab("history");
-  }catch(e){toast(e.message)}
-}
-
-function renderHistory(){
-  const groups=buildHistoryGroups();
-  historyGroupCache={};
-  let lastGroupKey="";
-  const modeLabel=historyGroupingMode==="day"?"📅 Günlük":historyGroupingMode==="week"?"🗓️ Haftalık":"📆 Aylık";
-
-  const cards=groups.map((g,i)=>{
-    const key=`g${i}`;historyGroupCache[key]=g;
-    const sel=selectedHistoryItem(key), h=sel.item;
-
-    let currentGroupKey="";
-    let currentGroupLabel="";
-    let downloadOnClick="";
-
-    if(historyGroupingMode==="day"){
-      const day=dayKey(h.takenAt);
-      currentGroupKey=day;
-      currentGroupLabel=formatHistoryDay(day);
-      downloadOnClick=`downloadDayPdf('${day}')`;
-    }else if(historyGroupingMode==="week"){
-      const w=getWeekDetails(h.takenAt);
-      currentGroupKey=w.key;
-      currentGroupLabel=w.label;
-      downloadOnClick=`downloadGroupRangePdf('${w.key}')`;
-    }else{
-      const m=getMonthDetails(h.takenAt);
-      currentGroupKey=m.key;
-      currentGroupLabel=m.label;
-      downloadOnClick=`downloadGroupRangePdf('${m.key}')`;
-    }
-
-    const divider=currentGroupKey!==lastGroupKey?`<div class="history-day">
-      <div class="history-day-line"><span class="history-day-label">${escapeHtml(currentGroupLabel)}</span></div>
-      <button type="button" class="history-day-download" onclick="${downloadOnClick}" aria-label="${escapeHtml(currentGroupLabel)} PDF indir" title="PDF indir">
-        <svg viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
-      </button>
-    </div>`:"";
-    lastGroupKey=currentGroupKey;
-
-    return `${divider}<details id="historyCard-${key}" class="history-item" ontoggle="toggleHistoryGroup(this,'${key}')">
-      <summary>
-        <div class="history-summary">
-          <div id="historyInfo-${key}" style="flex:1;min-width:0">${historyInfoHtml(h,g)}</div>
-          <div class="history-summary-actions">
-            <span class="history-chevron" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
-            </span>
-          </div>
-        </div>
-      </summary>
-      <div id="historyBody-${key}" class="history-body"><div class="muted tiny">Yükleniyor…</div></div>
-    </details>`;
-  }).join("");
-
-  $("historyPage").innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-    <h1 class="page-title" style="margin:0">ALINANLAR</h1>
-    <button type="button" class="btn secondary small" onclick="cycleHistoryGroupingMode()" title="Görünüm modunu değiştir">
-      ${modeLabel}
-    </button>
-  </div>
-  <div class="history-controls"><button class="archive-toggle" onclick="toggleArchiveView()">${showArchived?"Arşivi gizle":"Arşivi göster"}</button></div>
-  <div class="history">${cards||`<div class="card" style="text-align:center;padding:32px 16px"><p class="muted" style="margin-bottom:12px">Henüz yoklama kaydı yok.</p><button class="btn small" onclick="switchTab('lists')">Yoklamalara Git</button></div>`}</div>`;
-}
-
-async function downloadGroupRangePdf(groupKey){
-  try{
-    const matchingHistory=app.history.filter(h=>{
-      if(h.archivedAt&&!showArchived)return false;
-      if(historyGroupingMode==="week"){
-        return getWeekDetails(h.takenAt).key===groupKey;
-      }
-      if(historyGroupingMode==="month"){
-        return getMonthDetails(h.takenAt).key===groupKey;
-      }
-      return dayKey(h.takenAt)===groupKey;
-    });
-
-    if(!matchingHistory.length){
-      toast("PDF indirmek için aktif yoklama bulunamadı.");
-      return;
-    }
-
-    let titleLabel="";
-    if(historyGroupingMode==="week"){
-      titleLabel=getWeekDetails(matchingHistory[0].takenAt).label;
-    }else if(historyGroupingMode==="month"){
-      titleLabel=getMonthDetails(matchingHistory[0].takenAt).label;
-    }else{
-      titleLabel=formatHistoryDay(dayKey(matchingHistory[0].takenAt));
-    }
-
-    await downloadMasterRangePdf(matchingHistory, titleLabel);
-  }catch(e){
-    toast(e.message||"PDF oluşturulamadı.");
-  }
-}
-
-function cleanListName(name){
-  if(!name) return "Ders";
-  let cleaned = name.replace(/^[\s\-–—_]+/, "").trim();
-  cleaned = cleaned.replace(/([A-ZÇĞİÖŞÜa-zçğıöşü]+)\s*(\d+)/gi, "$1 $2");
-  cleaned = cleaned.replace(/\s+/g, " ").trim();
-  return cleaned || "Ders";
-}
-
-function formatTitleCaseTR(str){
-  if(!str) return "";
-  return str
-    .trim()
-    .split(/\s+/)
-    .map(w => w ? w.charAt(0).toLocaleUpperCase("tr-TR") + w.slice(1).toLocaleLowerCase("tr-TR") : "")
-    .join(" ");
-}
-
-function normalizeStudentKey(firstName, lastName, studentId){
-  const fn = (firstName || "")
-    .normalize("NFC")
-    .replace(/[\u00a0\u180e\u2000-\u200b\u202f\u205f\u3000\ufeff]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim()
-    .toLocaleUpperCase("tr-TR");
-  const ln = (lastName || "")
-    .normalize("NFC")
-    .replace(/[\u00a0\u180e\u2000-\u200b\u202f\u205f\u3000\ufeff]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim()
-    .toLocaleUpperCase("tr-TR");
-  
-  let full = `${fn} ${ln}`.trim().replace(/\s+/g, " ");
-  full = full.replace(/\bMAHMUD\b/gi, "MAHMUT").replace(/\bMEHMED\b/gi, "MEHMET");
-  return full;
-}
-
-async function downloadMasterRangePdf(items, titleLabel){
-  if(typeof pdfMake==="undefined")throw new Error("PDF modülü yüklenemedi.");
-
-  const sortedItems=[...items].sort((a,b)=>new Date(a.takenAt)-new Date(b.takenAt));
-  const sessions=[];
-  for(const h of sortedItems){
-    const r=attendanceCache[h.id]||await rpc("get_attendance",{p_token:token,p_attendance_id:h.id});
-    attendanceCache[h.id]=r;
-    sessions.push({h,r});
-  }
-
-  if(!sessions.length){
-    toast("Yoklama verisi bulunamadı.");
-    return;
-  }
-
-  // 1) Group classes cleanly by normalized list name
-  const classMap=new Map();
-  sessions.forEach(sess=>{
-    const cleanName=cleanListName(sess.h.listName);
-    const groupKey=cleanName.toLocaleUpperCase("tr-TR");
-    if(!classMap.has(groupKey)){
-      classMap.set(groupKey,{groupKey,listName:cleanName,items:[]});
-    }
-    classMap.get(groupKey).items.push(sess);
-  });
-  const classGroups=[...classMap.values()].sort((a,b)=>a.listName.localeCompare(b.listName,"tr"));
-
-  // 2) Deduplicate students across all lists & sessions
-  const studentMap=new Map();
-
-  app.lists.forEach(l=>{
-    const cName=cleanListName(l.name).toLocaleUpperCase("tr-TR");
-    if(classGroups.some(cg=>cg.groupKey===cName)){
-      l.students.forEach(s=>{
-        const normKey=normalizeStudentKey(s.firstName, s.lastName, s.id);
-        if(!studentMap.has(normKey)){
-          studentMap.set(normKey,{
-            normKey,
-            ids:new Set(s.id?[s.id]:[]),
-            name:formatTitleCaseTR(`${s.firstName||""} ${s.lastName||""}`),
-            listKeys:new Set([cName])
-          });
-        }else{
-          if(s.id)studentMap.get(normKey).ids.add(s.id);
-          studentMap.get(normKey).listKeys.add(cName);
-        }
-      });
-    }
-  });
-
-  sessions.forEach(({r,h})=>{
-    const cName=cleanListName(h.listName).toLocaleUpperCase("tr-TR");
-    r.entries.forEach(e=>{
-      const normKey=normalizeStudentKey(e.firstName, e.lastName, e.studentId);
-      if(!studentMap.has(normKey)){
-        studentMap.set(normKey,{
-          normKey,
-          ids:new Set(e.studentId?[e.studentId]:[]),
-          name:formatTitleCaseTR(`${e.firstName||""} ${e.lastName||""}`),
-          listKeys:new Set([cName])
-        });
-      }else{
-        if(e.studentId)studentMap.get(normKey).ids.add(e.studentId);
-        studentMap.get(normKey).listKeys.add(cName);
-      }
-    });
-  });
-
-  const allStudents=[...studentMap.values()].sort((a,b)=>a.name.localeCompare(b.name,"tr"));
-
-  if(!allStudents.length){
-    toast("Öğrenci bulunamadı.");
-    return;
-  }
-
-  // 3) Calculate dimensions & single-page font scaling
-  const totalCols=sessions.length;
-  const isLandscape=totalCols>16;
-  const printableWidth=isLandscape?822:575;
-  const nameColWidth=isLandscape?140:125;
-  const colWidth=Math.max(15,Math.min(22,Math.floor((printableWidth-nameColWidth)/totalCols)));
-
-  // Dynamic font sizing & vertical padding based on student count N
-  const N=allStudents.length;
-  let bodyFont, markFont, sessionFont, rowPad;
-
-  if(N<=20){
-    bodyFont=8.0; markFont=9.0; sessionFont=6.5; rowPad=1.5;
-  }else if(N<=30){
-    bodyFont=7.5; markFont=8.5; sessionFont=6.2; rowPad=1.0;
-  }else if(N<=40){
-    bodyFont=6.8; markFont=7.8; sessionFont=5.8; rowPad=0.5;
-  }else if(N<=55){
-    bodyFont=6.0; markFont=7.0; sessionFont=5.5; rowPad=0.2;
-  }else if(N<=70){
-    bodyFont=5.2; markFont=6.0; sessionFont=5.0; rowPad=0.0;
-  }else{
-    bodyFont=4.5; markFont=5.5; sessionFont=4.5; rowPad=0.0;
-  }
-
-  // 4) Build minimal, clean table headers
-  const headerRow1=[{text:"İSİM SOYİSİM",rowSpan:2,bold:true,fontSize:bodyFont,margin:[0,6,0,0],color:"#1e293b",fillColor:"#f8fafc"}];
-  const headerRow2=[{}];
-
-  classGroups.forEach(cg=>{
-    headerRow1.push({
-      text:cg.listName,
-      colSpan:cg.items.length,
-      bold:true,
-      fontSize:bodyFont,
-      alignment:"center",
-      fillColor:"#f1f5f9",
-      color:"#0f172a"
-    });
-    for(let k=1;k<cg.items.length;k++)headerRow1.push({});
-
-    cg.items.forEach((sess,localIdx)=>{
-      const dateStr=pdfCleanDate(sess.h.takenAt);
-      const sessionLabel=cg.items.length>1?`${dateStr}\n(${localIdx+1}/${cg.items.length})`:dateStr;
-      headerRow2.push({
-        text:sessionLabel,
-        bold:true,
-        fontSize:sessionFont,
-        alignment:"center",
-        color:"#475569",
-        fillColor:"#ffffff"
-      });
-    });
-  });
-
-  // 5) Build student rows with REAL DATA ONLY (unrecorded attendance stays EMPTY)
-  const rows=allStudents.map(s=>{
-    const rowCells=[{text:s.name,fontSize:bodyFont,bold:true,margin:[1,rowPad,0,rowPad],color:"#1e293b"}];
-
-    classGroups.forEach(cg=>{
-      cg.items.forEach(({r})=>{
-        const entry=r.entries.find(e=>{
-          const ek=normalizeStudentKey(e.firstName, e.lastName, e.studentId);
-          return ek===s.normKey || (e.studentId && s.ids.has(e.studentId));
-        });
-
-        if(!entry){
-          // REAL DATA FIX: If student was NOT in this session's attendance -> EMPTY CELL!
-          rowCells.push({text:"",fontSize:markFont,alignment:"center",margin:[0,rowPad,0,rowPad]});
-        }else if(entry.status==="present"){
-          rowCells.push({text:"+",color:"#16a34a",bold:true,fontSize:markFont,alignment:"center",margin:[0,rowPad,0,rowPad]});
-        }else if(entry.status==="excused"){
-          rowCells.push({text:"±",color:"#d97706",bold:true,fontSize:markFont,alignment:"center",margin:[0,rowPad,0,rowPad]});
-        }else if(entry.status==="absent"){
-          rowCells.push({text:"-",color:"#dc2626",bold:true,fontSize:markFont,alignment:"center",margin:[0,rowPad,0,rowPad]});
-        }else{
-          rowCells.push({text:"",fontSize:markFont,alignment:"center",margin:[0,rowPad,0,rowPad]});
-        }
-      });
-    });
-
-    return rowCells;
-  });
-
-  const doc={
-    pageSize:"A4",
-    pageOrientation:isLandscape?"landscape":"portrait",
-    pageMargins:[10,8,10,8],
-    defaultStyle:{font:"Roboto",fontSize:bodyFont,color:"#1e293b"},
-    content:[
-      {
-        columns:[
-          {
-            stack:[
-              {text:titleLabel,fontSize:11,bold:true,color:"#0f172a"},
-              {text:`${classGroups.length} ders grubu · ${totalCols} ders kaydı · ${allStudents.length} öğrenci · + Var  - Yok  ± İzinli`,fontSize:6.5,color:"#64748b",margin:[0,1,0,0]}
-            ]
-          }
-        ],
-        margin:[0,0,0,4]
-      },
-      {
-        table:{
-          headerRows:2,
-          widths:[nameColWidth,...sessions.map(()=>colWidth)],
-          body:[headerRow1,headerRow2,...rows],
-          dontBreakRows:true
-        },
-        layout:{
-          hLineWidth:(i,node)=>i===0||i===2||i===node.table.body.length?0.5:0.15,
-          vLineWidth:()=>0.15,
-          hLineColor:()=>"#e2e8f0",
-          vLineColor:()=>"#f1f5f9",
-          paddingLeft:()=>1,
-          paddingRight:()=>1,
-          paddingTop:()=>0,
-          paddingBottom:()=>0,
-          fillColor:(rowIndex)=>rowIndex<2?null:(rowIndex%2===0?"#fafafa":null)
-        }
-      }
-    ]
-  };
-
-  pdfMake.createPdf(doc).download(`yoklama-cizelgesi-${safeFileName(titleLabel)}.pdf`);
-}
-function toggleArchiveView(){
-  showArchived=!showArchived;
-  renderHistory();
-}
-async function toggleHistoryGroup(el,key){
-  if(el.open){await loadHistoryGroup(key);return}
-  const g=historyGroupCache[key];
-  if(g)g.items.forEach(h=>{delete historyDrafts[h.id];delete historyEditModes[h.id]});
-}
-async function loadHistoryGroup(key){
-  const g=historyGroupCache[key];if(!g)return;
-  const body=$(`historyBody-${key}`);if(!body)return;
-  const missing=g.items.filter(h=>!attendanceCache[h.id]);
-  if(missing.length){
-    body.innerHTML=`<div class="muted tiny">Yükleniyor…</div>`;
-    try{
-      await Promise.all(missing.map(async h=>{
-        attendanceCache[h.id]=await rpc("get_attendance",{p_token:token,p_attendance_id:h.id});
-      }));
-    }catch(e){body.innerHTML=`<div class="notice error">${escapeHtml(e.message)}</div>`;return}
-  }
-  renderHistoryBody(key);
-}
-function draftStatus(attendanceId,entry){
-  return historyDrafts[attendanceId]?.[entry.id] ?? entry.status;
-}
-function hasHistoryDraft(attendanceId){
-  return !!historyDrafts[attendanceId] && Object.keys(historyDrafts[attendanceId]).length>0;
-}
-function renderHistoryBody(key){
-  const g=historyGroupCache[key];if(!g)return;
-  const body=$(`historyBody-${key}`);if(!body)return;
-  const editing=g.items.some(h=>!!historyEditModes[h.id]);
-  const archived=!!g.archived;
-
-  const studentMap=new Map();
-  g.items.forEach(h=>{
-    const r=attendanceCache[h.id];
-    if(r)r.entries.forEach(e=>{
-      const k=e.studentId||`${e.firstName}|${e.lastName}`;
-      if(!studentMap.has(k))studentMap.set(k,{id:e.studentId,key:k,firstName:e.firstName,lastName:e.lastName});
-    });
-  });
-  const students=[...studentMap.values()].sort((a,b)=>`${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`,"tr"));
-
-  body.innerHTML=`
-    <div class="history-grid">
-      <div class="history-grid-header">
-        <span class="muted tiny" style="font-weight:700">Öğrenci</span>
-        <div class="history-grid-cols">
-          ${g.items.map((h,idx)=>`
-            <div class="h-col-head">${idx+1}/${g.items.length}</div>
-          `).join("")}
-        </div>
-      </div>
-
-      ${students.map(s=>`
-        <div class="history-grid-row">
-          <span class="history-grid-name">${escapeHtml(`${s.firstName} ${s.lastName}`)}</span>
-          <div class="history-grid-cols">
-            ${g.items.map(h=>{
-              const r=attendanceCache[h.id];
-              const entry=r?.entries.find(e=>(e.studentId&&e.studentId===s.id)||(e.firstName===s.firstName&&e.lastName===s.lastName));
-              if(!entry)return `<span class="h-cell empty">·</span>`;
-              const st=draftStatus(h.id,entry);
-              const sym=st==="present"?"+":st==="excused"?"±":"-";
-              const canEdit=editing&&!archived&&(app.role==="admin"||st!=="present");
-              return canEdit
-                ?`<button type="button" class="h-cell btn-cell ${st}" onclick="stageHistoryStatus('${h.id}','${entry.id}','${key}')">${sym}</button>`
-                :`<span class="h-cell ${st}">${sym}</span>`;
-            }).join("")}
-          </div>
-        </div>
-      `).join("")}
-
-      <div class="history-grid-footer">
-        <div class="history-group-actions">
-          <button type="button" class="history-tool" onclick="downloadHistoryPdf('${key}')" aria-label="Tümünü PDF indir" title="Tümünü PDF indir">
-            <svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>
-          </button>
-          <button type="button" class="history-tool summary-icon" onclick="copyHistoryAll('${key}',event)" aria-label="Tümünü kopyala" title="Tümünü kopyala">
-            <svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-          </button>
-          ${!archived&&!editing?`<button type="button" class="history-tool" onclick="toggleHistoryEdit('${key}')" aria-label="Düzenle" title="Düzenle">
-            <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4z"/></svg>
-          </button>`:""}
-          ${!archived&&editing?`<button type="button" class="history-save" onclick="saveHistoryChanges('${key}')" aria-label="Düzenlemeyi onayla" title="Onayla">
-            <svg viewBox="0 0 24 24"><path d="M5 12l4 4L19 6"/></svg>
-          </button>`:""}
-          ${app.role==="admin"&&!archived?`<button type="button" class="history-tool archive" onclick="archiveHistoryAttendance('${key}')" aria-label="Arşivle" title="Arşivle">
-            <svg viewBox="0 0 24 24"><path d="M3 5h18"/><path d="M5 5l1 15h12l1-15"/><path d="M9 9h6"/></svg>
-          </button>`:""}
-          ${!archived&&g.items.some(h=>historyUndoTokens[h.id])?`<button type="button" class="archive-toggle" onclick="undoHistoryChange('${key}')">Geri al</button>`:""}
-        </div>
-        <div class="history-col-actions">
-          <div class="history-grid-cols">
-            ${g.items.map((h,idx)=>`
-              <button type="button" class="icon-btn ghost h-download-btn" onclick="downloadSingleAttendancePdf('${h.id}')" aria-label="${idx+1}/${g.items.length} PDF indir" title="${idx+1}/${g.items.length} PDF indir">
-                <svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>
-              </button>
-            `).join("")}
-          </div>
-          <div class="history-grid-cols">
-            ${g.items.map((h,idx)=>`
-              <button type="button" class="icon-btn ghost h-download-btn summary-icon" onclick="copySingleAttendance('${h.id}',event)" aria-label="${idx+1}/${g.items.length} kopyala" title="${idx+1}/${g.items.length} kopyala">
-                <svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-              </button>
-            `).join("")}
-          </div>
-        </div>
-      </div>
-    </div>
-
-    ${app.role==="admin"&&!archived&&g.items.some(h=>historyUndoTokens[h.id])?`<div id="undoPanel-${key}" class="undo-confirm hidden">
-      <div class="password-wrap">
-        <input id="undoPassword-${key}" type="password" maxlength="64" autocomplete="current-password" placeholder="Üst yetkili parolası">
-        <button type="button" class="password-eye" onclick="revealPassword('undoPassword-${key}')" aria-label="Parolayı göster" title="1 saniye göster">
-          <svg viewBox="0 0 24 24"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="2.5"/></svg>
-        </button>
-      </div>
-      <button class="btn small" onclick="confirmSavedUndo('${key}')">Onayla</button>
-    </div>`:""}`;
-}
-function toggleHistoryEdit(key){
-  const g=historyGroupCache[key];if(!g)return;
-  const anyEditing=g.items.some(h=>historyEditModes[h.id]);
-  if(anyEditing){
-    g.items.forEach(h=>{delete historyEditModes[h.id];delete historyDrafts[h.id]});
-  }else{
-    g.items.forEach(h=>{historyEditModes[h.id]=true});
-  }
-  renderHistoryBody(key);
-}
-function stageHistoryStatus(attendanceId,entryId,key){
-  const r=attendanceCache[attendanceId], e=r?.entries.find(x=>x.id===entryId);
-  if(!e)return;
-  const cur=draftStatus(attendanceId,e);
-  let nxt;
-
-  if(app.role==="admin"){
-    nxt=cur==="present"?"absent":cur==="absent"?"excused":"present";
-  }else{
-    if(cur==="present")return;
-    nxt=cur==="absent"?"excused":"absent";
-  }
-
-  historyDrafts[attendanceId] ||= {};
-  if(nxt===e.status) delete historyDrafts[attendanceId][entryId];
-  else historyDrafts[attendanceId][entryId]=nxt;
-  if(!Object.keys(historyDrafts[attendanceId]).length) delete historyDrafts[attendanceId];
-
-  renderHistoryBody(key);
-}
-async function saveHistoryChanges(key){
-  const g=historyGroupCache[key];if(!g)return;
-  const withDrafts=g.items.filter(h=>historyDrafts[h.id]&&Object.keys(historyDrafts[h.id]).length);
-  if(!withDrafts.length){
-    g.items.forEach(h=>{delete historyEditModes[h.id];delete historyDrafts[h.id]});
-    renderHistoryBody(key);
-    return;
-  }
-  try{
-    for(const h of withDrafts){
-      const res=await rpc("apply_attendance_changes",{
-        p_token:token,
-        p_attendance_id:h.id,
-        p_changes:historyDrafts[h.id]
-      });
-      if(res?.undoToken)historyUndoTokens[h.id]=res.undoToken;
-      delete historyDrafts[h.id];
-      delete historyEditModes[h.id];
-      delete attendanceCache[h.id];
-    }
-    await refresh();
-    toast("Değişiklikler kaydedildi.");
-    await loadHistoryGroup(key);
-  }catch(e){toast(e.message)}
-}
-function undoHistoryChange(key){
-  const g=historyGroupCache[key];if(!g)return;
-  const anyDraft=g.items.some(h=>hasHistoryDraft(h.id));
-  if(anyDraft){
-    g.items.forEach(h=>{delete historyDrafts[h.id];delete historyEditModes[h.id]});
-    renderHistoryBody(key);
-    return;
-  }
-  const h=g.items.find(it=>historyUndoTokens[it.id]);
-  if(!h)return;
-  if(app.role==="admin"){
-    const panel=$(`undoPanel-${key}`);if(!panel)return;
-    panel.classList.toggle("hidden");
-    if(!panel.classList.contains("hidden"))$(`undoPassword-${key}`)?.focus();
-    return;
-  }
-  if(confirm("Az önce kaydettiğiniz değişiklik geri alınsın mı?")){
-    confirmSavedUndo(key);
-  }
-}
-async function confirmSavedUndo(key){
-  const g=historyGroupCache[key];if(!g)return;
-  const h=g.items.find(it=>historyUndoTokens[it.id]);
-  if(!h)return;
-  const input=$(`undoPassword-${key}`);
-  const password=app.role==="admin"?(input?.value||""):null;
-  const undoToken=historyUndoTokens[h.id];
-  if(!undoToken)return;
-  if(app.role==="admin"&&!password){toast("Üst yetkili parolasını yazın.");return}
-
-  try{
-    await rpc("undo_attendance_change",{
-      p_token:token,
-      p_attendance_id:h.id,
-      p_undo_token:undoToken,
-      p_password:password
-    });
-    delete attendanceCache[h.id];
-    delete historyDrafts[h.id];
-    delete historyUndoTokens[h.id];
-    await refresh();
-    toast("Son değişiklik geri alındı.");
-    await loadHistoryGroup(key);
-  }catch(e){toast(e.message)}
-}
-
-async function downloadSingleAttendancePdf(attendanceId){
-  try{
-    if(typeof pdfMake==="undefined")throw new Error("PDF modülü yüklenemedi.");
-    const h=app.history.find(x=>x.id===attendanceId);
-    if(!h)throw new Error("Yoklama bulunamadı.");
-    const section=await buildPdfClassSection([h]);
-    if(!section)return;
-    const doc={
-      pageSize:"A4",
-      pageMargins:[30,30,30,38],
-      defaultStyle:{font:"Roboto",fontSize:9,color:"#202020"},
-      content:section.content
-    };
-    pdfMake.createPdf(doc).download(`${safeFileName(section.listName)}-${section.day}-ders.pdf`);
-  }catch(e){toast(e.message||"PDF oluşturulamadı.")}
-}
-
-async function copySingleAttendance(attendanceId,ev){
-  if(ev){ev.preventDefault();ev.stopPropagation()}
-  const btn=ev?.currentTarget;
-  try{
-    const r=attendanceCache[attendanceId]||await rpc("get_attendance",{p_token:token,p_attendance_id:attendanceId});
-    attendanceCache[attendanceId]=r;
-
-    const h=app.history.find(x=>x.id===attendanceId);
-    const day=h?dayKey(h.takenAt):"";
-    const sameGroup=app.history
-      .filter(x=>x.listId===r.attendance.listId&&dayKey(x.takenAt)===day&&!x.archivedAt)
-      .sort((a,b)=>new Date(a.takenAt)-new Date(b.takenAt));
-    const sessionIdx=sameGroup.findIndex(x=>x.id===attendanceId);
-    const sessionLabel=sameGroup.length>1?` (${sessionIdx+1}/${sameGroup.length})`:"";
-
-    const dt=new Date(r.attendance.takenAt);
-    const date=new Intl.DateTimeFormat("tr-TR",{day:"numeric",month:"long",year:"numeric"}).format(dt);
-
-    const sortedEntries=[...r.entries].sort((a,b)=>`${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`,"tr"));
-    const absent=sortedEntries.filter(e=>draftStatus(attendanceId,e)==="absent");
-    const excused=sortedEntries.filter(e=>draftStatus(attendanceId,e)==="excused");
-
-    let text=`${r.attendance.listName} · ${date}${sessionLabel}\n`;
-    if(!absent.length&&!excused.length){
-      text+="\n+";
-    }else{
-      const lines=[];
-      absent.forEach(e=>lines.push(`- ${e.firstName} ${e.lastName}`));
-      excused.forEach(e=>lines.push(`± ${e.firstName} ${e.lastName}`));
-      text+="\n"+lines.join("\n");
-    }
-
-    await navigator.clipboard.writeText(text);
-    if(btn){
-      btn.classList.add("copied");
-      setTimeout(()=>btn.classList.remove("copied"),650);
-    }
-    toast("Yoklama kopyalandı.");
-  }catch(e){toast(e.message||"Kopyalanamadı.")}
-}
-
-async function copyHistoryAll(key,ev){
-  if(ev){ev.preventDefault();ev.stopPropagation()}
-  const btn=ev?.currentTarget;
-  const g=historyGroupCache[key];if(!g||!g.items.length)return;
-  try{
-    for(const h of g.items){
-      if(!attendanceCache[h.id]){
-        attendanceCache[h.id]=await rpc("get_attendance",{p_token:token,p_attendance_id:h.id});
-      }
-    }
-
-    const first=attendanceCache[g.items[0].id];
-    const dt=new Date(first.attendance.takenAt);
-    const date=new Intl.DateTimeFormat("tr-TR",{day:"numeric",month:"long",year:"numeric"}).format(dt);
-    const n=g.items.length;
-
-    let text=`${first.attendance.listName} · ${date}`;
-
-    if(n===1){
-      const h=g.items[0];
-      const r=attendanceCache[h.id];
-      const sortedEntries=[...r.entries].sort((a,b)=>`${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`,"tr"));
-      const absent=sortedEntries.filter(e=>draftStatus(h.id,e)==="absent");
-      const excused=sortedEntries.filter(e=>draftStatus(h.id,e)==="excused");
-      if(!absent.length&&!excused.length){
-        text+="\n\n+";
-      }else{
-        const lines=[];
-        absent.forEach(e=>lines.push(`- ${e.firstName} ${e.lastName}`));
-        excused.forEach(e=>lines.push(`± ${e.firstName} ${e.lastName}`));
-        text+="\n\n"+lines.join("\n");
-      }
-    }else{
-      g.items.forEach((h,idx)=>{
-        const r=attendanceCache[h.id];
-        const sortedEntries=[...r.entries].sort((a,b)=>`${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`,"tr"));
-        const absent=sortedEntries.filter(e=>draftStatus(h.id,e)==="absent");
-        const excused=sortedEntries.filter(e=>draftStatus(h.id,e)==="excused");
-        text+=`\n\n${idx+1}/${n}:`;
-        if(!absent.length&&!excused.length){
-          text+="\n+";
-        }else{
-          const lines=[];
-          absent.forEach(e=>lines.push(`- ${e.firstName} ${e.lastName}`));
-          excused.forEach(e=>lines.push(`± ${e.firstName} ${e.lastName}`));
-          text+="\n"+lines.join("\n");
-        }
-      });
-    }
-
-    await navigator.clipboard.writeText(text);
-    if(btn){
-      btn.classList.add("copied");
-      setTimeout(()=>btn.classList.remove("copied"),650);
-    }
-    toast("Tüm yoklamalar kopyalandı.");
-  }catch(e){toast(e.message||"Kopyalanamadı.")}
-}
-
-async function copyHistoryGroup(ev,key){
-  return copyHistoryAll(key,ev);
-}
-
-function safeFileName(v){
-  return String(v||"yoklama").trim().replace(/[\\/:*?"<>|]+/g,"-").replace(/\s+/g,"-");
-}
-function pdfCleanDate(iso){
-  const parts=new Intl.DateTimeFormat("en-GB",{
-    timeZone:"Europe/Istanbul",day:"2-digit",month:"2-digit"
-  }).formatToParts(new Date(iso));
-  const d=parts.find(p=>p.type==="day")?.value||"";
-  const m=parts.find(p=>p.type==="month")?.value||"";
-  return `${d}.${m}`;
-}
-
-async function buildPdfClassSection(items){
-  const sessions=[];
-  for(const h of items){
-    const r=attendanceCache[h.id]||await rpc("get_attendance",{p_token:token,p_attendance_id:h.id});
-    attendanceCache[h.id]=r;
-    sessions.push({h,r});
-  }
-  if(!sessions.length)return null;
-
-  const first=sessions[0];
-  const listName=first.r.attendance.listName;
-  const n=sessions.length;
-
-  const studentMap=new Map();
-  sessions.forEach(({r})=>r.entries.forEach(e=>{
-    const k=e.studentId||`${e.firstName}|${e.lastName}`;
-    if(!studentMap.has(k))studentMap.set(k,{key:k,name:`${e.firstName} ${e.lastName}`});
-  }));
-
-  const statusMaps=sessions.map(({r})=>{
-    const m=new Map();
-    r.entries.forEach(e=>m.set(e.studentId||`${e.firstName}|${e.lastName}`,e.status));
-    return m;
-  });
-
-  const students=[...studentMap.values()]
-    .map(s=>{
-      const absentCount=statusMaps.filter(m=>m.get(s.key)==="absent").length;
-      const excusedCount=statusMaps.filter(m=>m.get(s.key)==="excused").length;
-      return {...s,absentCount,excusedCount};
-    })
-    .filter(s=>s.absentCount>0 || s.excusedCount>0)
-    .sort((a,b)=>
-      (b.absentCount-a.absentCount) ||
-      (b.excusedCount-a.excusedCount) ||
-      a.name.localeCompare(b.name,"tr")
-    );
-
-  const headerRow=[{text:"Öğrenci",bold:true,fontSize:8.5,margin:[0,2,0,2]}];
-  sessions.forEach((_,i)=>{
-    headerRow.push({text:n>1?`${i+1}/${n}`:"1/1",bold:true,fontSize:8,alignment:"center",margin:[0,2,0,2]});
-  });
-
-  const rows=students.map(s=>[
-    {text:s.name,fontSize:8.5,margin:[0,2,0,2]},
-    ...statusMaps.map(m=>{
-      if(!m.has(s.key))return {text:"·",color:"#aaaaaa",alignment:"center",margin:[0,2,0,2]};
-      const st=m.get(s.key);
-      if(st==="excused")return {text:"±",color:"#d97706",bold:true,fontSize:9,alignment:"center",margin:[0,2,0,2]};
-      if(st==="absent")return {text:"-",color:"#d32f2f",bold:true,fontSize:9,alignment:"center",margin:[0,2,0,2]};
-      return {text:"+",color:"#247a43",bold:true,fontSize:9,alignment:"center",margin:[0,2,0,2]};
-    })
-  ]);
-
-  const teachers=sessions.map(({r},i)=>n>1?`${i+1}/${n}: ${r.attendance.takenByName}`:r.attendance.takenByName).join("  •  ");
-
-  return {
-    listName,
-    content:[
-      {text:listName,fontSize:12,bold:true,color:"#111111",margin:[0,0,0,2]},
-      {text:teachers,fontSize:7.5,color:"#777777",margin:[0,0,0,5]},
-      rows.length ? {
-        table:{
-          headerRows:1,
-          widths:["auto",...sessions.map(()=>18)],
-          body:[headerRow,...rows],
-          dontBreakRows:true
-        },
-        layout:{
-          hLineWidth:(i,node)=>i===0||i===1||i===node.table.body.length?0.6:0.2,
-          vLineWidth:()=>0,
-          hLineColor:()=>"#d0d0d0",
-          paddingLeft:(i)=>i===0?4:2,
-          paddingRight:(i)=>i===0?8:2,
-          paddingTop:()=>2,
-          paddingBottom:()=>2,
-          fillColor:(rowIndex)=>rowIndex===0?"#f2f2f2":null
-        }
-      } : {
-        text:"Tüm öğrenciler mevcuttur (Devamsızlık/izin yok).",
-        italics:true,
-        fontSize:8,
-        color:"#247a43",
-        margin:[0,4,0,8]
-      }
-    ]
-  };
-}
-
-async function downloadHistoryPdf(key){
-  const sel=selectedHistoryItem(key);if(!sel)return;
-  try{
-    if(typeof pdfMake==="undefined")throw new Error("PDF modülü yüklenemedi.");
-    const section=await buildPdfClassSection(sel.group.items);
-    if(!section)return;
-
-    const doc={
-      pageSize:"A4",
-      pageOrientation:"portrait",
-      pageMargins:[24,24,24,28],
-      defaultStyle:{font:"Roboto",fontSize:8.5,color:"#202020"},
-      content:section.content
-    };
-
-    pdfMake.createPdf(doc).download(`${safeFileName(section.listName)}-${dayKey(sel.item.takenAt)}.pdf`);
-  }catch(e){toast(e.message||"PDF oluşturulamadı.")}
-}
-
-async function downloadDayPdf(day){
-  try{
-    if(typeof pdfMake==="undefined")throw new Error("PDF modülü yüklenemedi.");
-
-    const sameDay=app.history
-      .filter(h=>!h.archivedAt&&dayKey(h.takenAt)===day);
-
-    if(!sameDay.length){toast("Bu güne ait aktif yoklama yok.");return}
-
-    const byClass=new Map();
-    sameDay.forEach(h=>{
-      const k=h.listId||h.listName;
-      if(!byClass.has(k))byClass.set(k,[]);
-      byClass.get(k).push(h);
-    });
-
-    const groups=[...byClass.values()]
-      .map(items=>items.sort((a,b)=>new Date(a.takenAt)-new Date(b.takenAt)))
-      .sort((a,b)=>{
-        const at=new Date(a[0]?.takenAt||0),bt=new Date(b[0]?.takenAt||0);
-        return at-bt || (a[0]?.listName||"").localeCompare(b[0]?.listName||"","tr");
-      });
-
-    const sections=[];
-    for(const items of groups){
-      const section=await buildPdfClassSection(items);
-      if(section)sections.push(section);
-    }
-    if(!sections.length){toast("PDF oluşturulacak yoklama bulunamadı.");return}
-
-    const doc={
-      pageSize:"A4",
-      pageOrientation:"portrait",
-      pageMargins:[24,22,24,26],
-      defaultStyle:{font:"Roboto",fontSize:8.5,color:"#202020"},
-      footer:(currentPage,pageCount)=>({
-        text:`${currentPage} / ${pageCount}`,
-        alignment:"center",
-        fontSize:7,
-        color:"#909090",
-        margin:[0,6,0,0]
-      }),
-      content:[
-        {
-          columns:[
-            {text:formatHistoryDay(day),fontSize:13,bold:true},
-            {text:"- Yok   ± İzinli",alignment:"right",fontSize:8,color:"#666666",margin:[0,2,0,0]}
-          ],
-          margin:[0,0,0,10]
-        },
-        {
-          columns:sections.map(sec=>({
-            width:"auto",
-            stack:sec.content
-          })),
-          columnGap:24
-        },
-        {text:"İmza",alignment:"right",fontSize:8,color:"#666666",margin:[0,18,28,2]},
-        {text:"________________________",alignment:"right",fontSize:8,color:"#888888"}
-      ]
-    };
-
-    pdfMake.createPdf(doc).download(`gunun-yoklamasi-${day}.pdf`);
-  }catch(e){toast(e.message||"Günün PDF'i oluşturulamadı.")}
-}
-async function downloadAllClassPdf(listId){
-  const list=app.lists.find(x=>x.id===listId);if(!list)return;
-
-  const chosen=app.history
-    .filter(h=>!h.archivedAt&&h.listId===listId)
-    .sort((a,b)=>new Date(a.takenAt)-new Date(b.takenAt));
-
-  if(!chosen.length){toast("Bu sınıfta henüz yoklama kaydı yok.");return}
-
-  try{
-    if(typeof pdfMake==="undefined")throw new Error("PDF modülü yüklenemedi.");
-
-    const sessions=[];
-    for(const h of chosen){
-      const r=attendanceCache[h.id]||await rpc("get_attendance",{p_token:token,p_attendance_id:h.id});
-      attendanceCache[h.id]=r;
-      sessions.push({h,r});
-    }
-
-    const studentMap=new Map();
-    sessions.forEach(({r})=>r.entries.forEach(e=>{
-      const k=e.studentId||`${e.firstName}|${e.lastName}`;
-      if(!studentMap.has(k))studentMap.set(k,{key:k,name:`${e.firstName} ${e.lastName}`});
-    }));
-
-    const statusMaps=sessions.map(({r})=>{
-      const m=new Map();
-      r.entries.forEach(e=>m.set(e.studentId||`${e.firstName}|${e.lastName}`,e.status));
-      return m;
-    });
-
-    const students=[...studentMap.values()]
-      .map(s=>{
-        const presentCount=statusMaps.filter(m=>m.get(s.key)==="present").length;
-        const absentCount=statusMaps.filter(m=>m.get(s.key)==="absent").length;
-        const excusedCount=statusMaps.filter(m=>m.get(s.key)==="excused").length;
-        const requiredCount=statusMaps.filter(m=>m.has(s.key)&&m.get(s.key)!=="excused").length;
-        return {...s,presentCount,absentCount,excusedCount,requiredCount};
-      })
-      .filter(s=>s.absentCount>0 || s.excusedCount>0)
-      .sort((a,b)=>
-        (b.absentCount-a.absentCount) ||
-        (b.excusedCount-a.excusedCount) ||
-        a.name.localeCompare(b.name,"tr")
-      );
-
-    const firstDay=dayKey(sessions[0].h.takenAt);
-    const lastDay=dayKey(sessions[sessions.length-1].h.takenAt);
-    const rangeLabel=firstDay===lastDay
-      ?formatHistoryDay(firstDay)
-      :`${formatHistoryDay(firstDay)} – ${formatHistoryDay(lastDay)}`;
-
-    const pageWidth=842, marginX=14, usable=pageWidth-(marginX*2);
-    const minNameWidth=135;
-    const colWidth=Math.max(7.5,Math.min(12.5,(usable-minNameWidth)/sessions.length));
-    const bodyFont=Math.max(6.5,Math.min(8,colWidth*.65));
-    const markFont=Math.max(7,Math.min(9.5,colWidth*.75));
-    const dateFont=7.5;
-    const sessionFont=5.8;
-    const rowPad=sessions.length>35?0.2:sessions.length>20?0.5:0.8;
-
-    const dateGroups=[];
-    sessions.forEach(({h},i)=>{
-      const d=pdfCleanDate(h.takenAt);
-      const last=dateGroups[dateGroups.length-1];
-      if(last&&last.date===d){
-        last.count++;
-        last.indices.push(i);
-      }else{
-        dateGroups.push({date:d,count:1,indices:[i]});
-      }
-    });
-
-    const headerRow1=[{text:"Öğrenci",rowSpan:2,bold:true,fontSize:bodyFont,margin:[0,12,0,0]}];
-    dateGroups.forEach(g=>{
-      headerRow1.push({text:g.date,colSpan:g.count,bold:true,fontSize:dateFont,alignment:"center",margin:[0,1,0,0]});
-      for(let k=1;k<g.count;k++) headerRow1.push({});
-    });
-
-    const headerRow2=[{}];
-    dateGroups.forEach(g=>{
-      g.indices.forEach((sessionIdx,localIdx)=>{
-        headerRow2.push({text:g.count>1?`${localIdx+1}/${g.count}`:"1",bold:true,fontSize:sessionFont,alignment:"center",color:"#444444",margin:[0,0,0,1]});
-      });
-    });
-
-    const rows=students.map(s=>[
-      {text:s.name,fontSize:bodyFont,margin:[0,rowPad,0,rowPad]},
-      ...statusMaps.map(m=>{
-        if(!m.has(s.key))return {text:"·",color:"#aaaaaa",fontSize:markFont,alignment:"center",margin:[0,rowPad,0,rowPad]};
-        const st=m.get(s.key);
-        if(st==="present")return {text:"+",color:"#247a43",bold:true,fontSize:markFont,alignment:"center",margin:[0,rowPad,0,rowPad]};
-        if(st==="excused")return {text:"±",color:"#d97706",bold:true,fontSize:markFont,alignment:"center",margin:[0,rowPad,0,rowPad]};
-        return {text:"-",color:"#d32f2f",bold:true,fontSize:markFont,alignment:"center",margin:[0,rowPad,0,rowPad]};
-      })
-    ]);
-
-    const doc={
-      pageSize:"A4",
-      pageOrientation:"portrait",
-      pageMargins:[16,14,16,16],
-      defaultStyle:{font:"Roboto",fontSize:bodyFont,color:"#202020"},
-      content:[
-        {
-          columns:[
-            {
-              stack:[
-                {text:list.name,fontSize:12,bold:true},
-                {text:rangeLabel,fontSize:6.5,color:"#666666",margin:[0,1,0,0]},
-                {text:`${sessions.length} ders · - Yok  ± İzinli`,fontSize:6,color:"#777777",margin:[0,2,0,0]}
-              ]
-            }
-          ],
-          margin:[0,0,0,5]
-        },
-        rows.length ? {
-          table:{
-            headerRows:2,
-            widths:["auto",...sessions.map(()=>colWidth)],
-            body:[headerRow1,headerRow2,...rows],
-            dontBreakRows:true
-          },
-          layout:{
-            hLineWidth:(i,node)=>i===0||i===2||i===node.table.body.length?0.55:0.18,
-            vLineWidth:()=>0,
-            hLineColor:()=>"#d8d8d8",
-            paddingLeft:(i)=>i===0?3:0,
-            paddingRight:(i)=>i===0?6:0,
-            paddingTop:()=>0,
-            paddingBottom:()=>0,
-            fillColor:(rowIndex)=>rowIndex<2?"#f4f4f4":null
-          }
-        } : {
-          text:"Tüm öğrenciler derste mevcuttur (Yok veya izinli öğrenci bulunmamaktadır).",
-          italics:true,
-          fontSize:8,
-          color:"#247a43",
-          margin:[0,6,0,8]
-        }
-      ]
-    };
-
-    pdfMake.createPdf(doc).download(`${safeFileName(list.name)}-tum-yoklamalar.pdf`);
-  }catch(e){toast(e.message||"PDF oluşturulamadı.")}
-}
-
-async function archiveHistoryAttendance(key){
-  const sel=selectedHistoryItem(key);if(!sel)return;
-  if(!confirm("Bu yoklama arşivlensin mi?"))return;
-  try{
-    await rpc("archive_attendance",{p_token:token,p_attendance_id:sel.item.id});
-    await refresh();
-    renderHistory();
-  }catch(e){toast(e.message)}
-}
-
-
-function renderNewList(){
-  importedStudents=[];
-  $("newPage").innerHTML=`<div class="stack">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><button type="button" class="top-icon-btn" onclick="switchTab('lists')" title="Geri"><svg viewBox="0 0 24 24"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button><h1 class="page-title" style="margin:0">YOKLAMA EKLE</h1></div>
     <div class="plain-section">
       <label>Sınıf adı<input id="newListName" type="text" placeholder="Örn. TDE Joker"></label>
     </div>
 
     <div class="mode-toggle">
-      <button id="fileModeBtn" class="active" type="button" onclick="setStudentMode('file')">Tablodan yükle</button>
-      <button id="manualModeBtn" type="button" onclick="setStudentMode('manual')">Elle yükle</button>
+      <button id="fileModeBtn" class="active" type="button" data-action="set-student-mode" data-mode="file">Tablodan yükle</button>
+      <button id="manualModeBtn" type="button" data-action="set-student-mode" data-mode="manual">Elle yükle</button>
     </div>
 
     <div id="fileMode" class="stack">
@@ -1776,172 +148,196 @@ function renderNewList(){
       <div class="manual-add">
         <input id="manualFirst" type="text" placeholder="İsim">
         <input id="manualLast" type="text" placeholder="Soyisim">
-        <button class="icon-btn" onclick="addManualStudent()" aria-label="Öğrenci ekle" title="Öğrenci ekle">+</button>
+        <button type="button" class="icon-btn" data-action="add-manual-student" aria-label="Öğrenci ekle" title="Öğrenci ekle">+</button>
       </div>
     </div>
 
     <div id="importMessage" class="notice hidden"></div>
     <div id="preview"></div>
-    <button id="createListBtn" class="btn" disabled>Sınıfı oluştur</button>
-  </div>`;
+    <button id="createListBtn" type="button" class="btn" data-action="create-list" disabled>Sınıfı oluştur</button>
+  </div>`;const s=$e("studentFile");s&&(s.onchange=r=>{const i=r.target.files?.[0],a=$e("fileName");a&&(a.textContent=i?.name||"Dosya seçilmedi"),Pl(i)}),["manualFirst","manualLast"].forEach(r=>{$e(r)?.addEventListener("keydown",n=>{n.key==="Enter"&&Rs()})})}async function Sn(t){const e=t.getState(),r=$e("newListName")?.value.trim()||"",n=$l();if(!r){T("Sınıf adını yazın.");return}if(!n.length){T("En az bir öğrenci ekleyin.");return}try{const i=await N("create_list",{p_token:e.token,p_name:r,p_students:n});await t.refresh(),T("Sınıf oluşturuldu."),t.navigate("lists");const a=i?.id||i?.listId||t.getState().lists.find(o=>o.name===r)?.id;if(a){const o=$e(`listCard-${a}`);o&&(o.classList.add("highlight-card"),setTimeout(()=>o.classList.remove("highlight-card"),2500))}}catch(i){T(i.message||"Sınıf oluşturulamadı.")}}function jl(t,e,s){const r=new Map;t.filter(i=>!i.archivedAt||s).forEach(i=>{const a=!!i.archivedAt;let o="";e==="week"?o=pn(i.takenAt).key:e==="month"?o=gn(i.takenAt).key:o=Z(i.takenAt);const l=`${i.listId||Ct(i.listName)}|${o}|${a?"a":"n"}`;r.has(l)||r.set(l,{rawKey:l,archived:a,items:[]}),r.get(l).items.push(i)});const n=[...r.values()];return n.forEach(i=>i.items.sort((a,o)=>new Date(a.takenAt).getTime()-new Date(o.takenAt).getTime())),n.sort((i,a)=>{const o=i.items[i.items.length-1],l=a.items[a.items.length-1];return!o||!l?0:new Date(l.takenAt).getTime()-new Date(o.takenAt).getTime()}),n}function En(t,e,s){const r=t[e];if(!r||!r.items.length)return null;const n=Math.min(s[r.rawKey]||0,r.items.length-1);s[r.rawKey]=Math.max(0,n);const i=r.items[n];return i?{group:r,index:n,item:i}:null}function Tn(t){return t==="day"?"week":t==="week"?"month":"day"}const ht=t=>typeof document<"u"?document.getElementById(t):null;function An(t,e,s){return s.historyDrafts[t]?.[e.studentId||e.id]??e.status}function xl(t,e){const s=e.historyDrafts[t];return!!(s&&Object.keys(s).length>0)}function Rn(t,e,s){const r=e.getState(),n=e._historyGroupCache?.[t];if(!n)return;const i=n.items.some(l=>r.historyEditModes[l.id]),a={...r.historyEditModes},o={...r.historyDrafts};i?n.items.forEach(l=>{delete a[l.id],delete o[l.id]}):n.items.forEach(l=>{a[l.id]=!0}),e.setState({historyEditModes:a,historyDrafts:o}),s(t)}function Cn(t,e,s,r,n){const i=r.getState(),o=i.attendanceCache[t]?.entries.find(f=>f.studentId===e||f.id===e);if(!o)return;const l=An(t,o,i);let c;if(i.role==="admin")c=l==="present"?"absent":l==="absent"?"excused":"present";else{if(l==="present")return;c=l==="absent"?"excused":"absent"}const u=o.studentId||o.id,d={...i.historyDrafts};d[t]={...d[t]||{}},c===o.status?delete d[t][u]:d[t][u]=c,Object.keys(d[t]).length||delete d[t],r.setState({historyDrafts:d}),n(s)}async function $n(t,e,s,r){const n=e.getState(),i=e._historyGroupCache?.[t];if(!i)return;const a=i.items.filter(o=>{const l=n.historyDrafts[o.id];return l&&Object.keys(l).length>0});if(!a.length){const o={...n.historyEditModes},l={...n.historyDrafts};i.items.forEach(c=>{delete o[c.id],delete l[c.id]}),e.setState({historyEditModes:o,historyDrafts:l}),s(t);return}try{const o={...n.historyUndoTokens},l={...n.historyDrafts},c={...n.historyEditModes},u={...n.attendanceCache};for(const f of a){const h=await N("apply_attendance_changes",{p_token:n.token,p_attendance_id:f.id,p_changes:l[f.id]});h?.undoToken&&(o[f.id]=h.undoToken),delete l[f.id],delete c[f.id],delete u[f.id]}e.setState({historyUndoTokens:o,historyDrafts:l,historyEditModes:c,attendanceCache:u}),await e.refresh(),T("Değişiklikler kaydedildi.");const d=ht(`historyCard-${t}`);d&&(d.open=!0),await r(t)}catch(o){T(o.message||"Değişiklikler kaydedilemedi.")}}function On(t,e,s,r){const n=e.getState(),i=e._historyGroupCache?.[t];if(!i)return;if(i.items.some(l=>xl(l.id,n))){const l={...n.historyDrafts},c={...n.historyEditModes};i.items.forEach(u=>{delete l[u.id],delete c[u.id]}),e.setState({historyDrafts:l,historyEditModes:c}),s(t);return}if(i.items.find(l=>n.historyUndoTokens[l.id])){if(n.role==="admin"){const l=ht(`undoPanel-${t}`);if(!l)return;l.classList.toggle("hidden"),l.classList.contains("hidden")||ht(`undoPassword-${t}`)?.focus();return}typeof window<"u"&&window.confirm("Az önce kaydettiğiniz değişiklik geri alınsın mı?")&&r(t)}}async function zt(t,e,s){const r=e.getState(),n=e._historyGroupCache?.[t];if(!n)return;const i=n.items.find(c=>r.historyUndoTokens[c.id]);if(!i)return;const a=ht(`undoPassword-${t}`),o=r.role==="admin"?a?.value||"":null,l=r.historyUndoTokens[i.id];if(l){if(r.role==="admin"&&!o){T("Üst yetkili parolasını yazın.");return}try{await N("undo_attendance_change",{p_token:r.token,p_attendance_id:i.id,p_undo_token:l,p_password:o});const c={...r.attendanceCache},u={...r.historyDrafts},d={...r.historyUndoTokens};delete c[i.id],delete u[i.id],delete d[i.id],e.setState({attendanceCache:c,historyDrafts:u,historyUndoTokens:d}),await e.refresh(),T("Son değişiklik geri alındı.");const f=ht(`historyCard-${t}`);f&&(f.open=!0),await s(t)}catch(c){T(c.message||"Geri alma işlemi başarısız.")}}}async function Pn(t,e){const s=e.getState(),r=e._historyGroupCache?.[t];if(!(!r||!r.items.length)&&!(typeof window<"u"&&!window.confirm("Bu yoklama arşivlensin mi?")))try{await N("archive_attendance",{p_token:s.token,p_attendance_id:r.items[0].id}),await e.refresh(),T("Yoklama arşivlendi."),e.navigate("lists")}catch(n){T(n.message||"Arşivlenemedi.")}}const In=t=>typeof document<"u"?document.getElementById(t):null,ae={};function Dl(t,e){return`<strong>${I(t.listName)}${e.archived?'<span class="archive-tag">ARŞİV</span>':""}</strong>
+    <div class="history-card-meta">
+      <span class="history-card-date">${El(t.takenAt)}</span>
+      <div class="history-card-times">
+        ${e.items.map(s=>`<span class="history-time-badge">${Tl(s.takenAt)}</span>`).join("")}
+      </div>
+      <span class="history-card-teacher">${I(t.takenByName)}</span>
+    </div>`}function Ul(t){const e=t.getState(),s=jl(e.history,e.historyGroupingMode,e.showArchived);Object.keys(ae).forEach(o=>delete ae[o]),t._historyGroupCache=ae;let r="";const n=e.historyGroupingMode==="day"?"☀️":e.historyGroupingMode==="week"?"📅":"🌙",i=e.historyGroupingMode==="day"?"Günlük Görünüm (Haftalık için tıklayın)":e.historyGroupingMode==="week"?"Haftalık Görünüm (Aylık için tıklayın)":"Aylık Görünüm (Günlük için tıklayın)",a=s.map((o,l)=>{const c=`g${l}`;ae[c]=o;const d=En(ae,c,e.historyGroupIndex)?.item||o.items[0];if(!d)return"";let f="",h="",p="",g="";if(e.historyGroupingMode==="day"){const y=Z(d.takenAt);f=y,h=tt(y),p="download-day-pdf",g=`data-day="${I(y)}"`}else if(e.historyGroupingMode==="week"){const y=pn(d.takenAt);f=y.key,h=y.label,p="download-group-range-pdf",g=`data-range-key="${I(y.key)}"`}else{const y=gn(d.takenAt);f=y.key,h=y.label,p="download-group-range-pdf",g=`data-range-key="${I(y.key)}"`}const m=f!==r?`<div class="history-day">
+        <div class="history-day-line"><span class="history-day-label">${I(h)}</span></div>
+        <button type="button" class="history-day-download" data-action="${p}" ${g}
+          aria-label="${I(h)} PDF indir" title="PDF indir">
+          <svg viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+        </button>
+      </div>`:"";return r=f,`${m}<details id="historyCard-${c}" class="history-item" data-action="toggle-history-group" data-group-key="${c}">
+        <summary>
+          <div class="history-summary">
+            <div id="historyInfo-${c}" style="flex:1;min-width:0">${Dl(d,o)}</div>
+            <div class="history-summary-actions">
+              <span class="history-chevron" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+              </span>
+            </div>
+          </div>
+        </summary>
+        <div id="historyBody-${c}" class="history-body"><div class="muted tiny">Yükleniyor…</div></div>
+      </details>`}).join("");return`
+    <div class="history-section stack" style="margin-top:24px;padding-top:20px;border-top:1px solid var(--line)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px">
+        <h2 class="section-title" style="margin:0;font-size:1.05rem;font-weight:800;letter-spacing:-0.01em;color:var(--text)">ALINANLAR (GEÇMİŞ)</h2>
+        <div style="display:flex;align-items:center;gap:8px">
+          <button type="button" class="top-icon-btn" data-action="cycle-history-mode" title="${i}" style="font-size:1.15rem;width:34px;height:34px">
+            ${n}
+          </button>
+          <span data-action="toggle-archive" style="font-size:0.76rem;color:var(--muted);cursor:pointer;user-select:none">
+            ${e.showArchived?"Arşivi gizle":"Arşivi göster"}
+          </span>
+        </div>
+      </div>
+      <div class="history">${a||'<div class="card" style="text-align:center;padding:32px 16px"><p class="muted" style="margin-bottom:12px">Henüz yoklama kaydı yok.</p></div>'}</div>
+    </div>
+  `}async function we(t,e){const s=ae[t];if(!s)return;const r=In(`historyBody-${t}`);if(!r)return;const n=e.getState(),i=s.items.filter(a=>!n.attendanceCache[a.id]);if(i.length&&n.token){r.innerHTML='<div class="muted tiny">Yükleniyor…</div>';try{const a={...n.attendanceCache};await Promise.all(i.map(async o=>{a[o.id]=await N("get_attendance",{p_token:n.token,p_attendance_id:o.id})})),e.setState({attendanceCache:a})}catch(a){const o=a;r.innerHTML=`<div class="notice error">${I(o.message||"Yüklenemedi")}</div>`;return}}ge(t,e)}function ge(t,e){const s=ae[t];if(!s)return;const r=In(`historyBody-${t}`);if(!r)return;const n=e.getState(),i=s.items.some(c=>!!n.historyEditModes[c.id]),a=!!s.archived,o=new Map;s.items.forEach(c=>{const u=n.attendanceCache[c.id];u&&u.entries.forEach(d=>{const f=d.studentId||`${d.firstName}|${d.lastName}`;o.has(f)||o.set(f,{id:d.studentId,key:f,firstName:d.firstName,lastName:d.lastName})})});const l=[...o.values()].sort((c,u)=>`${c.firstName} ${c.lastName}`.localeCompare(`${u.firstName} ${u.lastName}`,"tr"));r.innerHTML=`
+    <div class="history-grid">
+      <div class="history-grid-header">
+        <span class="muted tiny" style="font-weight:700">Öğrenci</span>
+        <div class="history-grid-cols">
+          ${s.items.map((c,u)=>`<div class="h-col-head">${u+1}/${s.items.length}</div>`).join("")}
+        </div>
+      </div>
 
-  $("studentFile").onchange=e=>{const f=e.target.files[0];$("fileName").textContent=f?.name||"Dosya seçilmedi";handleFile(f)};
-  $("createListBtn").onclick=createList;
-  ["manualFirst","manualLast"].forEach(id=>$(id).addEventListener("keydown",e=>{
-    if(e.key==="Enter")addManualStudent();
-  }));
-}
-function setStudentMode(mode){
-  const fileMode=mode==="file";
-  $("fileMode").classList.toggle("hidden",!fileMode);
-  $("manualMode").classList.toggle("hidden",fileMode);
-  $("fileModeBtn").classList.toggle("active",fileMode);
-  $("manualModeBtn").classList.toggle("active",!fileMode);
-}
-function addManualStudent(){
-  const first=$("manualFirst").value.trim(), last=$("manualLast").value.trim();
-  if(!first||!last){toast("İsim ve Soyisim birlikte gerekli.");return}
-  importedStudents.push({firstName:first,lastName:last});
-  $("manualFirst").value="";$("manualLast").value="";
-  renderStudentPreview();
-  $("manualFirst").focus();
-}
-function removeImportedStudent(idx){
-  importedStudents.splice(idx,1);
-  renderStudentPreview();
-}
-function renderStudentPreview(){
-  const p=$("preview"), b=$("createListBtn");
-  b.disabled=!importedStudents.length;
-  if(!importedStudents.length){
-    p.innerHTML="";
-    $("importMessage")?.classList.add("hidden");
-    return;
-  }
-  importedStudents.sort((a,b)=>fullName(a).localeCompare(fullName(b),"tr"));
-  p.innerHTML=`<div class="preview-head"><strong class="tiny">${importedStudents.length} öğrenci hazır</strong><span class="muted tiny">önizleme</span></div>
-    <div style="overflow:auto;max-height:260px"><table><thead><tr><th>İsim</th><th>Soyisim</th><th style="width:34px"></th></tr></thead><tbody>
-    ${importedStudents.map((s,i)=>`<tr><td>${escapeHtml(s.firstName)}</td><td>${escapeHtml(s.lastName)}</td><td style="text-align:right"><button type="button" class="icon-btn ghost" style="width:28px;height:28px;font-size:1.1rem;color:#777" onclick="removeImportedStudent(${i})" aria-label="Öğrenciyi çıkar" title="Kaldır">×</button></td></tr>`).join("")}
-    </tbody></table></div>`;
-}
-async function handleFile(file){
-  const m=$("importMessage"),p=$("preview"),b=$("createListBtn");importedStudents=[];p.innerHTML="";b.disabled=true;if(!file)return;
-  try{
-    const ext=file.name.split(".").pop().toLowerCase();let rows;
-    if(ext==="csv")rows=parseCSV(await file.text());
-    else if(["xlsx","xls"].includes(ext)){
-      if(typeof XLSX==="undefined")throw new Error("XLSX okuyucu yüklenemedi.");
-      const wb=XLSX.read(await file.arrayBuffer(),{type:"array"}), sh=wb.Sheets[wb.SheetNames[0]];
-      rows=XLSX.utils.sheet_to_json(sh,{header:1,defval:"",raw:false});
-    }else throw new Error("Yalnızca CSV, XLSX veya XLS kabul edilir.");
-    importedStudents=validateRows(rows);
-    m.textContent=`${importedStudents.length} öğrenci dosyadan yüklendi.`;m.className="notice success";m.classList.remove("hidden");
-    renderStudentPreview();
-  }catch(e){m.textContent=e.message;m.className="notice error";m.classList.remove("hidden")}
-}
-function parseCSV(text){
-  const line=text.split(/\r?\n/).find(x=>x.trim())||"", delim=(line.match(/;/g)||[]).length>(line.match(/,/g)||[]).length?";":",";
-  const rows=[];let row=[],cell="",q=false;
-  for(let i=0;i<text.length;i++){const ch=text[i],n=text[i+1];
-    if(ch=='"'&&q&&n=='"'){cell+='"';i++}else if(ch=='"')q=!q;else if(ch===delim&&!q){row.push(cell);cell=""}
-    else if((ch==="\n"||ch==="\r")&&!q){if(ch==="\r"&&n==="\n")i++;row.push(cell);rows.push(row);row=[];cell=""}else cell+=ch;
-  } if(cell.length||row.length){row.push(cell);rows.push(row)} return rows;
-}
-const norm=v=>String(v??"").trim(), normHead=v=>norm(v).toLocaleLowerCase("tr-TR").replaceAll("ı","i").replaceAll("ş","s").replaceAll("ğ","g").replaceAll("ü","u").replaceAll("ö","o").replaceAll("ç","c");
-function validateRows(raw){
-  let rows=raw.map(r=>Array.isArray(r)?r.map(norm):[]).filter(r=>r.some(c=>c!=="")).map(r=>{const x=[...r];while(x.length&&x[x.length-1]==="")x.pop();return x});
-  if(!rows.length)throw new Error("Dosyada öğrenci bulunamadı.");
-  if(rows.some(r=>r.length>2))throw new Error("Dosya reddedildi: 3. sütun bulundu.");
-  const first=rows[0]||[];if(normHead(first[0])==="isim"&&normHead(first[1])==="soyisim")rows=rows.slice(1);
-  if(!rows.length)throw new Error("Başlık dışında öğrenci bulunamadı.");
-  const bad=rows.findIndex(r=>r.length!==2||!r[0]||!r[1]);if(bad!==-1)throw new Error(`${bad+1}. öğrenci satırında İsim veya Soyisim eksik.`);
-  return rows.map(r=>({firstName:r[0],lastName:r[1]}));
-}
-async function createList(){
-  try{
-    const name=$("newListName").value.trim();if(!name)throw new Error("Sınıf adını yazın.");if(!importedStudents.length)throw new Error("En az bir öğrenci ekleyin.");
-    const res=await rpc("create_list",{p_token:token,p_name:name,p_students:importedStudents});
-    await refresh();toast("Sınıf oluşturuldu.");switchTab("lists");
-    const listId=res?.id||res?.listId||app.lists.find(x=>x.name===name)?.id;
-    if(listId){
-      const el=$(`listCard-${listId}`);
-      if(el){
-        el.classList.add("highlight-card");
-        setTimeout(()=>el.classList.remove("highlight-card"),2500);
-      }
-    }
-  }catch(e){toast(e.message)}
-}
+      ${l.map(c=>`
+        <div class="history-grid-row">
+          <span class="history-grid-name">${I(`${c.firstName} ${c.lastName}`)}</span>
+          <div class="history-grid-cols">
+            ${s.items.map(u=>{const f=n.attendanceCache[u.id]?.entries.find(m=>m.studentId&&m.studentId===c.id||m.firstName===c.firstName&&m.lastName===c.lastName);if(!f)return'<span class="h-cell empty">·</span>';const h=An(u.id,f,n),p=h==="present"?"+":h==="excused"?"±":"-";return i&&!a&&(n.role==="admin"||h!=="present")?`<button type="button" class="h-cell btn-cell ${h}" data-action="stage-history-status"
+                       data-attendance-id="${I(u.id)}" data-entry-id="${I(f.studentId||f.id)}" data-group-key="${t}">${p}</button>`:`<span class="h-cell ${h}">${p}</span>`}).join("")}
+          </div>
+        </div>
+      `).join("")}
 
-let pinRevealed=false;
-function togglePinReveal(){
-  pinRevealed=!pinRevealed;
-  renderAdmin();
-}
+      <div class="history-grid-footer">
+        <div class="history-group-actions">
+          <button type="button" class="history-tool" data-action="download-history-pdf" data-group-key="${t}"
+            aria-label="Tümünü PDF indir" title="Tümünü PDF indir">
+            <svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>
+          </button>
+          <button type="button" class="history-tool summary-icon" data-action="copy-history-all" data-group-key="${t}"
+            aria-label="Tümünü kopyala" title="Tümünü kopyala">
+            <svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </button>
+          ${!a&&!i?`<button type="button" class="history-tool" data-action="toggle-history-edit" data-group-key="${t}" aria-label="Düzenle" title="Düzenle">
+              <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4z"/></svg>
+            </button>`:""}
+          ${!a&&i?`<button type="button" class="history-save" data-action="save-history-changes" data-group-key="${t}" aria-label="Düzenlemeyi onayla" title="Onayla">
+              <svg viewBox="0 0 24 24"><path d="M5 12l4 4L19 6"/></svg>
+            </button>`:""}
+          ${n.role==="admin"&&!a?`<button type="button" class="history-tool archive" data-action="archive-history" data-group-key="${t}" aria-label="Arşivle" title="Arşivle">
+              <svg viewBox="0 0 24 24"><path d="M3 5h18"/><path d="M5 5l1 15h12l1-15"/><path d="M9 9h6"/></svg>
+            </button>`:""}
+          ${!a&&s.items.some(c=>n.historyUndoTokens[c.id])?`<button type="button" class="archive-toggle" data-action="undo-history-change" data-group-key="${t}">Geri al</button>`:""}
+        </div>
+        <div class="history-col-actions">
+          <div class="history-grid-cols">
+            ${s.items.map((c,u)=>`
+              <button type="button" class="icon-btn ghost h-download-btn" data-action="download-single-pdf" data-attendance-id="${I(c.id)}"
+                aria-label="${u+1}/${s.items.length} PDF indir" title="${u+1}/${s.items.length} PDF indir">
+                <svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>
+              </button>
+            `).join("")}
+          </div>
+          <div class="history-grid-cols">
+            ${s.items.map((c,u)=>`
+              <button type="button" class="icon-btn ghost h-download-btn summary-icon" data-action="copy-single-attendance" data-attendance-id="${I(c.id)}"
+                aria-label="${u+1}/${s.items.length} kopyala" title="${u+1}/${s.items.length} kopyala">
+                <svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              </button>
+            `).join("")}
+          </div>
+        </div>
+      </div>
+    </div>
 
-let adminEditingListId=null;
+    ${n.role==="admin"&&!a&&s.items.some(c=>n.historyUndoTokens[c.id])?`<div id="undoPanel-${t}" class="undo-confirm hidden">
+      <div class="password-wrap">
+        <input id="undoPassword-${t}" type="password" maxlength="64" autocomplete="current-password" placeholder="Üst yetkili parolası">
+        <button type="button" class="password-eye" data-action="reveal-password" data-target="undoPassword-${t}" aria-label="Parolayı göster" title="1 saniye göster">
+          <svg viewBox="0 0 24 24"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="2.5"/></svg>
+        </button>
+      </div>
+      <button type="button" class="btn small" data-action="confirm-saved-undo" data-group-key="${t}">Onayla</button>
+    </div>`:""}`}async function Nn(t,e,s){const r=e.getState();try{let n=r.attendanceCache[t];if(!n&&r.token&&(n=await N("get_attendance",{p_token:r.token,p_attendance_id:t}),e.setState({attendanceCache:{...r.attendanceCache,[t]:n}})),!n)throw new Error("Yoklama kaydı bulunamadı.");const i=r.history.find(m=>m.id===t),a=i?Z(i.takenAt):"",o=r.history.filter(m=>m.listId===n.attendance.listId&&Z(m.takenAt)===a&&!m.archivedAt).sort((m,y)=>new Date(m.takenAt).getTime()-new Date(y.takenAt).getTime()),l=o.findIndex(m=>m.id===t),c=o.length>1?` (${l+1}/${o.length})`:"",u=new Date(n.attendance.takenAt),d=new Intl.DateTimeFormat("tr-TR",{day:"numeric",month:"long",year:"numeric"}).format(u),f=[...n.entries].sort((m,y)=>`${m.firstName} ${m.lastName}`.localeCompare(`${y.firstName} ${y.lastName}`,"tr")),h=f.filter(m=>(r.historyDrafts[t]?.[m.studentId]??m.status)==="absent"),p=f.filter(m=>(r.historyDrafts[t]?.[m.studentId]??m.status)==="excused");let g=`${n.attendance.listName} · ${d}${c}
+`;if(!h.length&&!p.length)g+=`
++`;else{const m=[];h.forEach(y=>m.push(`- ${y.firstName} ${y.lastName}`)),p.forEach(y=>m.push(`± ${y.firstName} ${y.lastName}`)),g+=`
+`+m.join(`
+`)}typeof navigator<"u"&&navigator.clipboard&&await navigator.clipboard.writeText(g),s&&(s.classList.add("copied"),setTimeout(()=>s.classList.remove("copied"),650)),T("Yoklama kopyalandı.")}catch(n){T(n.message||"Kopyalanamadı.")}}async function bs(t,e,s){const r=e.getState(),n=e._historyGroupCache?.[t];if(!(!n||!n.items.length))try{const i={...r.attendanceCache};for(const d of n.items)!i[d.id]&&r.token&&(i[d.id]=await N("get_attendance",{p_token:r.token,p_attendance_id:d.id}));e.setState({attendanceCache:i});const a=i[n.items[0].id];if(!a)return;const o=new Date(a.attendance.takenAt),l=new Intl.DateTimeFormat("tr-TR",{day:"numeric",month:"long",year:"numeric"}).format(o),c=n.items.length;let u=`${a.attendance.listName} · ${l}`;if(c===1){const d=n.items[0],f=d?i[d.id]:void 0;if(!f)return;const h=[...f.entries].sort((m,y)=>`${m.firstName} ${m.lastName}`.localeCompare(`${y.firstName} ${y.lastName}`,"tr")),p=h.filter(m=>(r.historyDrafts[d.id]?.[m.studentId]??m.status)==="absent"),g=h.filter(m=>(r.historyDrafts[d.id]?.[m.studentId]??m.status)==="excused");if(!p.length&&!g.length)u+=`
 
-function renderAdmin(){
-  if(app.role!=="admin")return;
-  const pinDisplay=pinRevealed?escapeHtml(app.teacherPin||"------"):(app.teacherPin?"••••••":"------");
-  $("adminPage").innerHTML=`<div class="stack">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><button type="button" class="top-icon-btn" onclick="switchTab('lists')" title="Geri"><svg viewBox="0 0 24 24"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button><h1 class="page-title" style="margin:0">YÖNETİM & AYARLAR</h1></div>
++`;else{const m=[];p.forEach(y=>m.push(`- ${y.firstName} ${y.lastName}`)),g.forEach(y=>m.push(`± ${y.firstName} ${y.lastName}`)),u+=`
+
+`+m.join(`
+`)}}else n.items.forEach((d,f)=>{const h=i[d.id];if(!h)return;const p=[...h.entries].sort((y,v)=>`${y.firstName} ${y.lastName}`.localeCompare(`${v.firstName} ${v.lastName}`,"tr")),g=p.filter(y=>(r.historyDrafts[d.id]?.[y.studentId]??y.status)==="absent"),m=p.filter(y=>(r.historyDrafts[d.id]?.[y.studentId]??y.status)==="excused");if(u+=`
+
+${f+1}/${c}:`,!g.length&&!m.length)u+=`
++`;else{const y=[];g.forEach(v=>y.push(`- ${v.firstName} ${v.lastName}`)),m.forEach(v=>y.push(`± ${v.firstName} ${v.lastName}`)),u+=`
+`+y.join(`
+`)}});typeof navigator<"u"&&navigator.clipboard&&await navigator.clipboard.writeText(u),s&&(s.classList.add("copied"),setTimeout(()=>s.classList.remove("copied"),650)),T("Tüm yoklamalar kopyalandı.")}catch(i){T(i.message||"Kopyalanamadı.")}}async function Ln(t,e,s){const r=typeof window<"u"?window:{};if(typeof r.pdfMake>"u")throw new Error("PDF modülü yüklenemedi.");const n=s.getState(),i=[...t].sort((S,$)=>new Date(S.takenAt).getTime()-new Date($.takenAt).getTime()),a=[],o={...n.attendanceCache};for(const S of i){let $=o[S.id];!$&&n.token&&($=await N("get_attendance",{p_token:n.token,p_attendance_id:S.id}),o[S.id]=$),$&&a.push({h:S,r:$})}if(s.setState({attendanceCache:o}),!a.length){T("Yoklama verisi bulunamadı.");return}const l=new Map;a.forEach(S=>{const $=Ct(S.h.listName),x=$.toLocaleUpperCase("tr-TR");l.has(x)||l.set(x,{groupKey:x,listName:$,items:[]}),l.get(x).items.push(S)});const c=[...l.values()].sort((S,$)=>S.listName.localeCompare($.listName,"tr")),u=new Map;n.lists.forEach(S=>{const $=Ct(S.name).toLocaleUpperCase("tr-TR");c.some(x=>x.groupKey===$)&&S.students.forEach(x=>{const U=Qe(x.firstName,x.lastName,x.id);u.has(U)?(x.id&&u.get(U).ids.add(x.id),u.get(U).listKeys.add($)):u.set(U,{normKey:U,ids:new Set(x.id?[x.id]:[]),name:kr(`${x.firstName||""} ${x.lastName||""}`),listKeys:new Set([$])})})}),a.forEach(({r:S,h:$})=>{const x=Ct($.listName).toLocaleUpperCase("tr-TR");S.entries.forEach(U=>{const V=Qe(U.firstName,U.lastName,U.studentId);u.has(V)?(U.studentId&&u.get(V).ids.add(U.studentId),u.get(V).listKeys.add(x)):u.set(V,{normKey:V,ids:new Set(U.studentId?[U.studentId]:[]),name:kr(`${U.firstName||""} ${U.lastName||""}`),listKeys:new Set([x])})})});const d=[...u.values()].sort((S,$)=>S.name.localeCompare($.name,"tr"));if(!d.length){T("Öğrenci bulunamadı.");return}const f=a.length,h=f>16,p=h?822:575,g=h?140:125,m=Math.max(15,Math.min(22,Math.floor((p-g)/f))),y=d.length;let v=8,w=9,R=6.5,O=1.5;y<=20?(v=8,w=9,R=6.5,O=1.5):y<=30?(v=7.5,w=8.5,R=6.2,O=1):y<=40?(v=6.8,w=7.8,R=5.8,O=.5):y<=55?(v=6,w=7,R=5.5,O=.2):y<=70?(v=5.2,w=6,R=5,O=0):(v=4.5,w=5.5,R=4.5,O=0);const P=[{text:"İSİM SOYİSİM",rowSpan:2,bold:!0,fontSize:v,margin:[0,6,0,0],color:"#1e293b",fillColor:"#f8fafc"}],L=[{}];c.forEach(S=>{P.push({text:S.listName,colSpan:S.items.length,bold:!0,fontSize:v,alignment:"center",fillColor:"#f1f5f9",color:"#0f172a"});for(let $=1;$<S.items.length;$++)P.push({});S.items.forEach(($,x)=>{const U=fn($.h.takenAt),V=S.items.length>1?`${U}
+(${x+1}/${S.items.length})`:U;L.push({text:V,bold:!0,fontSize:R,alignment:"center",color:"#475569",fillColor:"#ffffff"})})});const A=d.map(S=>{const $=[{text:S.name,fontSize:v,bold:!0,margin:[1,O,0,O],color:"#1e293b"}];return c.forEach(x=>{x.items.forEach(({r:U})=>{const V=U.entries.find(Ke=>Qe(Ke.firstName,Ke.lastName,Ke.studentId)===S.normKey||Ke.studentId&&S.ids.has(Ke.studentId));V?V.status==="present"?$.push({text:"+",color:"#16a34a",bold:!0,fontSize:w,alignment:"center",margin:[0,O,0,O]}):V.status==="excused"?$.push({text:"±",color:"#d97706",bold:!0,fontSize:w,alignment:"center",margin:[0,O,0,O]}):V.status==="absent"?$.push({text:"-",color:"#dc2626",bold:!0,fontSize:w,alignment:"center",margin:[0,O,0,O]}):$.push({text:"",fontSize:w,alignment:"center",margin:[0,O,0,O]}):$.push({text:"",fontSize:w,alignment:"center",margin:[0,O,0,O]})})}),$}),C={pageSize:"A4",pageOrientation:h?"landscape":"portrait",pageMargins:[10,8,10,8],defaultStyle:{font:"Roboto",fontSize:v,color:"#1e293b"},content:[{columns:[{stack:[{text:e,fontSize:11,bold:!0,color:"#0f172a"},{text:`${c.length} ders grubu · ${f} ders kaydı · ${d.length} öğrenci · + Var  - Yok  ± İzinli`,fontSize:6.5,color:"#64748b",margin:[0,1,0,0]}]}],margin:[0,0,0,4]},{table:{headerRows:2,widths:[g,...a.map(()=>m)],body:[P,L,...A],dontBreakRows:!0},layout:{hLineWidth:(S,$)=>S===0||S===2||S===$.table.body.length?.5:.15,vLineWidth:()=>.15,hLineColor:()=>"#e2e8f0",vLineColor:()=>"#f1f5f9",paddingLeft:()=>1,paddingRight:()=>1,paddingTop:()=>0,paddingBottom:()=>0,fillColor:S=>S<2?null:S%2===0?"#fafafa":null}}]};r.pdfMake.createPdf(C).download(`yoklama-cizelgesi-${Ts(e)}.pdf`)}async function Yt(t,e){const s=e.getState(),r=[],n={...s.attendanceCache};for(const p of t){let g=n[p.id];!g&&s.token&&(g=await N("get_attendance",{p_token:s.token,p_attendance_id:p.id}),n[p.id]=g),g&&r.push({h:p,r:g})}if(e.setState({attendanceCache:n}),!r.length||!r[0])return null;const i=r[0],a=i.r.attendance.listName,o=r.length,l=new Map;r.forEach(({r:p})=>p.entries.forEach(g=>{const m=g.studentId||`${g.firstName}|${g.lastName}`;l.has(m)||l.set(m,{key:m,name:`${g.firstName} ${g.lastName}`})}));const c=r.map(({r:p})=>{const g=new Map;return p.entries.forEach(m=>g.set(m.studentId||`${m.firstName}|${m.lastName}`,m.status)),g}),u=[...l.values()].map(p=>{const g=c.filter(y=>y.get(p.key)==="absent").length,m=c.filter(y=>y.get(p.key)==="excused").length;return{...p,absentCount:g,excusedCount:m}}).filter(p=>p.absentCount>0||p.excusedCount>0).sort((p,g)=>g.absentCount-p.absentCount||g.excusedCount-p.excusedCount||p.name.localeCompare(g.name,"tr")),d=[{text:"Öğrenci",bold:!0,fontSize:8.5,margin:[0,2,0,2]}];r.forEach((p,g)=>{d.push({text:o>1?`${g+1}/${o}`:"1/1",bold:!0,fontSize:8,alignment:"center",margin:[0,2,0,2]})});const f=u.map(p=>[{text:p.name,fontSize:8.5,margin:[0,2,0,2]},...c.map(g=>{if(!g.has(p.key))return{text:"·",color:"#aaaaaa",alignment:"center",margin:[0,2,0,2]};const m=g.get(p.key);return m==="excused"?{text:"±",color:"#d97706",bold:!0,fontSize:9,alignment:"center",margin:[0,2,0,2]}:m==="absent"?{text:"-",color:"#d32f2f",bold:!0,fontSize:9,alignment:"center",margin:[0,2,0,2]}:{text:"+",color:"#247a43",bold:!0,fontSize:9,alignment:"center",margin:[0,2,0,2]}})]),h=r.map(({r:p},g)=>o>1?`${g+1}/${o}: ${p.attendance.takenByName}`:p.attendance.takenByName).join("  •  ");return{listName:a,day:Z(i.h.takenAt),content:[{text:a,fontSize:12,bold:!0,color:"#111111",margin:[0,0,0,2]},{text:h,fontSize:7.5,color:"#777777",margin:[0,0,0,5]},f.length?{table:{headerRows:1,widths:["auto",...r.map(()=>18)],body:[d,...f],dontBreakRows:!0},layout:{hLineWidth:(p,g)=>p===0||p===1||p===g.table.body.length?.6:.2,vLineWidth:()=>0,hLineColor:()=>"#d0d0d0",paddingLeft:p=>p===0?4:2,paddingRight:p=>p===0?8:2,paddingTop:()=>2,paddingBottom:()=>2,fillColor:p=>p===0?"#f2f2f2":null}}:{text:"Tüm öğrenciler mevcuttur (Devamsızlık/izin yok).",italics:!0,fontSize:8,color:"#247a43",margin:[0,4,0,8]}]}}async function $s(t,e){const s=typeof window<"u"?window:{};try{if(typeof s.pdfMake>"u")throw new Error("PDF modülü yüklenemedi.");const n=e.getState().history.find(o=>o.id===t);if(!n)throw new Error("Yoklama bulunamadı.");const i=await Yt([n],e);if(!i)return;const a={pageSize:"A4",pageMargins:[30,30,30,38],defaultStyle:{font:"Roboto",fontSize:9,color:"#202020"},content:i.content};s.pdfMake.createPdf(a).download(`${Ts(i.listName)}-${i.day}-ders.pdf`)}catch(r){T(r.message||"PDF oluşturulamadı.")}}async function jn(t,e){const s=typeof window<"u"?window:{},r=e.getState(),n=r.lists.find(a=>a.id===t);if(!n)return;const i=r.history.filter(a=>!a.archivedAt&&a.listId===t).sort((a,o)=>new Date(a.takenAt).getTime()-new Date(o.takenAt).getTime());if(!i.length){T("Bu sınıfta henüz yoklama kaydı yok.");return}try{if(typeof s.pdfMake>"u")throw new Error("PDF modülü yüklenemedi.");const a=[],o={...r.attendanceCache};for(const A of i){let C=o[A.id];!C&&r.token&&(C=await N("get_attendance",{p_token:r.token,p_attendance_id:A.id}),o[A.id]=C),C&&a.push({h:A,r:C})}e.setState({attendanceCache:o});const l=new Map;a.forEach(({r:A})=>A.entries.forEach(C=>{const S=C.studentId||`${C.firstName}|${C.lastName}`;l.has(S)||l.set(S,{key:S,name:`${C.firstName} ${C.lastName}`})}));const c=a.map(({r:A})=>{const C=new Map;return A.entries.forEach(S=>C.set(S.studentId||`${S.firstName}|${S.lastName}`,S.status)),C}),u=[...l.values()].map(A=>{const C=c.filter($=>$.get(A.key)==="absent").length,S=c.filter($=>$.get(A.key)==="excused").length;return{...A,absentCount:C,excusedCount:S}}).filter(A=>A.absentCount>0||A.excusedCount>0).sort((A,C)=>C.absentCount-A.absentCount||C.excusedCount-A.excusedCount||A.name.localeCompare(C.name,"tr")),d=a[0]?Z(a[0].h.takenAt):"",f=a[a.length-1],h=f?Z(f.h.takenAt):"",p=d===h?tt(d):`${tt(d)} – ${tt(h)}`,g=Math.max(7.5,Math.min(12.5,679/a.length)),m=Math.max(6.5,Math.min(8,g*.65)),y=Math.max(7,Math.min(9.5,g*.75)),v=a.length>35?.2:a.length>20?.5:.8,w=[];a.forEach(({h:A},C)=>{const S=fn(A.takenAt),$=w[w.length-1];$&&$.date===S?($.count++,$.indices.push(C)):w.push({date:S,count:1,indices:[C]})});const R=[{text:"Öğrenci",rowSpan:2,bold:!0,fontSize:m,margin:[0,12,0,0]}];w.forEach(A=>{R.push({text:A.date,colSpan:A.count,bold:!0,fontSize:7.5,alignment:"center",margin:[0,1,0,0]});for(let C=1;C<A.count;C++)R.push({})});const O=[{}];w.forEach(A=>{A.indices.forEach((C,S)=>{O.push({text:A.count>1?`${S+1}/${A.count}`:"1",bold:!0,fontSize:5.8,alignment:"center",color:"#444444",margin:[0,0,0,1]})})});const P=u.map(A=>[{text:A.name,fontSize:m,margin:[0,v,0,v]},...c.map(C=>{if(!C.has(A.key))return{text:"·",color:"#aaaaaa",fontSize:y,alignment:"center",margin:[0,v,0,v]};const S=C.get(A.key);return S==="present"?{text:"+",color:"#247a43",bold:!0,fontSize:y,alignment:"center",margin:[0,v,0,v]}:S==="excused"?{text:"±",color:"#d97706",bold:!0,fontSize:y,alignment:"center",margin:[0,v,0,v]}:{text:"-",color:"#d32f2f",bold:!0,fontSize:y,alignment:"center",margin:[0,v,0,v]}})]),L={pageSize:"A4",pageOrientation:"portrait",pageMargins:[16,14,16,16],defaultStyle:{font:"Roboto",fontSize:m,color:"#202020"},content:[{columns:[{stack:[{text:n.name,fontSize:12,bold:!0},{text:p,fontSize:6.5,color:"#666666",margin:[0,1,0,0]},{text:`${a.length} ders · - Yok  ± İzinli`,fontSize:6,color:"#777777",margin:[0,2,0,0]}]}],margin:[0,0,0,5]},P.length?{table:{headerRows:2,widths:["auto",...a.map(()=>g)],body:[R,O,...P],dontBreakRows:!0},layout:{hLineWidth:(A,C)=>A===0||A===2||A===C.table.body.length?.55:.18,vLineWidth:()=>0,hLineColor:()=>"#d8d8d8",paddingLeft:A=>A===0?3:0,paddingRight:A=>A===0?6:0,paddingTop:()=>0,paddingBottom:()=>0,fillColor:A=>A<2?"#f4f4f4":null}}:{text:"Tüm öğrenciler derste mevcuttur (Yok veya izinli öğrenci bulunmamaktadır).",italics:!0,fontSize:8,color:"#247a43",margin:[0,6,0,8]}]};s.pdfMake.createPdf(L).download(`${Ts(n.name)}-tum-yoklamalar.pdf`)}catch(a){T(a.message||"PDF oluşturulamadı.")}}const Bl=Object.freeze(Object.defineProperty({__proto__:null,buildPdfClassSection:Yt,downloadAllClassPdf:jn,downloadSingleAttendancePdf:$s},Symbol.toStringTag,{value:"Module"}));async function xn(t,e){const s=typeof window<"u"?window:{};try{if(typeof s.pdfMake>"u")throw new Error("PDF modülü yüklenemedi.");const n=e.getState().history.filter(c=>!c.archivedAt&&Z(c.takenAt)===t);if(!n.length){T("Bu güne ait aktif yoklama yok.");return}const i=new Map;n.forEach(c=>{const u=c.listId||c.listName;i.has(u)||i.set(u,[]),i.get(u).push(c)});const a=[...i.values()].map(c=>c.sort((u,d)=>new Date(u.takenAt).getTime()-new Date(d.takenAt).getTime())).sort((c,u)=>{const d=new Date(c[0]?.takenAt||0).getTime(),f=new Date(u[0]?.takenAt||0).getTime();return d-f||(c[0]?.listName||"").localeCompare(u[0]?.listName||"","tr")}),o=[];for(const c of a){const u=await Yt(c,e);u&&o.push(u)}if(!o.length){T("PDF oluşturulacak yoklama bulunamadı.");return}const l={pageSize:"A4",pageOrientation:"portrait",pageMargins:[24,22,24,26],defaultStyle:{font:"Roboto",fontSize:8.5,color:"#202020"},footer:(c,u)=>({text:`${c} / ${u}`,alignment:"center",fontSize:7,color:"#909090",margin:[0,6,0,0]}),content:[{columns:[{text:tt(t),fontSize:13,bold:!0},{text:"- Yok   ± İzinli",alignment:"right",fontSize:8,color:"#666666",margin:[0,2,0,0]}],margin:[0,0,0,10]},{columns:o.map(c=>({width:"auto",stack:c.content})),columnGap:24},{text:"İmza",alignment:"right",fontSize:8,color:"#666666",margin:[0,18,28,2]},{text:"________________________",alignment:"right",fontSize:8,color:"#888888"}]};s.pdfMake.createPdf(l).download(`gunun-yoklamasi-${t}.pdf`)}catch(r){T(r.message||"Günün PDF'i oluşturulamadı.")}}function Ml(){const t=[[1,2,3],[3,2,1],[4,5,6],[6,5,4],[7,8,9],[9,8,7],[1,4,7],[7,4,1],[2,5,8],[8,5,2],[3,6,9],[9,6,3],[1,5,9],[9,5,1],[3,5,7],[7,5,3]],e=[[1,3,5],[5,3,1],[2,4,6],[6,4,2],[3,5,7],[7,5,3],[4,6,8],[8,6,4],[5,7,9],[9,7,5]],s=[[1,2],[2,1],[2,3],[3,2],[4,5],[5,4],[5,6],[6,5],[7,8],[8,7],[8,9],[9,8],[1,4],[4,1],[2,5],[5,2],[3,6],[6,3],[4,7],[7,4],[5,8],[8,5],[6,9],[9,6],[1,5],[5,1],[3,5],[5,3],[7,5],[5,7],[9,5],[5,9],[2,8],[8,2],[4,6],[6,4]],r=[[1,2,3],[3,2,1],[4,5,6],[6,5,4],[7,8,9],[9,8,7],[1,4,7],[7,4,1],[2,5,8],[8,5,2],[3,6,9],[9,6,3],[2,4,6],[6,4,2],[1,3,5],[5,3,1]],n=Math.random();if(n<.3){const i=Math.floor(Math.random()*t.length),a=t[i];return`${a[0]}${a[1]}${a[2]}${a[2]}${a[1]}${a[0]}`}else if(n<.55){const i=Math.floor(Math.random()*t.length),a=t[i];return`${a[0]}${a[1]}${a[2]}${a[0]}${a[1]}${a[2]}`}else if(n<.8){const i=Math.floor(Math.random()*s.length),a=s[i];return`${a[0]}${a[1]}${a[0]}${a[1]}${a[0]}${a[1]}`}else if(n<.92){const i=Math.floor(Math.random()*e.length),a=e[i];return`${a[0]}${a[1]}${a[2]}${a[2]}${a[1]}${a[0]}`}else{const i=Math.floor(Math.random()*r.length),a=r[i];return`${a[0]}${a[0]}${a[1]}${a[1]}${a[2]}${a[2]}`}}const st=t=>typeof document<"u"?document.getElementById(t):null;function Dn(t){const e=t.getState().pinRevealed;t.setState({pinRevealed:!e})}async function Un(t){const e=t.getState().teacherPin||"";try{if(typeof navigator<"u"&&navigator.clipboard){await navigator.clipboard.writeText(e),T("PIN kopyalandı.");return}}catch{}T(`PIN: ${e}`)}async function Bn(t){const e=t.getState(),s=Ml();try{let r;try{r=await N("regenerate_teacher_pin",{p_token:e.token,p_pin:s})}catch{r=await N("regenerate_teacher_pin",{p_token:e.token})}const n=r?.teacherPin||r?.pin||s,i=r?.teacherPinDate||new Intl.DateTimeFormat("tr-TR",{dateStyle:"medium",timeStyle:"short"}).format(new Date);t.setState({teacherPin:n,teacherPinDate:i}),T(`Yeni PIN üretildi: ${n}`)}catch(r){T(r.message||"PIN üretilemedi.")}}function Mn(t,e){e.setState({adminEditingListId:t});const s=st(`className-${t}`);s&&(s.focus(),s.select())}function Hn(t){t.setState({adminEditingListId:null})}async function Fn(t,e){const r=st(`className-${t}`)?.value.trim()||"";if(!r){T("Sınıf adı boş olamaz.");return}try{await N("rename_list",{p_token:e.getState().token,p_list_id:t,p_name:r}),e.setState({adminEditingListId:null}),await e.refresh(),T("Sınıf adı değiştirildi.")}catch(n){T(n.message||"Ad değiştirilemedi.")}}async function zn(t,e){const s=e.getState().lists.find(n=>n.id===t);if(!s)return;const r=`“${s.name}” sınıfı silinsin mi?
+Eski yoklamalar korunur.`;if(!(typeof window<"u"&&!window.confirm(r)))try{await N("delete_list",{p_token:e.getState().token,p_list_id:t}),e.getState().adminEditingListId===t&&e.setState({adminEditingListId:null}),await e.refresh(),T("Sınıf silindi.")}catch(n){T(n.message||"Sınıf silinemedi.")}}async function Kn(t){if(!(typeof window<"u"&&!window.confirm("Bu dosya sınıflarınızın ve tüm yoklama geçmişinizin yedeğidir. Güvenli bir yerde saklayın ve silmeyin. Parola/PIN içermez. İndirilsin mi?")))try{const s=await N("admin_export_backup",{p_token:t.getState().token}),r=new Blob([JSON.stringify(s,null,2)],{type:"application/json"}),n=URL.createObjectURL(r),i=document.createElement("a");i.href=n,i.download=`eyoklama-yedek-${mt()}.json`,document.body.appendChild(i),i.click(),i.remove(),setTimeout(()=>URL.revokeObjectURL(n),1e3),T("Yedek indirildi. Güvenli bir yerde saklayın.")}catch(s){T(s.message||"Yedek indirilemedi.")}}async function qn(t){const e=st("oldAdminPassword"),s=st("newAdminPassword"),r=st("confirmAdminPassword"),n=e?.value||"",i=s?.value||"",a=r?.value||"";if(!n){T("Mevcut parolayı yazın.");return}if(i!==a){T("Yeni parolalar eşleşmiyor.");return}if(i.length<11){T("Yeni parola en az 11 karakter olmalı.");return}if(!/[A-ZÇĞİÖŞÜ]/.test(i)){T("En az bir büyük harf gerekli.");return}if(!/[^A-Za-z0-9ÇĞİÖŞÜçğıöşü]/.test(i)){T("En az bir özel karakter gerekli.");return}try{await N("change_admin_password",{p_token:t.getState().token,p_old_password:n,p_new_password:i,p_confirm_password:a}),e&&(e.value=""),s&&(s.value=""),r&&(r.value=""),T("Üst yetkili parolası değiştirildi.")}catch(o){T(o.message||"Parola değiştirilemedi.")}}const Hl=t=>typeof document<"u"?document.getElementById(t):null;function W(t){const e=t.getState();if(e.role!=="admin")return;const s=Hl("adminPage");if(!s)return;const r=e.pinRevealed?I(e.teacherPin||"------"):e.teacherPin?"••••••":"------",n=e.lists.map(i=>`<div class="class-admin-row">
+        ${e.adminEditingListId===i.id?`<div>
+                 <input id="className-${I(i.id)}" type="text" class="class-inline-input" value="${I(i.name)}" maxlength="120"
+                   data-action="rename-input" data-list-id="${I(i.id)}">
+                 <div class="muted tiny">${i.students.length} öğrenci</div>
+               </div>
+               <div class="class-admin-actions">
+                 <button type="button" class="icon-btn" style="color:var(--text)"
+                   data-action="confirm-rename-list" data-list-id="${I(i.id)}" aria-label="Kaydet" title="Kaydet">
+                   <svg viewBox="0 0 24 24"><path d="M5 12l4 4L19 6"/></svg>
+                 </button>
+                 <button type="button" class="icon-btn" data-action="cancel-rename-list" aria-label="İptal" title="İptal">
+                   <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                 </button>
+               </div>`:`<div><strong>${I(i.name)}</strong><div class="muted tiny">${i.students.length} öğrenci</div></div>
+               <div class="class-admin-actions">
+                 <button type="button" class="icon-btn" data-action="start-rename-list" data-list-id="${I(i.id)}"
+                   aria-label="Sınıf adını değiştir" title="Ad değiştir">
+                   <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4z"/></svg>
+                 </button>
+                 <button type="button" class="icon-btn danger" data-action="delete-list" data-list-id="${I(i.id)}"
+                   aria-label="Sınıfı sil" title="Sil">
+                   <svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M6 6l1 14h10l1-14"/><path d="M10 10v6M14 10v6"/></svg>
+                 </button>
+               </div>`}
+      </div>`).join("");s.innerHTML=`<div class="stack">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+      <button type="button" class="top-icon-btn" data-action="switch-tab" data-tab="lists" title="Geri">
+        <svg viewBox="0 0 24 24"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+      </button>
+      <h1 class="page-title" style="margin:0">YÖNETİM & AYARLAR</h1>
+    </div>
 
     <section class="plain-section stack">
       <div>
         <h2>Bugünün Hoca PIN'i</h2>
         <div class="pin-row">
-          <div class="pin">${pinDisplay}</div>
+          <div class="pin">${r}</div>
           <div class="pin-actions">
-            <button class="icon-btn" onclick="togglePinReveal()" aria-label="PIN göster/gizle" title="${pinRevealed?'Gizle':'Göster'}">
+            <button type="button" class="icon-btn" data-action="toggle-pin-reveal" aria-label="PIN göster/gizle" title="${e.pinRevealed?"Gizle":"Göster"}">
               <svg viewBox="0 0 24 24"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="2.5"/></svg>
             </button>
-            <button class="icon-btn" onclick="copyPin()" aria-label="PIN'i kopyala" title="Kopyala">
+            <button type="button" class="icon-btn" data-action="copy-pin" aria-label="PIN'i kopyala" title="Kopyala">
               <svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
             </button>
-            <button class="icon-btn" onclick="regeneratePin()" aria-label="Yeni PIN üret" title="Yenile">
+            <button type="button" class="icon-btn" data-action="regenerate-pin" aria-label="Yeni PIN üret" title="Yenile">
               <svg viewBox="0 0 24 24"><path d="M20 6v5h-5"/><path d="M4 18v-5h5"/><path d="M5.5 9a7 7 0 0 1 11.8-2.5L20 9"/><path d="M4 15l2.7 2.5A7 7 0 0 0 18.5 15"/></svg>
             </button>
           </div>
         </div>
-        <div class="muted tiny" style="margin-top:4px">${escapeHtml(app.teacherPinDate||"")}</div>
+        <div class="muted tiny" style="margin-top:4px">${I(e.teacherPinDate||"")}</div>
         <div class="muted tiny" style="margin-top:6px">Hoca bu PIN'i haftanın ilk girişinde bir kez kullanır. Cihaz yetkisi Pazartesi 00:00'da otomatik sıfırlanır.</div>
       </div>
     </section>
 
-    <details class="admin-drop" ${adminEditingListId?'open':''}>
+    <details class="admin-drop" ${e.adminEditingListId?"open":""}>
       <summary>Sınıf Yönetimi</summary>
-      <div class="drop-body">
-        ${app.lists.map(l=>{
-          const isEditing=adminEditingListId===l.id;
-          return `<div class="class-admin-row">
-            ${isEditing
-              ? `<div>
-                   <input id="className-${l.id}" type="text" class="class-inline-input" value="${escapeHtml(l.name)}" maxlength="120"
-                     onkeydown="if(event.key==='Enter'){event.preventDefault();confirmRenameList('${l.id}')}if(event.key==='Escape'){event.preventDefault();cancelClassRename()}">
-                   <div class="muted tiny">${l.students.length} öğrenci</div>
-                 </div>
-                 <div class="class-admin-actions">
-                   <button type="button" class="icon-btn" style="color:var(--text)" onclick="confirmRenameList('${l.id}')" aria-label="Kaydet" title="Kaydet">
-                     <svg viewBox="0 0 24 24"><path d="M5 12l4 4L19 6"/></svg>
-                   </button>
-                   <button type="button" class="icon-btn" onclick="cancelClassRename()" aria-label="İptal" title="İptal">
-                     <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
-                   </button>
-                 </div>`
-              : `<div><strong>${escapeHtml(l.name)}</strong><div class="muted tiny">${l.students.length} öğrenci</div></div>
-                 <div class="class-admin-actions">
-                   <button type="button" class="icon-btn" onclick="startRenameList('${l.id}')" aria-label="Sınıf adını değiştir" title="Ad değiştir">
-                     <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4z"/></svg>
-                   </button>
-                   <button type="button" class="icon-btn danger" onclick="deleteList('${l.id}')" aria-label="Sınıfı sil" title="Sil">
-                     <svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M6 6l1 14h10l1-14"/><path d="M10 10v6M14 10v6"/></svg>
-                   </button>
-                 </div>`
-            }
-          </div>`;
-        }).join("")}
-      </div>
+      <div class="drop-body">${n}</div>
     </details>
 
     <details class="admin-drop">
@@ -1950,179 +346,28 @@ function renderAdmin(){
         <div class="muted tiny">En az 11 karakter · 1 büyük harf · 1 özel karakter</div>
         <div class="password-wrap">
           <input id="oldAdminPassword" type="password" maxlength="64" autocomplete="current-password" placeholder="Mevcut parola">
-          <button type="button" class="password-eye" onclick="revealPassword('oldAdminPassword')" aria-label="Parolayı göster" title="1 saniye göster">
+          <button type="button" class="password-eye" data-action="reveal-password" data-target="oldAdminPassword" aria-label="Parolayı göster" title="1 saniye göster">
             <svg viewBox="0 0 24 24"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="2.5"/></svg>
           </button>
         </div>
         <div class="password-wrap">
           <input id="newAdminPassword" type="password" maxlength="64" autocomplete="new-password" placeholder="Yeni parola">
-          <button type="button" class="password-eye" onclick="revealPassword('newAdminPassword')" aria-label="Parolayı göster" title="1 saniye göster">
+          <button type="button" class="password-eye" data-action="reveal-password" data-target="newAdminPassword" aria-label="Parolayı göster" title="1 saniye göster">
             <svg viewBox="0 0 24 24"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="2.5"/></svg>
           </button>
         </div>
         <div class="password-wrap">
           <input id="confirmAdminPassword" type="password" maxlength="64" autocomplete="new-password" placeholder="Yeni parola tekrar">
-          <button type="button" class="password-eye" onclick="revealPassword('confirmAdminPassword')" aria-label="Parolayı göster" title="1 saniye göster">
+          <button type="button" class="password-eye" data-action="reveal-password" data-target="confirmAdminPassword" aria-label="Parolayı göster" title="1 saniye göster">
             <svg viewBox="0 0 24 24"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="2.5"/></svg>
           </button>
         </div>
-        <button class="btn" onclick="changeAdminPassword()">Parolayı değiştir</button>
+        <button type="button" class="btn" data-action="change-admin-password">Parolayı değiştir</button>
       </div>
     </details>
 
     <div style="margin-top:16px;text-align:center">
-      <button type="button" class="archive-toggle" onclick="downloadBackup()">Verileri yedekle (.json)</button>
+      <button type="button" class="archive-toggle" data-action="download-backup">Verileri yedekle (.json)</button>
     </div>
-  </div>`;
-}
-function generateMemorablePin() {
-  const glides = [
-    [1,2,3], [3,2,1], [4,5,6], [6,5,4], [7,8,9], [9,8,7],
-    [1,4,7], [7,4,1], [2,5,8], [8,5,2], [3,6,9], [9,6,3],
-    [1,5,9], [9,5,1], [3,5,7], [7,5,3]
-  ];
-  const steps = [
-    [1,3,5], [5,3,1], [2,4,6], [6,4,2], [3,5,7], [7,5,3], [4,6,8], [8,6,4], [5,7,9], [9,7,5]
-  ];
-  const pairs = [
-    [1,2], [2,1], [2,3], [3,2], [4,5], [5,4], [5,6], [6,5], [7,8], [8,7], [8,9], [9,8],
-    [1,4], [4,1], [2,5], [5,2], [3,6], [6,3], [4,7], [7,4], [5,8], [8,5], [6,9], [9,6],
-    [1,5], [5,1], [3,5], [5,3], [7,5], [5,7], [9,5], [5,9],
-    [2,8], [8,2], [4,6], [6,4]
-  ];
-  const ladders = [
-    [1,2,3], [3,2,1], [4,5,6], [6,5,4], [7,8,9], [9,8,7],
-    [1,4,7], [7,4,1], [2,5,8], [8,5,2], [3,6,9], [9,6,3],
-    [2,4,6], [6,4,2], [1,3,5], [5,3,1]
-  ];
-
-  const roll = Math.random();
-  if (roll < 0.30) {
-    const g = glides[Math.floor(Math.random() * glides.length)];
-    return `${g[0]}${g[1]}${g[2]}${g[2]}${g[1]}${g[0]}`;
-  } else if (roll < 0.55) {
-    const g = glides[Math.floor(Math.random() * glides.length)];
-    return `${g[0]}${g[1]}${g[2]}${g[0]}${g[1]}${g[2]}`;
-  } else if (roll < 0.80) {
-    const p = pairs[Math.floor(Math.random() * pairs.length)];
-    return `${p[0]}${p[1]}${p[0]}${p[1]}${p[0]}${p[1]}`;
-  } else if (roll < 0.92) {
-    const s = steps[Math.floor(Math.random() * steps.length)];
-    return `${s[0]}${s[1]}${s[2]}${s[2]}${s[1]}${s[0]}`;
-  } else {
-    const l = ladders[Math.floor(Math.random() * ladders.length)];
-    return `${l[0]}${l[0]}${l[1]}${l[1]}${l[2]}${l[2]}`;
-  }
-}
-
-async function copyPin(){try{await navigator.clipboard.writeText(app.teacherPin);toast("PIN kopyalandı.")}catch{toast("PIN: "+app.teacherPin)}}
-async function regeneratePin(){
-  const newPin = generateMemorablePin();
-  try{
-    let r;
-    try {
-      r = await rpc("regenerate_teacher_pin", { p_token: token, p_pin: newPin });
-    } catch(err) {
-      r = await rpc("regenerate_teacher_pin", { p_token: token });
-    }
-    app.teacherPin = r?.teacherPin || newPin;
-    app.teacherPinDate = r?.teacherPinDate || new Intl.DateTimeFormat("tr-TR",{dateStyle:"medium",timeStyle:"short"}).format(new Date());
-    renderAdmin();
-    toast(`Yeni PIN üretildi: ${app.teacherPin}`);
-  }catch(e){
-    toast(e.message);
-  }
-}
-function startRenameList(id){
-  adminEditingListId=id;
-  renderAdmin();
-  const input=$(`className-${id}`);
-  if(input){input.focus();input.select()}
-}
-function cancelClassRename(){
-  adminEditingListId=null;
-  renderAdmin();
-}
-async function confirmRenameList(id){
-  const input=$(`className-${id}`),name=input?.value.trim();
-  if(!name){toast("Sınıf adı boş olamaz.");return}
-  try{
-    await rpc("rename_list",{p_token:token,p_list_id:id,p_name:name});
-    adminEditingListId=null;
-    await refresh();renderAdmin();toast("Sınıf adı değiştirildi.");
-  }catch(e){toast(e.message)}
-}
-async function deleteList(id){
-  const l=app.lists.find(x=>x.id===id);if(!l)return;
-  if(!confirm(`“${l.name}” sınıfı silinsin mi?\nEski yoklamalar korunur.`))return;
-  try{
-    await rpc("delete_list",{p_token:token,p_list_id:id});
-    if(adminEditingListId===id)adminEditingListId=null;
-    await refresh();renderAdmin();toast("Sınıf silindi.");
-  }catch(e){toast(e.message)}
-}
-
-async function downloadBackup(){
-  if(!confirm("Bu dosya sınıflarınızın ve tüm yoklama geçmişinizin yedeğidir. Güvenli bir yerde saklayın ve silmeyin. Parola/PIN içermez. İndirilsin mi?"))return;
-  try{
-    const data=await rpc("admin_export_backup",{p_token:token});
-    const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement("a");
-    a.href=url;
-    a.download=`eyoklama-yedek-${todayKey()}.json`;
-    document.body.appendChild(a);a.click();a.remove();
-    setTimeout(()=>URL.revokeObjectURL(url),1000);
-    toast("Yedek indirildi. Güvenli bir yerde saklayın.");
-  }catch(e){toast(e.message)}
-}
-
-async function changeAdminPassword(){
-  const oldP=$("oldAdminPassword").value;
-  const newP=$("newAdminPassword").value;
-  const confirmP=$("confirmAdminPassword").value;
-
-  if(!oldP){toast("Mevcut parolayı yazın.");return}
-  if(newP!==confirmP){toast("Yeni parolalar eşleşmiyor.");return}
-  if(newP.length<11){toast("Yeni parola en az 11 karakter olmalı.");return}
-  if(!/[A-ZÇĞİÖŞÜ]/.test(newP)){toast("En az bir büyük harf gerekli.");return}
-  if(!/[^A-Za-z0-9ÇĞİÖŞÜçğıöşü]/.test(newP)){toast("En az bir özel karakter gerekli.");return}
-
-  try{
-    await rpc("change_admin_password",{
-      p_token:token,
-      p_old_password:oldP,
-      p_new_password:newP,
-      p_confirm_password:confirmP
-    });
-    $("oldAdminPassword").value="";
-    $("newAdminPassword").value="";
-    $("confirmAdminPassword").value="";
-    toast("Üst yetkili parolası değiştirildi.");
-  }catch(e){toast(e.message)}
-}
-
-if(typeof window !== "undefined"){
-  Object.assign(window,{startAttendance,handleStudentTap,cancelAttendance,saveNewAttendance,renderHistory,renderLists,switchTab,logout,startPrePermissionView,cycleHistoryGroupingMode,toggleArchiveView,toggleHistoryGroup,cycleHistorySession,copyHistoryGroup,copySingleAttendance,copyHistoryAll,stageHistoryStatus,archiveHistoryAttendance,copyPin,regeneratePin,togglePinReveal,changeAdminPassword,addManualStudent,removeImportedStudent,setStudentMode,revealPassword,saveHistoryChanges,undoHistoryChange,confirmSavedUndo,downloadHistoryPdf,downloadGroupRangePdf,downloadSingleAttendancePdf,downloadBackup,toggleHistoryEdit,startRenameList,cancelClassRename,confirmRenameList,deleteList,downloadDayPdf,downloadAllClassPdf,openPrePermissionModal,closePrePermissionModal,renderPrePermissionList,filterPrePermissionList,togglePrePermission,savePrePermissions});
-
-  if("serviceWorker" in navigator){
-    window.addEventListener("load",()=>{
-      navigator.serviceWorker.register("sw.js").catch(()=>{});
-    });
-  }
-}
-
-if(typeof module !== "undefined" && module.exports){
-  module.exports = {
-    generateMemorablePin,
-    escapeHtml,
-    fullName,
-    dayKey,
-    todayKey,
-    pdfCleanDate,
-    formatCardDate,
-    formatCardTime,
-    validateRows,
-    parseCSV
-  };
-}
+  </div>`}const Te=t=>typeof document<"u"?document.getElementById(t):null;function Os(t){const e=t.getState(),s=yn(),r=Object.keys(s).length,n=Te("topPermBadge");n&&(n.textContent=String(r),n.classList.toggle("hidden",r===0)),Te("topAdminBtn")?.classList.toggle("hidden",e.role!=="admin")}function be(t,e){if(Os(e),t==="attendance"){gt(e);return}const s=t==="history"?"lists":t;if(s==="lists"){const r=Ul(e);Nl(e,r)}else s==="new"?Ll():s==="admin"&&W(e)}let Ar=!1;function Fl(t){typeof document>"u"||Ar||(Ar=!0,Te("topBrandBtn")?.addEventListener("click",()=>t.navigate("lists")),Te("topPermBtn")?.addEventListener("click",()=>vn(t)),Te("topAddBtn")?.addEventListener("click",()=>t.navigate("new")),Te("topAdminBtn")?.addEventListener("click",()=>t.navigate("admin")),Te("topLogoutBtn")?.addEventListener("click",()=>Es(t)),window.addEventListener("offline",()=>T("İnternet bağlantısı kesildi.")),window.addEventListener("online",()=>T("İnternet bağlantısı yeniden kuruldu.")),document.addEventListener("click",async e=>{const s=e.target;if(!s)return;const r=s.closest("[data-action]");if(!r||!r.dataset.action)return;const n=r.dataset.action,i=r.dataset;if(n==="switch-tab")t.navigate(i.tab||"lists");else if(n==="start-attendance"&&i.listId)await un(i.listId,t);else if(n==="student-tap"&&i.studentId)e.preventDefault(),e.stopPropagation(),ln(i.studentId,t);else if(n==="cancel-attendance")await dn(t);else if(n==="save-attendance")await hn(t);else if(n==="save-pre-permissions")await wn(t);else if(n==="clear-attendance-search")bl(t);else if(n==="toggle-first-name")Sl(t);else if(n==="cycle-history-mode")t.setState({historyGroupingMode:Tn(t.getState().historyGroupingMode)}),be("lists",t);else if(n==="toggle-archive")t.setState({showArchived:!t.getState().showArchived}),be("lists",t);else if(n==="toggle-history-edit"&&i.groupKey)Rn(i.groupKey,t,a=>ge(a,t));else if(n==="stage-history-status"&&i.attendanceId&&i.entryId&&i.groupKey)Cn(i.attendanceId,i.entryId,i.groupKey,t,a=>ge(a,t));else if(n==="save-history-changes"&&i.groupKey)await $n(i.groupKey,t,a=>ge(a,t),a=>we(a,t));else if(n==="undo-history-change"&&i.groupKey)On(i.groupKey,t,a=>ge(a,t),a=>zt(a,t,o=>we(o,t)));else if(n==="confirm-saved-undo"&&i.groupKey)await zt(i.groupKey,t,a=>we(a,t));else if(n==="archive-history"&&i.groupKey)await Pn(i.groupKey,t);else if(n==="download-history-pdf"&&i.groupKey){const a=En(ae,i.groupKey,t.getState().historyGroupIndex);if(a){const o=await Yt(a.group.items,t);o&&typeof window<"u"&&window.pdfMake&&window.pdfMake.createPdf({pageSize:"A4",pageMargins:[24,24,24,28],defaultStyle:{font:"Roboto",fontSize:8.5,color:"#202020"},content:o.content}).download(`${o.listName}-${o.day}.pdf`)}}else if(n==="copy-history-all"&&i.groupKey)await bs(i.groupKey,t,r);else if(n==="download-single-pdf"&&i.attendanceId)await $s(i.attendanceId,t);else if(n==="copy-single-attendance"&&i.attendanceId)await Nn(i.attendanceId,t,r);else if(n==="download-day-pdf"&&i.day)await xn(i.day,t);else if(n==="download-group-range-pdf"&&i.rangeKey){const a=t.getState().history.filter(o=>!o.archivedAt||t.getState().showArchived);await Ln(a,i.rangeKey,t)}else n==="set-student-mode"&&i.mode?_n(i.mode):n==="add-manual-student"?Rs():n==="remove-imported-student"&&i.index!==void 0?kn(Number(i.index)):n==="create-list"?await Sn(t):n==="toggle-pin-reveal"?(Dn(t),W(t)):n==="copy-pin"?await Un(t):n==="regenerate-pin"?(await Bn(t),W(t)):n==="start-rename-list"&&i.listId?(Mn(i.listId,t),W(t)):n==="confirm-rename-list"&&i.listId?(await Fn(i.listId,t),W(t)):n==="cancel-rename-list"?(Hn(t),W(t)):n==="delete-list"&&i.listId?(await zn(i.listId,t),W(t)):n==="change-admin-password"?await qn(t):n==="download-backup"?await Kn(t):n==="reveal-password"&&i.target&&Ss(i.target)}),document.addEventListener("toggle",async e=>{const s=e.target;if(s?.dataset?.action==="toggle-history-group"){const r=s.dataset.groupKey;if(r)if(s.open)await we(r,t);else{const n=ae[r];if(n){const i={...t.getState().historyDrafts},a={...t.getState().historyEditModes};n.items.forEach(o=>{delete i[o.id],delete a[o.id]}),t.setState({historyDrafts:i,historyEditModes:a})}}}},!0))}const te=t=>typeof document<"u"?document.getElementById(t):null,k={getState:oe,setState:Bt,navigate:(t,e)=>ut.navigate(t,e),refresh:async()=>{await Wn()},updateTopBar:()=>Os(k)};function zl(){typeof navigator<"u"&&"serviceWorker"in navigator&&window.location.protocol.startsWith("http")&&window.addEventListener("load",()=>{navigator.serviceWorker.register("/sw.js").catch(t=>{console.warn("[eYoklama] ServiceWorker registration skipped:",t)})})}async function Wn(){const t=oe().token;if(!t)return;const e=await N("app_bootstrap",{p_token:t});if(Bt({...e,attendanceCache:{}}),typeof document>"u")return;Os(k);const s=te("appView");if(s?.classList.contains("hidden")){te("loginView")?.classList.add("hidden"),s?.classList.remove("hidden");const n=oe().active;n?.listId&&n?.students?(cn(n.listId,k),ut.navigate("attendance",{skipClearActive:!0}),gt(k)):ut.navigate("lists")}else be(oe().currentTab,k)}function Kl(){te("loginBtn")?.addEventListener("click",()=>ml(k)),te("continueTeacherBtn")?.addEventListener("click",()=>yl(k)),te("differentTeacherBtn")?.addEventListener("click",()=>vl()),te("passwordEyeBtn")?.addEventListener("click",()=>Ss("loginPin")),["loginName","loginPin"].forEach(e=>{te(e)?.addEventListener("keydown",s=>{s.key==="Enter"&&te("loginBtn")?.click()})});const t=te("logoutBtn");t&&(t.onclick=()=>Es(k)),dt()}function ql(){if(typeof window>"u")return;const t=window;Object.assign(t,{bootstrap:Wn,logout:()=>Es(k),switchTab:e=>ut.navigate(e),startAttendance:e=>un(e,k),handleStudentTap:(e,s)=>{e?.preventDefault?.(),e?.stopPropagation?.(),ln(s,k)},cancelAttendance:()=>dn(k),saveNewAttendance:()=>hn(k),startPrePermissionView:()=>vn(k),savePrePermissions:()=>wn(k),renderLists:()=>be("lists",k),renderHistory:()=>be("lists",k),cycleHistoryGroupingMode:()=>{k.setState({historyGroupingMode:Tn(oe().historyGroupingMode)}),be("lists",k)},toggleArchiveView:()=>{k.setState({showArchived:!oe().showArchived}),be("lists",k)},toggleHistoryGroup:(e,s)=>{e?.open&&we(s,k)},toggleHistoryEdit:e=>Rn(e,k,s=>ge(s,k)),stageHistoryStatus:(e,s,r)=>Cn(e,s,r,k,n=>ge(n,k)),saveHistoryChanges:e=>$n(e,k,s=>ge(s,k),s=>we(s,k)),undoHistoryChange:e=>On(e,k,s=>ge(s,k),s=>zt(s,k,r=>we(r,k))),confirmSavedUndo:e=>zt(e,k,s=>we(s,k)),archiveHistoryAttendance:e=>Pn(e,k),downloadHistoryPdf:async e=>{const s=ae[e];if(s){const r=await Jn(()=>Promise.resolve().then(()=>Bl),void 0,import.meta.url).then(n=>n.buildPdfClassSection(s.items,k));r&&t.pdfMake&&t.pdfMake.createPdf({pageSize:"A4",pageMargins:[24,24,24,28],defaultStyle:{font:"Roboto",fontSize:8.5},content:r.content}).download(`${r.listName}-${r.day}.pdf`)}},copyHistoryAll:(e,s)=>bs(e,k,s?.currentTarget),copyHistoryGroup:(e,s)=>bs(s,k,e?.currentTarget),copySingleAttendance:(e,s)=>Nn(e,k,s?.currentTarget),downloadSingleAttendancePdf:e=>$s(e,k),downloadDayPdf:e=>xn(e,k),downloadGroupRangePdf:e=>{const s=oe().history.filter(r=>!r.archivedAt||oe().showArchived);return Ln(s,e,k)},downloadAllClassPdf:e=>jn(e,k),setStudentMode:_n,addManualStudent:Rs,removeImportedStudent:kn,createList:()=>Sn(k),togglePinReveal:()=>{Dn(k),W(k)},copyPin:()=>Un(k),regeneratePin:async()=>{await Bn(k),W(k)},startRenameList:e=>{Mn(e,k),W(k)},cancelClassRename:()=>{Hn(k),W(k)},confirmRenameList:async e=>{await Fn(e,k),W(k)},deleteList:async e=>{await zn(e,k),W(k)},changeAdminPassword:()=>qn(k),downloadBackup:()=>Kn(k),revealPassword:Ss})}let Rr=!1;function Cr(){if(Rr)return;Rr=!0,tn(e=>be(e,k)),Kl(),Fl(k),ql(),zl();const t=oe().active;t?.listId&&t?.students&&(te("loginView")?.classList.add("hidden"),te("appView")?.classList.remove("hidden"),ut.navigate("attendance",{skipClearActive:!0}),gt(k)),console.info("[eYoklama] Native DOM Architecture initialized successfully.")}typeof document<"u"&&(document.readyState==="loading"?document.addEventListener("DOMContentLoaded",Cr):Cr());
+//# sourceMappingURL=app.js.map

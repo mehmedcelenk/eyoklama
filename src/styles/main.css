@@ -1,0 +1,12 @@
+/* ==========================================================================
+   eYoklama - Modular Master Stylesheet
+   File: src/styles/main.css
+   Role: Master entry aggregator preserving strict architectural cascade order
+   Lines: ~17 (< 350 line limit)
+   ========================================================================== */
+
+@import './base.css';
+@import './layout.css';
+@import './attendance.css';
+@import './history.css';
+@import './admin.css';

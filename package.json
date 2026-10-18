@@ -1,0 +1,33 @@
+{
+  "name": "eyoklama",
+  "version": "3.0.0",
+  "private": true,
+  "type": "module",
+  "description": "eYoklama - Vibecoding-Safe Native DOM Architecture",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "check:types": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "check:arch": "node scripts/check-architecture.mjs",
+    "check": "npm run check:arch && npm run test",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.48.1",
+    "pdfmake": "^0.2.12",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.50.1",
+    "@types/node": "^22.13.0",
+    "@types/pdfmake": "^0.2.11",
+    "happy-dom": "^17.0.0",
+    "typescript": "^5.7.3",
+    "vite": "^6.2.0",
+    "vite-plugin-pwa": "^0.21.1",
+    "vitest": "^3.0.5"
+  }
+}

@@ -1,31 +1,3 @@
-const CACHE_NAME = "eyoklama-v3-cache-v18";
-const ASSETS = [
-  "./",
-  "./index.html",
-  "./style.css",
-  "./app.js",
-  "./manifest.json",
-  "./icon-192.svg",
-  "./icon-512.svg"
-];
-
-self.addEventListener("install", (e) => {
-  e.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)).then(() => self.skipWaiting())
-  );
-});
-
-self.addEventListener("activate", (e) => {
-  e.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
-    ).then(() => self.clients.claim())
-  );
-});
-
-self.addEventListener("fetch", (e) => {
-  if (e.request.method !== "GET" || e.request.url.includes("supabase.co")) return;
-  e.respondWith(
-    caches.match(e.request).then((cached) => cached || fetch(e.request))
-  );
-});
+if(!self.define){let e,s={};const i=(i,c)=>(i=new URL(i+".js",c).href,s[i]||new Promise(s=>{if("document"in self){const e=document.createElement("script");e.src=i,e.onload=s,document.head.appendChild(e)}else e=i,importScripts(i),s()}).then(()=>{let e=s[i];if(!e)throw new Error(`Module ${i} didn’t register its module`);return e}));self.define=(c,r)=>{const a=e||("document"in self?document.currentScript.src:"")||location.href;if(s[a])return;let n={};const o=e=>i(e,a),t={module:{uri:a},exports:n,require:o};s[a]=Promise.all(c.map(e=>t[e]||o(e))).then(e=>(r(...e),n))}}define(["./workbox-abeb32eb"],function(e){"use strict";self.skipWaiting(),e.clientsClaim(),e.precacheAndRoute([{url:"tsconfig.json",revision:"57dec3f4b3f4c81c36974eb0bc1415a8"},{url:"registerSW.js",revision:"402b66900e731ca748771b6fc5e7a068"},{url:"package.json",revision:"dea2d7e075391dc11d3b665ad6faf30f"},{url:"package-lock.json",revision:"2b6a3f0a69d64407c0cde91fab5e8f24"},{url:"manifest.json",revision:"154e0d8e8441a094e86ad4ee42c52825"},{url:"index.html",revision:"98cdea1097ceec0801a126543a06f5bf"},{url:"icon-512.svg",revision:"4fdc5fb2a069389fdef91b24b676b744"},{url:"icon-192.svg",revision:"bc61854f4acf63115bd37228c9951fad"},{url:"src/styles/main.css",revision:"b409cab08ee6addca6e7b37d6bf7cba0"},{url:"src/styles/layout.css",revision:"e1acb5749599d5c0d9f166a370f4dea7"},{url:"src/styles/history.css",revision:"9a85d9f18e1b3a09be7287bb15c4f6c8"},{url:"src/styles/base.css",revision:"87fcc416d9e049127dc11e90be63740e"},{url:"src/styles/attendance.css",revision:"ca8e0373eefbfe4ce36ed3c0bed59e5f"},{url:"src/styles/admin.css",revision:"4e109df8c163baafd8b0ed5d59358400"},{url:"dist/workbox-abeb32eb.js",revision:"915e044558ff7a6351e41ccc2a46107b"},{url:"dist/sw.js",revision:"0baa8f021bbb7b1bc2f3fdb934016c42"},{url:"dist/registerSW.js",revision:"402b66900e731ca748771b6fc5e7a068"},{url:"dist/index.html",revision:"98cdea1097ceec0801a126543a06f5bf"},{url:"dist/assets/manifest-Bm5U6o9k.json",revision:"154e0d8e8441a094e86ad4ee42c52825"},{url:"dist/assets/main-oAwIBFa-.js",revision:"c7a08803665991cfad6cc929ca024b90"},{url:"dist/assets/main-DO3S84-m.css",revision:"dc17ac34b79ac985e8e33bf10bebc7da"},{url:"dist/assets/icon-192-C9yt5Q7i.svg",revision:"bc61854f4acf63115bd37228c9951fad"},{url:"assets/manifest-Bm5U6o9k.json",revision:null},{url:"assets/main-oAwIBFa-.js",revision:null},{url:"assets/main-DO3S84-m.css",revision:null},{url:"assets/icon-192-C9yt5Q7i.svg",revision:null},{url:"manifest.webmanifest",revision:"5072bce477385272f1f9f64b4e9c6905"}],{}),e.cleanupOutdatedCaches(),e.registerRoute(new e.NavigationRoute(e.createHandlerBoundToURL("index.html"))),e.registerRoute(/^https:\/\/.*\.supabase\.co\/.*/i,new e.NetworkOnly,"GET")});
+//# sourceMappingURL=sw.js.map
+//# sourceMappingURL=sw.js.map

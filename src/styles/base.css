@@ -1,0 +1,104 @@
+/* ==========================================================================
+   eYoklama - Base Styles & Design Tokens
+   File: src/styles/base.css
+   Role: Design tokens (:root), resets, typography, form controls, base buttons
+   ========================================================================== */
+
+:root {
+  color-scheme: dark;
+  --bg: #000; --surface: #0b0b0b; --surface2: #121212;
+  --text: #f5f5f5; --muted: #8e8e93; --line: #262626; --line2: #343434;
+  --accent: #3b82f6;
+  --green: #8ee6a8; --greenbg: #0d2415;
+  --red: #ff9b98; --redbg: #2a1010;
+  --yellow: #f4cf70; --yellowbg: #2b220d;
+  --shadow: 0 12px 34px rgba(0, 0, 0, 0.42);
+}
+
+* { box-sizing: border-box; }
+
+html, body { background: var(--bg); overflow-x: hidden; scrollbar-width: none; }
+html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
+
+body {
+  margin: 0; min-height: 100vh; color: var(--text);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button, input { font: inherit; }
+button { cursor: pointer; }
+
+/* Typography */
+h1, h2, h3, p { margin-top: 0; }
+h1 { font-size: clamp(1.8rem, 7vw, 2.35rem); margin-bottom: 5px; letter-spacing: -0.045em; }
+h2 { font-size: 1.08rem; margin-bottom: 8px; }
+h3 { font-size: 1rem; margin-bottom: 4px; }
+.muted { color: var(--muted); }
+.tiny { font-size: 0.78rem; }
+.brand { font-weight: 900; font-size: 1.05rem; letter-spacing: -0.03em; }
+
+/* Base Surfaces & Utilities */
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 15px; }
+.hidden { display: none !important; }
+
+/* Form Controls */
+label { display: grid; gap: 7px; font-size: 0.86rem; font-weight: 720; color: #d8d8d8; }
+input[type=text], input[type=password], input[type=file] {
+  width: 100%; min-height: 48px; border: 1px solid var(--line2); border-radius: 10px;
+  padding: 12px 13px; background: var(--surface2); color: var(--text); outline: none;
+}
+input::placeholder { color: #656565; }
+input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12); }
+
+.password-wrap { position: relative; }
+.password-wrap input { padding-right: 48px; }
+.password-eye {
+  position: absolute; right: 5px; top: 50%; transform: translateY(-50%);
+  width: 38px; height: 38px; border: 0; border-radius: 8px; background: transparent; color: #777;
+  display: grid; place-items: center;
+}
+.password-eye svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Base Buttons */
+.btn {
+  min-height: 44px; border: 1px solid #ddd; border-radius: 9px; background: #f3f3f3; color: #090909;
+  padding: 10px 14px; font-weight: 820; box-shadow: none;
+}
+.btn.loading { opacity: 0.65; pointer-events: none; cursor: wait; }
+.btn:active, .icon-btn:active, .save-fab:active { transform: scale(0.97); }
+.btn.secondary { background: var(--surface2); color: var(--text); border-color: var(--line2); }
+.btn.danger { background: #2a1010; color: #ffb4b1; border-color: #5a2424; }
+.btn.small { min-height: 38px; padding: 7px 11px; font-size: 0.82rem; }
+.btn:disabled { opacity: 0.38; cursor: not-allowed; }
+
+.icon-btn {
+  width: 40px; height: 40px; display: grid; place-items: center; padding: 0; border: 1px solid var(--line2);
+  border-radius: 9px; background: var(--surface2); color: #eee;
+}
+.icon-btn svg, .save-fab svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.icon-btn.ghost { border-color: transparent; background: transparent; color: var(--muted); }
+.icon-btn.ghost:hover, .icon-btn.ghost:active { color: var(--text); }
+.logout-btn { border-color: transparent; background: transparent; color: var(--red); }
+
+/* Feedback & Badges */
+.notice { padding: 10px 11px; border-radius: 8px; background: #111; color: #d8d8d8; border: 1px solid var(--line2); font-size: 0.87rem; }
+.notice.error { background: #241010; color: #ffb4b1; border-color: #552222; }
+.notice.success { background: #0d2114; color: #9ae6b0; border-color: #244d31; }
+
+.badge-count {
+  display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px;
+  padding: 0 5px; background: #d97706; color: #fff; font-size: 0.68rem; font-weight: 900;
+  border-radius: 9px; margin-left: 4px;
+}
+.pill { display: inline-flex; border: 1px solid var(--line2); border-radius: 6px; padding: 4px 7px; font-size: 0.72rem; font-weight: 820; background: #111; color: #ccc; }
+
+table { width: 100%; border-collapse: collapse; font-size: 0.87rem; }
+th, td { padding: 9px 7px; border-bottom: 1px solid var(--line); text-align: left; }
+th { color: #aaa; }
+
+.toast {
+  position: fixed; left: 50%; bottom: max(80px, calc(env(safe-area-inset-bottom) + 74px)); transform: translateX(-50%);
+  z-index: 100; width: min(92vw, 520px); padding: 11px 13px; border: 1px solid var(--line2);
+  border-radius: 9px; background: #151515; color: #fff; box-shadow: var(--shadow); font-weight: 700;
+}

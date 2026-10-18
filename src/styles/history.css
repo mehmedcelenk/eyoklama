@@ -1,0 +1,106 @@
+/* ==========================================================================
+   eYoklama - History Feature Styles
+   File: src/styles/history.css
+   Role: History timeline, grouping, session cards, matrix grid, and action tools
+   ========================================================================== */
+
+/* History Timeline & Grouping */
+.history { display: grid; gap: 7px; }
+.history-day {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px;
+  margin: 12px 2px 4px;
+}
+.history-day-line { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.history-day-line:after { content: ""; height: 1px; background: var(--line); flex: 1; }
+.history-day-label { font-size: 0.76rem; font-weight: 850; color: #a6a6aa; white-space: nowrap; }
+.history-day-download {
+  width: 32px; height: 32px; border: 0; border-radius: 8px; background: transparent; color: #929297;
+  display: grid; place-items: center;
+}
+.history-day-download:active { background: #141414; }
+.history-day-download svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* History Session Cards & Accordions */
+.history-item { border: 1px solid var(--line); border-radius: 9px; background: #080808; overflow: hidden; }
+.history-item summary { list-style: none; cursor: pointer; padding: 12px; }
+.history-item summary::-webkit-details-marker { display: none; }
+.history-item[open] summary { border-bottom: 1px solid var(--line); }
+.history-summary { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; }
+.history-summary-actions { display: flex; align-items: center; gap: 4px; }
+.history-controls { display: flex; justify-content: flex-end; margin: -5px 0 10px; }
+.archive-toggle { border: 0; background: transparent; color: var(--muted); padding: 5px 2px; font-size: 0.75rem; }
+.archive-tag {
+  display: inline-flex; margin-left: 6px; padding: 2px 5px; border: 1px solid var(--line2);
+  border-radius: 5px; color: var(--muted); font-size: 0.62rem; font-weight: 850; vertical-align: 1px;
+}
+.archive-action { margin-top: 10px; }
+.summary-icon { width: 34px; height: 34px; border: 0; background: transparent; transition: color 0.18s ease, background 0.18s ease, transform 0.18s ease; }
+.summary-icon.copied { color: var(--green); background: rgba(142, 230, 168, 0.10); transform: scale(1.08); }
+.history-chevron { display: grid; place-items: center; width: 26px; height: 34px; color: #777; transition: transform 0.15s; }
+.history-chevron svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.history-item[open] .history-chevron { transform: rotate(180deg); }
+
+/* Session Metadata & Badges */
+.history-card-meta { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; margin-top: 3px; }
+.history-card-date { font-size: 0.76rem; font-weight: 700; color: var(--muted); white-space: nowrap; }
+.history-card-times { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.history-time-badge {
+  display: inline-flex; align-items: center; padding: 1px 5px; font-size: 0.70rem; font-weight: 720;
+  color: #aaa; background: #111; border: 1px solid #242424; border-radius: 5px; line-height: 1.3; white-space: nowrap;
+}
+.history-card-teacher { margin-left: auto; font-size: 0.72rem; color: #777; white-space: nowrap; }
+
+/* History Detail Grid Matrix */
+.history-body { padding: 5px 12px 12px; }
+.history-grid { width: 100%; margin-top: 4px; }
+.history-grid-row, .history-grid-header {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px;
+  padding: 7px 0; border-bottom: 1px solid #141414;
+}
+.history-grid-header { border-bottom: 1px solid var(--line); padding: 4px 0 6px; }
+.history-grid-footer {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding-top: 10px; border-top: 1px solid #141414; margin-top: 2px;
+}
+.history-grid-name { font-size: 0.84rem; font-weight: 720; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.history-grid-cols { display: flex; align-items: center; gap: 6px; }
+.history-group-actions { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.history-col-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
+.h-col-head { width: 32px; text-align: center; font-size: 0.68rem; font-weight: 800; color: var(--muted); }
+
+.h-cell {
+  width: 32px; height: 26px; display: grid; place-items: center; font-size: 0.88rem; font-weight: 900;
+  border-radius: 5px; user-select: none; line-height: 1;
+}
+.h-cell.present { color: var(--green); background: var(--greenbg); border: 1px solid #1c4827; }
+.h-cell.absent { color: var(--red); background: #220e0e; border: 1px solid #481a1a; }
+.h-cell.excused { color: var(--yellow); background: var(--yellowbg); border: 1px solid #4a3d16; }
+.h-cell.empty { color: #444; }
+.h-cell.btn-cell { cursor: pointer; border: 1px dashed var(--line2); }
+
+.h-download-btn { width: 32px; height: 28px; color: var(--muted); padding: 0; display: grid; place-items: center; transition: color 0.18s, transform 0.18s; }
+.h-download-btn svg { width: 15px; height: 15px; }
+.h-download-btn:hover { color: #fff; }
+.h-download-btn.copied { color: var(--green); transform: scale(1.12); }
+
+.class-inline-input {
+  width: 100%; min-height: 38px; padding: 6px 9px; border: 1px solid var(--accent);
+  border-radius: 8px; background: var(--surface2); color: #fff; font-weight: 760;
+}
+
+/* History Tools & Action Buttons */
+.history-tool {
+  width: 34px; height: 34px; border: 0; border-radius: 9px; background: transparent; color: var(--muted);
+  display: grid; place-items: center; transition: color 0.18s, transform 0.18s;
+}
+.history-tool svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.history-tool:hover { color: #fff; }
+.history-tool.copied { color: var(--green); transform: scale(1.1); }
+.history-tool.active { background: #161616; color: #eee; }
+.history-tool.archive { color: #999; }
+
+.history-save { width: 34px; height: 34px; border: 0; border-radius: 9px; background: #f2f2f2; color: #080808; display: grid; place-items: center; }
+.history-save svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.history-save.hidden { display: none; }
+
+.undo-confirm { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 7px; margin-top: 9px; align-items: center; }

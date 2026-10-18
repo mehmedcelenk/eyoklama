@@ -1,0 +1,69 @@
+/* ==========================================================================
+   eYoklama - Layout & Navigation Styles
+   File: src/styles/layout.css
+   Role: Layout containers, grids, top-nav header, tabs, and login shells
+   ========================================================================== */
+
+/* Main Container & Layout Primitives */
+.app { width: min(720px, 100%); margin: auto; padding: 12px 12px 40px; }
+.stack { display: grid; gap: 12px; }
+.row { display: flex; gap: 9px; align-items: center; flex-wrap: wrap; }
+.between { justify-content: space-between; }
+.grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
+.page-title { font-size: 1.65rem; letter-spacing: -0.045em; margin: 6px 0 14px; text-transform: uppercase; }
+
+/* Top Bar Styling */
+.top-nav {
+  position: sticky; top: 0; z-index: 80; display: flex; align-items: center;
+  justify-content: space-between; padding: 10px 4px; background: rgba(0, 0, 0, 0.94);
+  backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); margin-bottom: 18px;
+}
+.top-nav-brand { display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; }
+.login-mark.small { width: 34px; height: 34px; flex: 0 0 34px; border-radius: 9px; }
+.login-mark.small svg { width: 17px; height: 17px; }
+.brand-title { font-weight: 850; font-size: 1.08rem; color: var(--text); letter-spacing: -0.025em; }
+.top-nav-actions { display: flex; align-items: center; gap: 4px; }
+
+.top-icon-btn {
+  position: relative; width: 38px; height: 38px; border: none !important;
+  background: transparent !important; color: #a3a3a3; border-radius: 9px;
+  display: grid; place-items: center; cursor: pointer; padding: 0;
+  transition: color 0.15s ease, background 0.15s ease; box-shadow: none !important;
+}
+.top-icon-btn:hover, .top-icon-btn:active { color: #ffffff; background: rgba(255, 255, 255, 0.08) !important; }
+.top-icon-btn.danger:hover, .top-icon-btn.danger:active { color: var(--red) !important; background: var(--redbg) !important; }
+.top-icon-btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.top-icon-btn .badge-count { position: absolute; top: 3px; right: 3px; min-width: 16px; height: 16px; font-size: 0.62rem; padding: 0 4px; margin-left: 0; }
+
+/* Bottom Navigation (Legacy / Fallback) */
+.bottom-nav { display: none !important; }
+.tab, .nav-logout {
+  min-height: 50px; border: 0; background: transparent; color: #777; border-radius: 15px;
+  display: grid; place-items: center; gap: 2px; padding: 5px 8px; font-weight: 760;
+}
+.tab svg, .nav-logout svg { width: 21px; height: 21px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.tab span, .nav-logout span { font-size: 0.68rem; }
+.tab.active { background: #1a1a1a; color: #f5f5f5; }
+.tab.plus-tab { font-weight: 350; }
+.nav-logout { color: var(--red); }
+
+/* Login View Styling */
+.login-view { max-width: 430px; margin: max(11vh, 42px) auto 0; }
+.login-head { display: flex; align-items: center; gap: 13px; margin: 0 4px 22px; }
+.login-mark {
+  width: 46px; height: 46px; position: relative; flex: 0 0 46px; border: 1px solid var(--line2);
+  border-radius: 11px; background: #0d0d0d; display: grid; place-items: center; color: #f5f5f5;
+}
+.login-mark svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.login-panel { padding: 15px; background: #090909; border: 1px solid var(--line); border-radius: 12px; }
+.continue-teacher { display: grid; gap: 9px; }
+.continue-teacher .btn { width: 100%; }
+.login-divider { display: flex; align-items: center; gap: 10px; color: #666; font-size: 0.72rem; }
+.login-divider:before, .login-divider:after { content: ""; height: 1px; background: var(--line); flex: 1; }
+
+/* Responsive Layout */
+@media (min-width: 640px) {
+  .app { padding: 20px 20px 112px; }
+  .grid { grid-template-columns: repeat(2, 1fr); }
+  .card { padding: 17px; }
+}
