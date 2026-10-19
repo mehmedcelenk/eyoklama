@@ -38,7 +38,7 @@ export default defineConfig({
   plugins: [
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icon-192.svg', 'icon-512.svg', 'CNAME'],
+      includeAssets: ['icon-192.svg', 'icon-512.svg'],
       manifest: {
         name: 'eYoklama V3',
         short_name: 'eYoklama',
