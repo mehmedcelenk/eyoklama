@@ -7,7 +7,15 @@
 import type { FeatureContext, TabName } from '../data/models/types';
 import { toast } from '../shared/toast';
 import { dayKey, formatHistoryDay } from '../shared/date';
-import { revealPassword, switchLoginTab, handleAdminLogin, type LoginTabMode } from '../features/auth/auth-view';
+import {
+  revealPassword,
+  switchLoginTab,
+  handleAdminLogin,
+  handleLogin,
+  handleContinueTeacher,
+  handleDifferentTeacher,
+  type LoginTabMode
+} from '../features/auth/auth-view';
 import { handleTeacherSubmit, stopApprovalPolling } from '../features/auth/teacher-auth';
 import { handleTeacherDecision, loadTeacherApprovals } from '../features/settings/teacher-management';
 import {
@@ -246,7 +254,16 @@ export function initEventDelegation(context: FeatureContext): void {
         ($('adminPasswordInput') as HTMLInputElement | null)?.focus();
       }
     } else if (a === 'teacher-submit') {
-      await handleTeacherSubmit(context);
+      const pinInput = ($('teacherPin') || $('loginPin')) as HTMLInputElement | null;
+      if (pinInput && pinInput.value.trim()) {
+        await handleLogin(context);
+      } else {
+        await handleTeacherSubmit(context);
+      }
+    } else if (a === 'continue-teacher') {
+      await handleContinueTeacher(context);
+    } else if (a === 'different-teacher') {
+      handleDifferentTeacher();
     } else if (a === 'teacher-cancel-poll') {
       stopApprovalPolling();
     } else if (a === 'admin-login') {

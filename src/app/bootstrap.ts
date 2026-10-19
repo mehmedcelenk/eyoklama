@@ -170,11 +170,13 @@ export async function bootstrap(): Promise<void> {
 function setupAuthListeners(): void {
   $('adminPasswordEyeBtn')?.addEventListener('click', () => revealPassword('adminPasswordInput'));
   $('passwordEyeBtn')?.addEventListener('click', () => revealPassword('loginPin'));
+  $('teacherPinEyeBtn')?.addEventListener('click', () => revealPassword('teacherPin'));
 
-  ['teacherInstCode', 'teacherFullName', 'teacherTc'].forEach((id) => {
+  ['teacherInstCode', 'teacherFullName', 'teacherTc', 'teacherPin', 'loginName', 'loginPin'].forEach((id) => {
     $(id)?.addEventListener('keydown', (e) => {
       if ((e as KeyboardEvent).key === 'Enter') {
-        $('teacherSubmitBtn')?.click();
+        const btn = $('teacherSubmitBtn') || $('loginBtn');
+        btn?.click();
       }
     });
   });
