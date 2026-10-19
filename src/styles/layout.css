@@ -15,13 +15,14 @@
 /* Top Bar Styling */
 .top-nav {
   position: sticky; top: 0; z-index: 80; display: flex; align-items: center;
-  justify-content: space-between; padding: 10px 4px; background: rgba(0, 0, 0, 0.94);
-  backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); margin-bottom: 18px;
+  justify-content: space-between; gap: 8px; padding: 8px 12px; min-height: 50px;
+  background: rgba(0, 0, 0, 0.96); backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--line); margin-bottom: 18px;
 }
-.top-nav-brand { display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; }
+.top-nav-brand { display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; min-height: 34px; min-width: 0; }
 .login-mark.small { width: 34px; height: 34px; flex: 0 0 34px; border-radius: 9px; }
 .login-mark.small svg { width: 17px; height: 17px; }
-.brand-title { font-weight: 850; font-size: 1.08rem; color: var(--text); letter-spacing: -0.025em; }
+.brand-title { font-weight: 800; font-size: 0.95rem; color: var(--text); letter-spacing: -0.015em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .top-nav-actions { display: flex; align-items: center; gap: 4px; }
 
 .top-icon-btn {

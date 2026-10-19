@@ -48,7 +48,7 @@ export function startPrePermissionView(context: FeatureContext): void {
   const todayPerms = getTodayPermissions();
   const uniqueStudentsMap = new Map<string, Student & { listNames: string[] }>();
 
-  state.lists.forEach((l) => {
+  state.roster.lists.forEach((l) => {
     l.students.forEach((s) => {
       const key = normalizeStudentKey(s.firstName, s.lastName, s.id);
       const existing = uniqueStudentsMap.get(key);
@@ -92,7 +92,10 @@ export function startPrePermissionView(context: FeatureContext): void {
   };
 
   resetAttendanceSearch();
-  context.setState({ active, currentTab: 'attendance' });
+  context.setState({
+    attendance: { active },
+    navigation: { currentTab: 'attendance' }
+  });
   renderAttendanceView(context);
 }
 
@@ -102,14 +105,14 @@ export function startPrePermissionView(context: FeatureContext): void {
  */
 export async function savePrePermissions(context: FeatureContext): Promise<void> {
   const state = context.getState();
-  const active = state.active;
+  const active = state.attendance.active;
   const permMap: Record<string, boolean> = {};
 
   // Build a lookup from studentId to normalized student key
   const idToKeyMap = new Map<string, string>();
   const keyToIdsMap = new Map<string, Set<string>>();
 
-  state.lists.forEach((l) => {
+  state.roster.lists.forEach((l) => {
     l.students.forEach((s) => {
       if (s.id) {
         const key = normalizeStudentKey(s.firstName, s.lastName, s.id);
@@ -140,22 +143,22 @@ export async function savePrePermissions(context: FeatureContext): Promise<void>
     sessionStorage.removeItem('eyoklama_active');
   }
   resetAttendanceSearch();
-  context.setState({ active: null });
+  context.setState({ attendance: { active: null } });
   context.navigate('lists');
   toast('Günün izinlileri kaydedildi.');
 
   const d = todayKey();
-  const todayHistory = state.history.filter(
+  const todayHistory = state.history.records.filter(
     (h) => !h.archivedAt && dayKey(h.takenAt) === d
   );
 
-  if (todayHistory.length && Object.keys(permMap).length && state.token) {
+  if (todayHistory.length && Object.keys(permMap).length && state.session.token) {
     for (const h of todayHistory) {
       try {
         const att =
-          state.attendanceCache[h.id] ||
+          state.history.sessionDetailsCache[h.id] ||
           ((await rpc('get_attendance', {
-            p_token: state.token,
+            p_token: state.session.token,
             p_attendance_id: h.id
           })) as any);
 
@@ -170,13 +173,13 @@ export async function savePrePermissions(context: FeatureContext): Promise<void>
         }
         if (Object.keys(changes).length) {
           await rpc('apply_attendance_changes', {
-            p_token: state.token,
+            p_token: state.session.token,
             p_attendance_id: h.id,
             p_changes: changes as any
           });
-          const cacheCopy = { ...state.attendanceCache };
+          const cacheCopy = { ...state.history.sessionDetailsCache };
           delete cacheCopy[h.id];
-          context.setState({ attendanceCache: cacheCopy });
+          context.setState({ history: { sessionDetailsCache: cacheCopy } });
         }
       } catch {
         // ignore sync errors

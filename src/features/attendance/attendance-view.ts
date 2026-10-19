@@ -33,7 +33,7 @@ export function isFirstNameVisible(): boolean {
  */
 export function toggleFirstName(context: FeatureContext): void {
   showFirstName = !showFirstName;
-  const active = context.getState().active;
+  const active = context.getState().attendance.active;
   if (!active) return;
 
   const toggleBtn = document.getElementById('nameToggleBtn');
@@ -66,7 +66,7 @@ export function toggleFirstName(context: FeatureContext): void {
  */
 export function renderAttendanceView(context: FeatureContext): void {
   const state = context.getState();
-  const active = state.active;
+  const active = state.attendance.active;
   if (!active || typeof document === 'undefined') return;
 
   if (typeof sessionStorage !== 'undefined') {
@@ -100,7 +100,7 @@ export function renderAttendanceView(context: FeatureContext): void {
         <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
       </button>
       <div class="attendance-title">
-        <strong>${escapeHtml(active.listName)}</strong>
+        <strong>${escapeHtml(active.listName)}${active.courseName ? ` · <span style="font-weight:normal;opacity:0.85">${escapeHtml(active.courseName)}</span>` : ''}</strong>
       </div>
       <button type="button" id="nameToggleBtn" class="name-toggle-btn ${showFirstName ? 'active' : ''}"
         data-action="toggle-first-name" aria-pressed="${showFirstName}"
@@ -141,7 +141,7 @@ function updateCardElement(studentId: string, status: AttendanceStatus, isLocked
  */
 export function handleStudentTap(studentId: string, context: FeatureContext): void {
   const state = context.getState();
-  const active = state.active;
+  const active = state.attendance.active;
   if (!active) return;
 
   if (active.preExcused?.[studentId]) {
@@ -153,7 +153,7 @@ export function handleStudentTap(studentId: string, context: FeatureContext): vo
     const cur = active.statuses[studentId] || 'absent';
     const next = cur === 'excused' ? 'absent' : 'excused';
     active.statuses[studentId] = next;
-    context.setState({ active: { ...active } });
+    context.setState({ attendance: { active: { ...active } } });
     updateCardElement(studentId, next, false);
     updateAttendanceCounts(context);
     return;
@@ -162,7 +162,7 @@ export function handleStudentTap(studentId: string, context: FeatureContext): vo
   const cur = active.statuses[studentId] || 'absent';
   const next: AttendanceStatus = cur === 'absent' ? 'present' : cur === 'present' ? 'excused' : 'absent';
   active.statuses[studentId] = next;
-  context.setState({ active: { ...active } });
+  context.setState({ attendance: { active: { ...active } } });
   updateCardElement(studentId, next, false);
   updateAttendanceCounts(context);
 }
@@ -171,7 +171,7 @@ export function handleStudentTap(studentId: string, context: FeatureContext): vo
  * Updates top count badges (+, -, ±) and toggles save FAB dimmed state.
  */
 export function updateAttendanceCounts(context: FeatureContext): void {
-  const active = context.getState().active;
+  const active = context.getState().attendance.active;
   if (!active) return;
 
   const vals = Object.values(active.statuses);

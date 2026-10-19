@@ -1,11 +1,21 @@
 /**
  * Authentication Feature View & Controller
  * Vibecoding-Safe Native DOM Architecture
+ * Handles 3-Tab Login Mode (Teacher / Parent / Institution Admin)
  */
 
 import { rpc } from '../../data/supabase/rpc';
 import { getDeviceToken } from '../../data/auth/device';
-import { TEACHER_NAME_KEY, TEACHER_WEEK_UNTIL_KEY } from '../../data/storage/keys';
+import {
+  getTeacherNameKey,
+  getTeacherWeekUntilKey,
+  getLastInstitutionSlugKey
+} from '../../data/storage/keys';
+import {
+  getActiveInstitution,
+  getActiveInstitutionSlug,
+  setActiveInstitution
+} from '../../data/supabase/config';
 import type { FeatureContext, LoginResult } from '../../data/models/types';
 import { toast } from '../../shared/toast';
 import {
@@ -13,9 +23,12 @@ import {
   recordFailedAttempt,
   resetLoginAttempts
 } from './rate-limit';
+import { initTeacherInputs, stopApprovalPolling } from './teacher-auth';
 
 const $ = (id: string): HTMLElement | null =>
   typeof document !== 'undefined' ? document.getElementById(id) : null;
+
+export type LoginTabMode = 'teacher' | 'parent' | 'admin';
 
 /**
  * Checks for remembered teacher in localStorage within 7-day validity.
@@ -24,8 +37,8 @@ export function rememberedTeacher(): { name: string; until: string; valid: boole
   if (typeof localStorage === 'undefined') {
     return { name: '', until: '', valid: false };
   }
-  const name = localStorage.getItem(TEACHER_NAME_KEY) || '';
-  const until = localStorage.getItem(TEACHER_WEEK_UNTIL_KEY) || '';
+  const name = localStorage.getItem(getTeacherNameKey()) || '';
+  const until = localStorage.getItem(getTeacherWeekUntilKey()) || '';
   const valid =
     Boolean(name) &&
     Boolean(until) &&
@@ -35,10 +48,10 @@ export function rememberedTeacher(): { name: string; until: string; valid: boole
 }
 
 /**
- * Displays error or status notices in login form.
+ * Displays error or status notices in login form (supports both legacy and new notice IDs).
  */
 export function loginMsg(msg: string, type: 'error' | 'success' = 'error'): void {
-  const e = $('loginMessage');
+  const e = $('adminLoginMsg') || $('teacherLoginMsg') || $('loginMessage');
   if (!e) return;
   e.textContent = msg;
   e.className = `notice ${type}`;
@@ -62,64 +75,94 @@ export function revealPassword(id: string): void {
 }
 
 /**
- * Renders remembered teacher mode or manual credential inputs.
+ * Switches between the 3 login tabs: 'teacher' | 'parent' | 'admin'
  */
-export function renderLoginMode(forceCredentials = false): void {
-  const remembered = rememberedTeacher();
-  const continueBox = $('continueLogin');
-  const credentials = $('credentialLogin');
-  const msg = $('loginMessage');
-  if (!continueBox || !credentials) return;
+export function switchLoginTab(tab: LoginTabMode): void {
+  stopApprovalPolling();
+  const teacherBtn = $('teacherLoginTabBtn');
+  const parentBtn = $('parentQueryTabBtn');
+  const adminBtn = $('adminLoginTabBtn');
 
-  if (remembered.valid && !forceCredentials) {
-    const continueBtn = $('continueTeacherBtn');
-    if (continueBtn) {
-      continueBtn.textContent = `${remembered.name} olarak devam et`;
-    }
-    continueBox.classList.remove('hidden');
-    credentials.classList.add('hidden');
-  } else {
-    continueBox.classList.add('hidden');
-    credentials.classList.remove('hidden');
-    const nameInput = $('loginName') as HTMLInputElement | null;
-    if (remembered.name && nameInput && !nameInput.value) {
-      nameInput.value = remembered.name;
+  const teacherSec = $('teacherLoginSection');
+  const parentSec = $('parentQuerySection');
+  const adminSec = $('adminLoginSection');
+
+  teacherBtn?.classList.toggle('active', tab === 'teacher');
+  parentBtn?.classList.toggle('active', tab === 'parent');
+  adminBtn?.classList.toggle('active', tab === 'admin');
+
+  teacherSec?.classList.toggle('hidden', tab !== 'teacher');
+  parentSec?.classList.toggle('hidden', tab !== 'parent');
+  adminSec?.classList.toggle('hidden', tab !== 'admin');
+
+  $('teacherLoginMsg')?.classList.add('hidden');
+  $('adminLoginMsg')?.classList.add('hidden');
+}
+
+/**
+ * Renders initial login view and pre-populates saved institution/teacher fields.
+ */
+export function renderLoginMode(_forceCredentials = false): void {
+  const activeInst = getActiveInstitution();
+  const subtitle = $('loginSubtitle');
+  if (subtitle) {
+    subtitle.textContent = activeInst.slug !== 'default'
+      ? `${activeInst.name} · Yoklama Sistemi`
+      : 'Yoklama. Gerektiği kadar.';
+  }
+
+  initTeacherInputs();
+
+  if (typeof localStorage !== 'undefined') {
+    const savedSlug = localStorage.getItem(getLastInstitutionSlugKey());
+    if (savedSlug) {
+      const parentInst = $('parentInstCode') as HTMLInputElement | null;
+      const adminInst = $('adminInstCode') as HTMLInputElement | null;
+      if (parentInst && !parentInst.value) parentInst.value = savedSlug;
+      if (adminInst && !adminInst.value) adminInst.value = savedSlug;
     }
   }
-  if (msg) msg.classList.add('hidden');
 }
 
 /**
  * Stores token, role, and teacher session upon successful login.
  */
 export function setSession(result: LoginResult, context: FeatureContext): void {
-  context.setState({
-    token: result.token,
-    role: result.role,
-    displayName: result.displayName
-  });
+  context.setState((prev) => ({
+    session: {
+      ...prev.session,
+      token: result.token,
+      role: result.role,
+      displayName: result.displayName,
+      institutionId: result.institutionId,
+      institutionSlug: result.institutionSlug,
+      institutionName: result.institutionName
+    }
+  }));
 
   if (result.role === 'teacher' && typeof localStorage !== 'undefined') {
-    localStorage.setItem(TEACHER_NAME_KEY, result.displayName || '');
+    localStorage.setItem(getTeacherNameKey(), result.displayName || '');
     localStorage.setItem(
-      TEACHER_WEEK_UNTIL_KEY,
+      getTeacherWeekUntilKey(),
       result.teacherWeekEndsAt || result.expiresAt || ''
     );
   }
 }
 
 /**
- * Handles explicit teacher / admin credential login submission.
+ * Handles Institution Administrator login submission (Tab 3: Kurum Girişi).
  */
-export async function handleLogin(context: FeatureContext): Promise<void> {
+export async function handleAdminLogin(context: FeatureContext): Promise<void> {
   const limit = getLoginRateLimitMsg();
   if (limit) {
     loginMsg(limit);
     return;
   }
-  const btn = $('loginBtn') as HTMLButtonElement | null;
-  const nameInput = $('loginName') as HTMLInputElement | null;
-  const pinInput = $('loginPin') as HTMLInputElement | null;
+
+  const btn = $('adminSubmitBtn') as HTMLButtonElement | null;
+  const instInput = $('adminInstCode') as HTMLInputElement | null;
+  const passInput = $('adminPasswordInput') as HTMLInputElement | null;
+  const msgEl = $('adminLoginMsg');
 
   try {
     if (btn) {
@@ -127,115 +170,67 @@ export async function handleLogin(context: FeatureContext): Promise<void> {
       btn.classList.add('loading');
       btn.textContent = 'Giriş yapılıyor…';
     }
-    const name = nameInput?.value.trim() || '';
-    const pin = pinInput?.value.trim() || '';
-    if (!name) throw new Error('Hoca adını yazın.');
-    if (!pin) throw new Error('PIN / parolayı yazın.');
+    msgEl?.classList.add('hidden');
 
-    const deviceToken = await getDeviceToken();
+    const instSlug = (instInput?.value.trim() || getActiveInstitutionSlug() || 'default').toLowerCase();
+    const password = passInput?.value.trim() || '';
+
+    if (!password) {
+      throw new Error('Yönetici şifresini yazın.');
+    }
+
+    setActiveInstitution(instSlug);
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(getLastInstitutionSlugKey(), instSlug);
+    }
+
+    const deviceToken = getDeviceToken();
     const r = (await rpc('app_login', {
-      p_name: name,
-      p_pin: pin,
-      p_device_token: deviceToken
+      p_name: 'admin',
+      p_pin: password,
+      p_device_token: deviceToken,
+      p_institution_slug: instSlug
     })) as LoginResult & { ok?: boolean; error?: string };
 
     if (!r?.ok) {
       recordFailedAttempt();
-      throw new Error(r?.error || 'Giriş başarısız.');
+      throw new Error(r?.error || 'Yönetici şifresi hatalı.');
     }
+
     resetLoginAttempts();
     setSession(r, context);
     await context.refresh();
   } catch (e: unknown) {
     const l = getLoginRateLimitMsg();
     const err = e as { message?: string };
-    loginMsg(l || err.message || 'Giriş başarısız.');
+    if (msgEl) {
+      msgEl.textContent = l || err.message || 'Giriş başarısız.';
+      msgEl.className = 'notice error';
+      msgEl.classList.remove('hidden');
+    } else {
+      loginMsg(l || err.message || 'Giriş başarısız.');
+    }
   } finally {
     if (btn) {
       btn.disabled = false;
       btn.classList.remove('loading');
-      btn.textContent = 'Giriş yap';
+      btn.textContent = 'Yönetici Girişi Yap';
     }
   }
 }
 
-/**
- * Handles 1-click continuation for remembered weekly teacher session.
- */
-export async function handleContinueTeacher(context: FeatureContext): Promise<void> {
-  const limit = getLoginRateLimitMsg();
-  if (limit) {
-    loginMsg(limit);
-    return;
-  }
-  const btn = $('continueTeacherBtn') as HTMLButtonElement | null;
-  const remembered = rememberedTeacher();
-
-  try {
-    if (btn) {
-      btn.disabled = true;
-      btn.classList.add('loading');
-      btn.textContent = 'Giriş yapılıyor…';
-    }
-    const deviceToken = await getDeviceToken();
-    const r = (await rpc('app_login', {
-      p_name: '',
-      p_pin: '',
-      p_device_token: deviceToken
-    })) as LoginResult & { ok?: boolean; code?: string; error?: string };
-
-    if (!r?.ok) {
-      recordFailedAttempt();
-      if (r?.code === 'WEEKLY_PIN_REQUIRED') {
-        if (typeof localStorage !== 'undefined') {
-          localStorage.removeItem(TEACHER_WEEK_UNTIL_KEY);
-        }
-        renderLoginMode(true);
-        const nameInput = $('loginName') as HTMLInputElement | null;
-        if (nameInput) nameInput.value = remembered.name || '';
-        const pinInput = $('loginPin') as HTMLInputElement | null;
-        pinInput?.focus();
-        loginMsg(r.error || 'Bu haftanın ilk girişinde PIN gerekli.');
-        return;
-      }
-      throw new Error(r?.error || 'Giriş başarısız.');
-    }
-    resetLoginAttempts();
-    setSession(r, context);
-    await context.refresh();
-  } catch (e: unknown) {
-    renderLoginMode(true);
-    const nameInput = $('loginName') as HTMLInputElement | null;
-    if (nameInput) nameInput.value = remembered.name || '';
-    const l = getLoginRateLimitMsg();
-    const err = e as { message?: string };
-    loginMsg(l || err.message || 'Giriş başarısız.');
-  } finally {
-    if (btn) {
-      btn.disabled = false;
-      btn.classList.remove('loading');
-      const nowRemembered = rememberedTeacher();
-      btn.textContent = nowRemembered.name
-        ? `${nowRemembered.name} olarak devam et`
-        : 'Hoca olarak devam et';
-    }
-  }
+// Backward-compatible aliases for tests & shims
+export async function handleLogin(context: FeatureContext): Promise<void> {
+  return handleAdminLogin(context);
 }
 
-/**
- * Switches from remembered teacher button to explicit credential inputs.
- */
+export async function handleContinueTeacher(_context: FeatureContext): Promise<void> {
+  // Handled automatically by teacher-auth.ts
+}
+
 export function handleDifferentTeacher(): void {
-  if (typeof localStorage !== 'undefined') {
-    localStorage.removeItem(TEACHER_NAME_KEY);
-    localStorage.removeItem(TEACHER_WEEK_UNTIL_KEY);
-  }
+  stopApprovalPolling();
   renderLoginMode(true);
-  const nameInput = $('loginName') as HTMLInputElement | null;
-  const pinInput = $('loginPin') as HTMLInputElement | null;
-  if (nameInput) nameInput.value = '';
-  if (pinInput) pinInput.value = '';
-  nameInput?.focus();
 }
 
 /**
@@ -246,20 +241,21 @@ export async function logout(context: FeatureContext): Promise<void> {
   if (typeof window !== 'undefined' && !window.confirm('Çıkış yapılsın mı?')) {
     return;
   }
+  stopApprovalPolling();
   const state = context.getState();
   try {
-    if (state.token && state.active?.listId) {
+    if (state.session.token && state.attendance.active?.listId) {
       await rpc('release_attendance', {
-        p_token: state.token,
-        p_list_id: state.active.listId
+        p_token: state.session.token,
+        p_list_id: state.attendance.active.listId
       });
     }
   } catch {
     // ignore release errors
   }
   try {
-    if (state.token) {
-      await rpc('app_logout', { p_token: state.token });
+    if (state.session.token) {
+      await rpc('app_logout', { p_token: state.session.token });
     }
   } catch {
     // ignore logout errors
@@ -269,25 +265,32 @@ export async function logout(context: FeatureContext): Promise<void> {
     sessionStorage.removeItem('eyoklama_active');
   }
   if (typeof localStorage !== 'undefined') {
-    localStorage.removeItem(TEACHER_NAME_KEY);
-    localStorage.removeItem(TEACHER_WEEK_UNTIL_KEY);
+    localStorage.removeItem(getTeacherWeekUntilKey());
   }
 
   context.setState({
-    token: '',
-    role: null,
-    displayName: '',
-    active: null,
-    attendanceCache: {}
+    session: {
+      token: '',
+      role: null,
+      displayName: '',
+      teacherPin: null,
+      teacherPinDate: null,
+      pinRevealed: false
+    },
+    attendance: {
+      active: null,
+      isSaving: false
+    },
+    history: {
+      sessionDetailsCache: {}
+    }
   });
 
   if (typeof document !== 'undefined') {
     $('appView')?.classList.add('hidden');
     $('loginView')?.classList.remove('hidden');
-    const nameInput = $('loginName') as HTMLInputElement | null;
-    const pinInput = $('loginPin') as HTMLInputElement | null;
-    if (nameInput) nameInput.value = '';
-    if (pinInput) pinInput.value = '';
+    const passInput = $('adminPasswordInput') as HTMLInputElement | null;
+    if (passInput) passInput.value = '';
     renderLoginMode(true);
   }
   toast('Çıkış yapıldı.');

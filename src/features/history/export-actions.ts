@@ -18,21 +18,21 @@ export async function copySingleAttendance(
 ): Promise<void> {
   const state = context.getState();
   try {
-    let r = state.attendanceCache[attendanceId];
-    if (!r && state.token) {
+    let r = state.history.sessionDetailsCache[attendanceId];
+    if (!r && state.session.token) {
       r = (await rpc('get_attendance', {
-        p_token: state.token,
+        p_token: state.session.token,
         p_attendance_id: attendanceId
       })) as AttendanceDetails;
       context.setState({
-        attendanceCache: { ...state.attendanceCache, [attendanceId]: r }
+        history: { sessionDetailsCache: { ...state.history.sessionDetailsCache, [attendanceId]: r } }
       });
     }
     if (!r) throw new Error('Yoklama kaydı bulunamadı.');
 
-    const h = state.history.find((x) => x.id === attendanceId);
+    const h = state.history.records.find((x) => x.id === attendanceId);
     const day = h ? dayKey(h.takenAt) : '';
-    const sameGroup = state.history
+    const sameGroup = state.history.records
       .filter((x) => x.listId === r.attendance.listId && dayKey(x.takenAt) === day && !x.archivedAt)
       .sort((a, b) => new Date(a.takenAt).getTime() - new Date(b.takenAt).getTime());
     const sessionIdx = sameGroup.findIndex((x) => x.id === attendanceId);
@@ -45,11 +45,11 @@ export async function copySingleAttendance(
       `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`, 'tr')
     );
     const absent = sortedEntries.filter((e) => {
-      const st = state.historyDrafts[attendanceId]?.[e.studentId] ?? e.status;
+      const st = state.history.stagedDrafts[attendanceId]?.[e.studentId] ?? e.status;
       return st === 'absent';
     });
     const excused = sortedEntries.filter((e) => {
-      const st = state.historyDrafts[attendanceId]?.[e.studentId] ?? e.status;
+      const st = state.history.stagedDrafts[attendanceId]?.[e.studentId] ?? e.status;
       return st === 'excused';
     });
 
@@ -90,16 +90,16 @@ export async function copyHistoryAll(
   if (!cache || !cache.items.length) return;
 
   try {
-    const cacheCopy = { ...state.attendanceCache };
+    const cacheCopy = { ...state.history.sessionDetailsCache };
     for (const h of cache.items) {
-      if (!cacheCopy[h.id] && state.token) {
+      if (!cacheCopy[h.id] && state.session.token) {
         cacheCopy[h.id] = (await rpc('get_attendance', {
-          p_token: state.token,
+          p_token: state.session.token,
           p_attendance_id: h.id
         })) as AttendanceDetails;
       }
     }
-    context.setState({ attendanceCache: cacheCopy });
+    context.setState({ history: { sessionDetailsCache: cacheCopy } });
 
     const first = cacheCopy[cache.items[0].id];
     if (!first) return;
@@ -117,11 +117,11 @@ export async function copyHistoryAll(
         `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`, 'tr')
       );
       const absent = sortedEntries.filter((e) => {
-        const st = state.historyDrafts[h.id]?.[e.studentId] ?? e.status;
+        const st = state.history.stagedDrafts[h.id]?.[e.studentId] ?? e.status;
         return st === 'absent';
       });
       const excused = sortedEntries.filter((e) => {
-        const st = state.historyDrafts[h.id]?.[e.studentId] ?? e.status;
+        const st = state.history.stagedDrafts[h.id]?.[e.studentId] ?? e.status;
         return st === 'excused';
       });
       if (!absent.length && !excused.length) {
@@ -140,11 +140,11 @@ export async function copyHistoryAll(
           `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`, 'tr')
         );
         const absent = sortedEntries.filter((e) => {
-          const st = state.historyDrafts[h.id]?.[e.studentId] ?? e.status;
+          const st = state.history.stagedDrafts[h.id]?.[e.studentId] ?? e.status;
           return st === 'absent';
         });
         const excused = sortedEntries.filter((e) => {
-          const st = state.historyDrafts[h.id]?.[e.studentId] ?? e.status;
+          const st = state.history.stagedDrafts[h.id]?.[e.studentId] ?? e.status;
           return st === 'excused';
         });
         text += `\n\n${idx + 1}/${n}:`;

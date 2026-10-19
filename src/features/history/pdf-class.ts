@@ -8,6 +8,7 @@ import type { FeatureContext, AttendanceRecord, AttendanceDetails } from '../../
 import { safeFileName } from '../../shared/formatters';
 import { dayKey, pdfCleanDate, formatHistoryDay } from '../../shared/date';
 import { toast } from '../../shared/toast';
+import { ensurePdfMake } from '../../shared/pdf-loader';
 
 export interface PdfClassSectionResult {
   listName: string;
@@ -24,20 +25,20 @@ export async function buildPdfClassSection(
 ): Promise<PdfClassSectionResult | null> {
   const state = context.getState();
   const sessions: Array<{ h: AttendanceRecord; r: AttendanceDetails }> = [];
-  const cacheCopy = { ...state.attendanceCache };
+  const cacheCopy = { ...state.history.sessionDetailsCache };
 
   for (const h of items) {
     let r = cacheCopy[h.id];
-    if (!r && state.token) {
+    if (!r && state.session.token) {
       r = (await rpc('get_attendance', {
-        p_token: state.token,
+        p_token: state.session.token,
         p_attendance_id: h.id
       })) as AttendanceDetails;
       cacheCopy[h.id] = r;
     }
     if (r) sessions.push({ h, r });
   }
-  context.setState({ attendanceCache: cacheCopy });
+  context.setState({ history: { sessionDetailsCache: cacheCopy } });
   if (!sessions.length || !sessions[0]) return null;
 
   const first = sessions[0];
@@ -143,11 +144,10 @@ export async function downloadSingleAttendancePdf(
   attendanceId: string,
   context: FeatureContext
 ): Promise<void> {
-  const win = typeof window !== 'undefined' ? (window as any) : {};
   try {
-    if (typeof win.pdfMake === 'undefined') throw new Error('PDF modülü yüklenemedi.');
+    const pdfMake = await ensurePdfMake();
     const state = context.getState();
-    const h = state.history.find((x) => x.id === attendanceId);
+    const h = state.history.records.find((x) => x.id === attendanceId);
     if (!h) throw new Error('Yoklama bulunamadı.');
 
     const section = await buildPdfClassSection([h], context);
@@ -159,7 +159,8 @@ export async function downloadSingleAttendancePdf(
       defaultStyle: { font: 'Roboto', fontSize: 9, color: '#202020' },
       content: section.content
     };
-    win.pdfMake.createPdf(doc).download(`${safeFileName(section.listName)}-${section.day}-ders.pdf`);
+    pdfMake.createPdf(doc).download(`${safeFileName(section.listName)}-${section.day}-ders.pdf`);
+    toast('PDF dosyası indirildi.');
   } catch (e: unknown) {
     const err = e as { message?: string };
     toast(err.message || 'PDF oluşturulamadı.');
@@ -173,12 +174,11 @@ export async function downloadAllClassPdf(
   listId: string,
   context: FeatureContext
 ): Promise<void> {
-  const win = typeof window !== 'undefined' ? (window as any) : {};
   const state = context.getState();
-  const list = state.lists.find((x) => x.id === listId);
+  const list = state.roster.lists.find((x) => x.id === listId);
   if (!list) return;
 
-  const chosen = state.history
+  const chosen = state.history.records
     .filter((h) => !h.archivedAt && h.listId === listId)
     .sort((a, b) => new Date(a.takenAt).getTime() - new Date(b.takenAt).getTime());
 
@@ -188,19 +188,19 @@ export async function downloadAllClassPdf(
   }
 
   try {
-    if (typeof win.pdfMake === 'undefined') throw new Error('PDF modülü yüklenemedi.');
+    const pdfMake = await ensurePdfMake();
     const sessions: Array<{ h: AttendanceRecord; r: AttendanceDetails }> = [];
-    const cacheCopy = { ...state.attendanceCache };
+    const cacheCopy = { ...state.history.sessionDetailsCache };
 
     for (const h of chosen) {
       let r = cacheCopy[h.id];
-      if (!r && state.token) {
-        r = (await rpc('get_attendance', { p_token: state.token, p_attendance_id: h.id })) as AttendanceDetails;
+      if (!r && state.session.token) {
+        r = (await rpc('get_attendance', { p_token: state.session.token, p_attendance_id: h.id })) as AttendanceDetails;
         cacheCopy[h.id] = r;
       }
       if (r) sessions.push({ h, r });
     }
-    context.setState({ attendanceCache: cacheCopy });
+    context.setState({ history: { sessionDetailsCache: cacheCopy } });
 
     const studentMap = new Map<string, { key: string; name: string }>();
     sessions.forEach(({ r }) =>
@@ -325,7 +325,8 @@ export async function downloadAllClassPdf(
       ]
     };
 
-    win.pdfMake.createPdf(doc).download(`${safeFileName(list.name)}-tum-yoklamalar.pdf`);
+    pdfMake.createPdf(doc).download(`${safeFileName(list.name)}-tum-yoklamalar.pdf`);
+    toast('PDF dosyası indirildi.');
   } catch (e: unknown) {
     const err = e as { message?: string };
     toast(err.message || 'PDF oluşturulamadı.');

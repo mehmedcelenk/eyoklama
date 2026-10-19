@@ -14,7 +14,13 @@ import type {
   ApplyChangesResult,
   UndoChangeResult,
   ClassList,
-  BackupExport
+  BackupExport,
+  GradeEntry,
+  StudentReportResponse,
+  MasterStudent,
+  TeacherAccessResponse,
+  TeacherApprovalCheckResponse,
+  AdminTeacherApprovalsResult
 } from '../models/types';
 
 /**
@@ -34,7 +40,12 @@ export function cleanRpcError(err: { message?: string } | null | undefined): str
  */
 export interface RpcSchema {
   app_login: {
-    params: { p_name?: string; p_pin?: string; p_device_token: string };
+    params: {
+      p_name?: string;
+      p_pin?: string;
+      p_device_token: string;
+      p_institution_slug?: string;
+    };
     returns: LoginResult;
   };
   app_bootstrap: {
@@ -86,7 +97,7 @@ export interface RpcSchema {
     params: {
       p_token: string;
       p_name: string;
-      p_students: Array<{ firstName: string; lastName: string }>;
+      p_students: Array<{ firstName: string; lastName: string; tcNo?: string }>;
     };
     returns: ClassList & { listId?: string };
   };
@@ -114,6 +125,158 @@ export interface RpcSchema {
   admin_export_backup: {
     params: { p_token: string };
     returns: BackupExport;
+  };
+  get_student_report: {
+    params: { p_tc: string };
+    returns: StudentReportResponse;
+  };
+  save_grades_batch: {
+    params: {
+      p_token: string;
+      p_list_id: string;
+      p_course_name: string;
+      p_academic_year: string;
+      p_term: number;
+      p_exam: number;
+      p_entries: GradeEntry[];
+    };
+    returns: { success?: boolean };
+  };
+  get_class_grades: {
+    params: {
+      p_token: string;
+      p_list_id: string;
+      p_course_name: string;
+      p_academic_year: string;
+      p_term: number;
+      p_exam: number;
+    };
+    returns: Record<string, { grade: string; opinion: string }>;
+  };
+  get_school_students: {
+    params: { p_token: string };
+    returns: MasterStudent[];
+  };
+  upsert_school_students: {
+    params: {
+      p_token: string;
+      p_students: Array<{ firstName: string; lastName: string; tcNo?: string; classLabel?: string }>;
+    };
+    returns: { success?: boolean; insertedCount?: number };
+  };
+  delete_school_student: {
+    params: { p_token: string; p_student_id: string };
+    returns: { success?: boolean };
+  };
+  request_teacher_access: {
+    params: {
+      p_institution_slug: string;
+      p_tc_no: string;
+      p_full_name?: string;
+      p_device_token: string;
+    };
+    returns: TeacherAccessResponse;
+  };
+  check_teacher_approval: {
+    params: {
+      p_institution_slug: string;
+      p_tc_no: string;
+      p_device_token: string;
+    };
+    returns: TeacherApprovalCheckResponse;
+  };
+  admin_get_teacher_approvals: {
+    params: { p_token: string };
+    returns: AdminTeacherApprovalsResult;
+  };
+  admin_decide_teacher: {
+    params: {
+      p_token: string;
+      p_registration_id: string;
+      p_action: 'approve' | 'reject' | 'revoke' | 'delete';
+    };
+    returns: { ok?: boolean; action?: string; id?: string };
+  };
+  update_student_in_list: {
+    params: {
+      p_token: string;
+      p_list_id: string;
+      p_student_id: string;
+      p_first_name: string;
+      p_last_name: string;
+      p_tc_no?: string | null;
+    };
+    returns: {
+      success?: boolean;
+      studentId?: string;
+      firstName?: string;
+      lastName?: string;
+      tcNo?: string;
+      poolSynced?: boolean;
+    };
+  };
+  add_student_to_list: {
+    params: {
+      p_token: string;
+      p_list_id: string;
+      p_first_name: string;
+      p_last_name: string;
+      p_tc_no?: string | null;
+    };
+    returns: {
+      success?: boolean;
+      studentId?: string;
+      firstName?: string;
+      lastName?: string;
+      tcNo?: string;
+      poolSynced?: boolean;
+    };
+  };
+  remove_student_from_list: {
+    params: {
+      p_token: string;
+      p_list_id: string;
+      p_student_id: string;
+    };
+    returns: { success?: boolean; removedStudentId?: string };
+  };
+  bulk_add_students_to_list: {
+    params: {
+      p_token: string;
+      p_list_id: string;
+      p_students: Array<{ firstName: string; lastName: string; tcNo?: string }>;
+    };
+    returns: { success?: boolean; addedCount?: number };
+  };
+  update_school_student: {
+    params: {
+      p_token: string;
+      p_student_id: string;
+      p_first_name: string;
+      p_last_name: string;
+      p_tc_no?: string | null;
+      p_class_label?: string | null;
+    };
+    returns: {
+      success?: boolean;
+      studentId?: string;
+      firstName?: string;
+      lastName?: string;
+      tcNo?: string;
+      classLabel?: string;
+    };
+  };
+  update_institution_profile: {
+    params: {
+      p_token: string;
+      p_name: string;
+      p_slug: string;
+    };
+    returns: {
+      success?: boolean;
+      name?: string;
+      slug?: string;
+    };
   };
 }
 

@@ -14,16 +14,22 @@
 export function parseCSV(text: string): string[][] {
   if (!text || !text.trim()) return [];
 
-  // Detect delimiter by inspecting the first non-empty line
-  const firstNonEmptyLine = text.split(/\r?\n/).find((line) => line.trim().length > 0) || '';
-  const tabCount = (firstNonEmptyLine.match(/\t/g) || []).length;
-  const semicolonCount = (firstNonEmptyLine.match(/;/g) || []).length;
-  const commaCount = (firstNonEmptyLine.match(/,/g) || []).length;
-  
+  // Detect delimiter by inspecting sample of non-empty lines
+  const sampleLines = text.split(/\r?\n/).filter((l) => l.trim().length > 0).slice(0, 10);
+  let totalTab = 0;
+  let totalSemicolon = 0;
+  let totalComma = 0;
+
+  for (const line of sampleLines) {
+    totalTab += (line.match(/\t/g) || []).length;
+    totalSemicolon += (line.match(/;/g) || []).length;
+    totalComma += (line.match(/,/g) || []).length;
+  }
+
   let delimiter = ',';
-  if (tabCount > 0 && tabCount >= semicolonCount && tabCount >= commaCount) {
+  if (totalTab > 0 && totalTab >= totalSemicolon && totalTab >= totalComma) {
     delimiter = '\t';
-  } else if (semicolonCount > commaCount) {
+  } else if (totalSemicolon > totalComma) {
     delimiter = ';';
   }
 

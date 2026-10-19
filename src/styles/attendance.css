@@ -7,12 +7,12 @@
 /* Student Card List & Items */
 .student-list { display: grid; gap: 0; padding-bottom: 80px; }
 .student-card {
-  width: 100%; min-height: 52px; display: grid; grid-template-columns: 18px minmax(0, 1fr) auto;
-  align-items: center; gap: 10px; border: 0; border-bottom: 1px solid var(--line); border-radius: 0;
-  padding: 10px 4px; background: transparent; color: var(--text); text-align: left;
-  user-select: none; cursor: pointer;
+  width: 100%; min-height: 50px; display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; border: 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05); border-radius: 0;
+  padding: 10px 8px; background: transparent; color: var(--text); text-align: left;
+  user-select: none; cursor: pointer; transition: background 0.12s ease;
 }
-.student-card:active { background: rgba(255, 255, 255, 0.03); }
+.student-card:active { background: rgba(255, 255, 255, 0.05); }
 .student-card:last-child { border-bottom: 0; }
 .student-card.locked { opacity: 0.82; }
 .student-bullet { justify-self: center; color: #a0a0a0; font-size: 1rem; line-height: 1; }

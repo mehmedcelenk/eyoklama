@@ -30,13 +30,15 @@ export function navigate(tab: TabName, options?: { skipClearActive?: boolean }):
       sessionStorage.removeItem('eyoklama_active');
     }
     setState({
-      active: null,
-      historyDrafts: tab === 'lists' || tab === 'history' ? state.historyDrafts : {},
-      historyEditModes: tab === 'lists' || tab === 'history' ? state.historyEditModes : {}
+      attendance: { active: null },
+      history: {
+        stagedDrafts: tab === 'lists' || tab === 'history' ? state.history.stagedDrafts : {},
+        activeEditModes: tab === 'lists' || tab === 'history' ? state.history.activeEditModes : {}
+      }
     });
   }
 
-  setState({ currentTab: tab });
+  setState({ navigation: { currentTab: tab } });
 
   if (typeof document === 'undefined') return;
 

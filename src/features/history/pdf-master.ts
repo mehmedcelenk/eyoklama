@@ -14,6 +14,7 @@ import {
 } from '../../shared/formatters';
 import { pdfCleanDate } from '../../shared/date';
 import { toast } from '../../shared/toast';
+import { ensurePdfMake } from '../../shared/pdf-loader';
 
 /**
  * Generates and downloads comprehensive multi-class master PDF schedule.
@@ -23,10 +24,7 @@ export async function downloadMasterRangePdf(
   titleLabel: string,
   context: FeatureContext
 ): Promise<void> {
-  const win = typeof window !== 'undefined' ? (window as any) : {};
-  if (typeof win.pdfMake === 'undefined') {
-    throw new Error('PDF modülü yüklenemedi.');
-  }
+  const pdfMake = await ensurePdfMake();
 
   const state = context.getState();
   const sortedItems = [...items].sort(
@@ -34,13 +32,13 @@ export async function downloadMasterRangePdf(
   );
 
   const sessions: Array<{ h: AttendanceRecord; r: AttendanceDetails }> = [];
-  const cacheCopy = { ...state.attendanceCache };
+  const cacheCopy = { ...state.history.sessionDetailsCache };
 
   for (const h of sortedItems) {
     let r = cacheCopy[h.id];
-    if (!r && state.token) {
+    if (!r && state.session.token) {
       r = (await rpc('get_attendance', {
-        p_token: state.token,
+        p_token: state.session.token,
         p_attendance_id: h.id
       })) as AttendanceDetails;
       cacheCopy[h.id] = r;
@@ -49,7 +47,7 @@ export async function downloadMasterRangePdf(
       sessions.push({ h, r });
     }
   }
-  context.setState({ attendanceCache: cacheCopy });
+  context.setState({ history: { sessionDetailsCache: cacheCopy } });
 
   if (!sessions.length) {
     toast('Yoklama verisi bulunamadı.');
@@ -76,7 +74,7 @@ export async function downloadMasterRangePdf(
     { normKey: string; ids: Set<string>; name: string; listKeys: Set<string> }
   >();
 
-  state.lists.forEach((l) => {
+  state.roster.lists.forEach((l) => {
     const cName = cleanListName(l.name).toLocaleUpperCase('tr-TR');
     if (classGroups.some((cg) => cg.groupKey === cName)) {
       l.students.forEach((s) => {
@@ -252,5 +250,6 @@ export async function downloadMasterRangePdf(
     ]
   };
 
-  win.pdfMake.createPdf(doc).download(`yoklama-cizelgesi-${safeFileName(titleLabel)}.pdf`);
+  pdfMake.createPdf(doc).download(`yoklama-cizelgesi-${safeFileName(titleLabel)}.pdf`);
+  toast('PDF dosyası indirildi.');
 }

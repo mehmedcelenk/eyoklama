@@ -4,6 +4,7 @@
  */
 
 import { rpc } from '../../data/supabase/rpc';
+import { getSupabaseClient } from '../../data/supabase/client';
 import type { FeatureContext } from '../../data/models/types';
 import { generateMemorablePin } from '../../shared/pin';
 import { todayKey } from '../../shared/date';
@@ -16,15 +17,15 @@ const $ = (id: string): HTMLElement | null =>
  * Toggles PIN visibility between masked and plaintext.
  */
 export function togglePinReveal(context: FeatureContext): void {
-  const cur = context.getState().pinRevealed;
-  context.setState({ pinRevealed: !cur });
+  const cur = context.getState().session.pinRevealed;
+  context.setState({ session: { pinRevealed: !cur } });
 }
 
 /**
  * Copies today's teacher PIN to clipboard.
  */
 export async function copyPin(context: FeatureContext): Promise<void> {
-  const pin = context.getState().teacherPin || '';
+  const pin = context.getState().session.teacherPin || '';
   try {
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
       await navigator.clipboard.writeText(pin);
@@ -47,9 +48,9 @@ export async function regeneratePin(context: FeatureContext): Promise<void> {
   try {
     let r: any;
     try {
-      r = await rpc('regenerate_teacher_pin', { p_token: state.token, p_pin: newPin });
+      r = await rpc('regenerate_teacher_pin', { p_token: state.session.token, p_pin: newPin });
     } catch {
-      r = await rpc('regenerate_teacher_pin', { p_token: state.token });
+      r = await rpc('regenerate_teacher_pin', { p_token: state.session.token });
     }
 
     const teacherPin = r?.teacherPin || r?.pin || newPin;
@@ -57,7 +58,7 @@ export async function regeneratePin(context: FeatureContext): Promise<void> {
       r?.teacherPinDate ||
       new Intl.DateTimeFormat('tr-TR', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date());
 
-    context.setState({ teacherPin, teacherPinDate });
+    context.setState({ session: { teacherPin, teacherPinDate } });
     toast(`Yeni PIN üretildi: ${teacherPin}`);
   } catch (err: unknown) {
     const e = err as { message?: string };
@@ -69,7 +70,7 @@ export async function regeneratePin(context: FeatureContext): Promise<void> {
  * Enters in-place editing mode for class list name.
  */
 export function startRenameList(id: string, context: FeatureContext): void {
-  context.setState({ adminEditingListId: id });
+  context.setState({ roster: { editingListId: id } });
   const input = $(`className-${id}`) as HTMLInputElement | null;
   if (input) {
     input.focus();
@@ -81,7 +82,7 @@ export function startRenameList(id: string, context: FeatureContext): void {
  * Cancels class list renaming mode.
  */
 export function cancelClassRename(context: FeatureContext): void {
-  context.setState({ adminEditingListId: null });
+  context.setState({ roster: { editingListId: null } });
 }
 
 /**
@@ -98,11 +99,11 @@ export async function confirmRenameList(id: string, context: FeatureContext): Pr
 
   try {
     await rpc('rename_list', {
-      p_token: context.getState().token,
+      p_token: context.getState().session.token,
       p_list_id: id,
       p_name: name
     });
-    context.setState({ adminEditingListId: null });
+    context.setState({ roster: { editingListId: null } });
     await context.refresh();
     toast('Sınıf adı değiştirildi.');
   } catch (err: unknown) {
@@ -115,7 +116,11 @@ export async function confirmRenameList(id: string, context: FeatureContext): Pr
  * Deletes a class list via delete_list RPC with user confirmation.
  */
 export async function deleteList(id: string, context: FeatureContext): Promise<void> {
-  const list = context.getState().lists.find((x) => x.id === id);
+  if (context.getState().session.role !== 'admin') {
+    toast('Sınıf silmek için kurum yöneticisi yetkisi gereklidir.');
+    return;
+  }
+  const list = context.getState().roster.lists.find((x) => x.id === id);
   if (!list) return;
 
   const msg = `“${list.name}” sınıfı silinsin mi?\nEski yoklamalar korunur.`;
@@ -125,11 +130,11 @@ export async function deleteList(id: string, context: FeatureContext): Promise<v
 
   try {
     await rpc('delete_list', {
-      p_token: context.getState().token,
+      p_token: context.getState().session.token,
       p_list_id: id
     });
-    if (context.getState().adminEditingListId === id) {
-      context.setState({ adminEditingListId: null });
+    if (context.getState().roster.editingListId === id) {
+      context.setState({ roster: { editingListId: null } });
     }
     await context.refresh();
     toast('Sınıf silindi.');
@@ -151,7 +156,7 @@ export async function downloadBackup(context: FeatureContext): Promise<void> {
 
   try {
     const data = await rpc('admin_export_backup', {
-      p_token: context.getState().token
+      p_token: context.getState().session.token
     });
     const blob = new Blob([JSON.stringify(data, null, 2)], {
       type: 'application/json'
@@ -206,7 +211,7 @@ export async function changeAdminPassword(context: FeatureContext): Promise<void
 
   try {
     await rpc('change_admin_password', {
-      p_token: context.getState().token,
+      p_token: context.getState().session.token,
       p_old_password: oldP,
       p_new_password: newP,
       p_confirm_password: confirmP
@@ -220,3 +225,70 @@ export async function changeAdminPassword(context: FeatureContext): Promise<void
     toast(e.message || 'Parola değiştirilemedi.');
   }
 }
+
+/**
+ * Updates institution name and slug.
+ */
+export async function updateInstitutionProfile(context: FeatureContext): Promise<void> {
+  if (context.getState().session.role !== 'admin') {
+    toast('Bu işlem için kurum yöneticisi yetkisi gereklidir.');
+    return;
+  }
+
+  const nameInput = $('institutionNameInput') as HTMLInputElement | null;
+  const slugInput = $('institutionSlugInput') as HTMLInputElement | null;
+
+  const rawName = nameInput?.value.trim() || '';
+  const rawSlug = slugInput?.value.trim().toLowerCase() || '';
+
+  if (!rawName || rawName.length < 2) {
+    toast('Kurum adı en az 2 karakter olmalıdır.');
+    return;
+  }
+  if (!rawSlug || rawSlug.length < 2) {
+    toast('Kurum kodu en az 2 karakter olmalıdır.');
+    return;
+  }
+  if (!/^[a-z0-9_-]+$/.test(rawSlug)) {
+    toast('Kurum kodu yalnızca küçük harf, rakam ve tire içerebilir.');
+    return;
+  }
+
+  const token = context.getState().session.token;
+
+  try {
+    try {
+      await rpc('update_institution_profile', {
+        p_token: token,
+        p_name: rawName,
+        p_slug: rawSlug
+      });
+    } catch {
+      const client = getSupabaseClient();
+      const currentSlug = context.getState().session.institutionSlug || 'default';
+      const { error } = await client
+        .from('institutions')
+        .update({ name: rawName, slug: rawSlug })
+        .eq('slug', currentSlug);
+      if (error) throw error;
+    }
+
+    context.setState({
+      session: {
+        institutionName: rawName,
+        institutionSlug: rawSlug
+      }
+    });
+
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('eyoklama_institution_slug', rawSlug);
+    }
+
+    context.updateTopBar();
+    toast('Kurum bilgileri güncellendi.');
+  } catch (err: unknown) {
+    const e = err as { message?: string };
+    toast(e.message || 'Kurum bilgileri güncellenemedi.');
+  }
+}
+

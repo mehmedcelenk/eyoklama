@@ -49,7 +49,7 @@ export function clearAttendanceSearch(context: FeatureContext): void {
  */
 export function applyAttendanceFilter(context: FeatureContext): void {
   if (typeof document === 'undefined') return;
-  const active = context.getState().active;
+  const active = context.getState().attendance.active;
   const listEl = document.querySelector('.student-list');
   const clearBtn = document.getElementById('searchClearBtn');
   if (!active || !listEl) return;
