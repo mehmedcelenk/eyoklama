@@ -40,11 +40,13 @@ describe('Student Validator Utility (validateRows)', () => {
     expect(() => validateRows([['   ', '   ']])).toThrow('Dosyada öğrenci bulunamadı.');
   });
 
-  it('throws error when file has 3 or more columns', () => {
+  it('takes the first 2 columns if extra columns exist', () => {
     const raw = [
       ['Ahmet', 'Yılmaz', '101']
     ];
-    expect(() => validateRows(raw)).toThrow('Dosya reddedildi: 3. sütun bulundu.');
+    const validated = validateRows(raw);
+    expect(validated.length).toBe(1);
+    expect(validated[0]).toEqual({ firstName: 'Ahmet', lastName: 'Yılmaz' });
   });
 
   it('throws error when only header exists without students', () => {
@@ -61,5 +63,19 @@ describe('Student Validator Utility (validateRows)', () => {
       ['Ayşe', 'Demir']
     ];
     expect(() => validateRows(raw)).toThrow('1. öğrenci satırında İsim veya Soyisim eksik.');
+  });
+
+  it('extracts 3rd column as tcNo if it is an 11-digit number', () => {
+    const raw = [
+      ['Ad', 'Soyad', 'TC Kimlik'],
+      ['Ali', 'Yılmaz', '10000000146']
+    ];
+    const validated = validateRows(raw);
+    expect(validated.length).toBe(1);
+    expect(validated[0]).toEqual({
+      firstName: 'Ali',
+      lastName: 'Yılmaz',
+      tcNo: '10000000146'
+    });
   });
 });

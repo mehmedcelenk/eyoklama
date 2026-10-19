@@ -6,18 +6,18 @@
 import type { FeatureContext, AttendanceRecord } from '../../data/models/types';
 import { dayKey, formatHistoryDay } from '../../shared/date';
 import { toast } from '../../shared/toast';
+import { ensurePdfMake } from '../../shared/pdf-loader';
 import { buildPdfClassSection } from './pdf-class';
 
 /**
  * Downloads day summary PDF report (gunun-yoklamasi-YYYY-MM-DD.pdf).
  */
 export async function downloadDayPdf(day: string, context: FeatureContext): Promise<void> {
-  const win = typeof window !== 'undefined' ? (window as any) : {};
   try {
-    if (typeof win.pdfMake === 'undefined') throw new Error('PDF modülü yüklenemedi.');
+    const pdfMake = await ensurePdfMake();
 
     const state = context.getState();
-    const sameDay = state.history.filter(
+    const sameDay = state.history.records.filter(
       (h) => !h.archivedAt && dayKey(h.takenAt) === day
     );
 
@@ -87,7 +87,8 @@ export async function downloadDayPdf(day: string, context: FeatureContext): Prom
       ]
     };
 
-    win.pdfMake.createPdf(doc).download(`gunun-yoklamasi-${day}.pdf`);
+    pdfMake.createPdf(doc).download(`gunun-yoklamasi-${day}.pdf`);
+    toast('PDF dosyası indirildi.');
   } catch (e: unknown) {
     const err = e as { message?: string };
     toast(err.message || "Günün PDF'i oluşturulamadı.");

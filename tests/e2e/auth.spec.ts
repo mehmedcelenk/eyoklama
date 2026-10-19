@@ -213,6 +213,6 @@ test.describe('Feature 1: Authentication & Authorization (Teacher PIN & Admin)',
     await expect(page.locator('#adminPage')).toBeVisible();
 
     // 3. Admin panel shows PIN management and admin actions
-    await expect(page.locator('#adminPage h1')).toContainText('YÖNETİM & AYARLAR');
+    await expect(page.locator('#topNav .brand-title')).toContainText('Ayarlar');
   });
 });

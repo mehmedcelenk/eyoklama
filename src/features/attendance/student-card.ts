@@ -32,7 +32,6 @@ export function renderStudentCard(options: StudentCardRenderOptions): string {
     : '';
 
   return `<div class="student-card ${lockedClass}" data-action="student-tap" data-student-id="${escapeHtml(sId)}">
-    <span class="student-bullet" aria-hidden="true">•</span>
     <span class="student-name">${escapeHtml(displayName(student, showFirstName))}${listTag}${lockTag}</span>
     <span class="attendance-tag ${status} ${lockedClass}">${stateLabel}</span>
   </div>`;

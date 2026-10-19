@@ -15,14 +15,18 @@ import { renderAttendanceView } from './attendance-view';
  * Initiates an attendance session for a class list.
  * Obtains concurrency lock, checks pre-permissions, initializes statuses, and renders view.
  */
-export async function startAttendance(listId: string, context: FeatureContext): Promise<void> {
+export async function startAttendance(
+  listId: string,
+  context: FeatureContext,
+  courseName?: string
+): Promise<void> {
   const state = context.getState();
-  const list = state.lists.find((x) => x.id === listId);
+  const list = state.roster.lists.find((x) => x.id === listId);
   if (!list) return;
 
   try {
     let lock = (await rpc('begin_attendance', {
-      p_token: state.token,
+      p_token: state.session.token,
       p_list_id: listId
     })) as { ok?: boolean; error?: string };
 
@@ -31,14 +35,14 @@ export async function startAttendance(listId: string, context: FeatureContext): 
       if (typeof window !== 'undefined' && window.confirm(msg)) {
         try {
           await rpc('release_attendance', {
-            p_token: state.token,
+            p_token: state.session.token,
             p_list_id: listId
           });
         } catch {
           // ignore release error
         }
         lock = (await rpc('begin_attendance', {
-          p_token: state.token,
+          p_token: state.session.token,
           p_list_id: listId
         })) as { ok?: boolean; error?: string };
       }
@@ -88,12 +92,16 @@ export async function startAttendance(listId: string, context: FeatureContext): 
     mode: 'new',
     listId: list.id,
     listName: list.name,
+    courseName: courseName || undefined,
     students: sortedStudents,
     statuses,
     preExcused
   };
 
-  context.setState({ active, currentTab: 'attendance' });
+  context.setState({
+    attendance: { active },
+    navigation: { currentTab: 'attendance' }
+  });
   startAttendanceHeartbeat(list.id, context);
   renderAttendanceView(context);
 }
@@ -103,7 +111,7 @@ export async function startAttendance(listId: string, context: FeatureContext): 
  */
 export async function cancelAttendance(context: FeatureContext): Promise<void> {
   const state = context.getState();
-  const active = state.active;
+  const active = state.attendance.active;
 
   if (active) {
     const hasChanges = Object.values(active.statuses || {}).some((st) => st !== 'absent');
@@ -119,10 +127,10 @@ export async function cancelAttendance(context: FeatureContext): Promise<void> {
   const listId = active?.listId;
   stopAttendanceHeartbeat();
 
-  if (listId && state.token) {
+  if (listId && state.session.token) {
     try {
       await rpc('release_attendance', {
-        p_token: state.token,
+        p_token: state.session.token,
         p_list_id: listId
       });
     } catch {
@@ -134,7 +142,7 @@ export async function cancelAttendance(context: FeatureContext): Promise<void> {
     sessionStorage.removeItem('eyoklama_active');
   }
   resetAttendanceSearch();
-  context.setState({ active: null });
+  context.setState({ attendance: { active: null } });
   context.navigate('lists');
 }
 
@@ -143,7 +151,7 @@ export async function cancelAttendance(context: FeatureContext): Promise<void> {
  */
 export async function saveNewAttendance(context: FeatureContext): Promise<void> {
   const state = context.getState();
-  const active = state.active;
+  const active = state.attendance.active;
   if (!active || !active.listId) return;
 
   const vals = Object.values(active.statuses);
@@ -160,7 +168,7 @@ export async function saveNewAttendance(context: FeatureContext): Promise<void> 
 
   try {
     await rpc('save_attendance', {
-      p_token: state.token,
+      p_token: state.session.token,
       p_list_id: active.listId,
       p_statuses: active.statuses
     });
@@ -170,7 +178,7 @@ export async function saveNewAttendance(context: FeatureContext): Promise<void> 
       sessionStorage.removeItem('eyoklama_active');
     }
     resetAttendanceSearch();
-    context.setState({ active: null });
+    context.setState({ attendance: { active: null } });
     await context.refresh();
     toast('Yoklama kaydedildi ve kilitlendi.');
     context.navigate('lists');

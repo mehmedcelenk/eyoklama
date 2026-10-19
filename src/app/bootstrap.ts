@@ -11,9 +11,6 @@ import { router, setRouteRenderer } from './router';
 import { updateTopBar, renderCurrentTab, initEventDelegation } from './shell';
 import {
   renderLoginMode,
-  handleLogin,
-  handleContinueTeacher,
-  handleDifferentTeacher,
   revealPassword,
   logout
 } from '../features/auth/auth-view';
@@ -47,6 +44,8 @@ import { copySingleAttendance, copyHistoryAll } from '../features/history/export
 import { downloadMasterRangePdf } from '../features/history/pdf-master';
 import { downloadSingleAttendancePdf, downloadAllClassPdf } from '../features/history/pdf-class';
 import { downloadDayPdf } from '../features/history/pdf-day';
+import { ensurePdfMake } from '../shared/pdf-loader';
+import { toast } from '../shared/toast';
 import {
   togglePinReveal,
   copyPin,
@@ -93,11 +92,52 @@ function registerServiceWorker(): void {
  * Fetches initial bootstrap payload from backend and reveals application shell.
  */
 export async function bootstrap(): Promise<void> {
-  const token = getState().token;
+  const token = getState().session.token;
   if (!token) return;
 
   const data = (await rpc('app_bootstrap', { p_token: token })) as BootstrapData;
-  setState({ ...(data as any), attendanceCache: {} });
+  let masterPool: any[] = [];
+  try {
+    masterPool = await rpc('get_school_students', { p_token: token });
+  } catch {
+    // If table not migrated yet, derive from existing lists
+    const map = new Map<string, any>();
+    (data.lists || []).forEach((l) => {
+      l.students.forEach((s) => {
+        const k = `${s.firstName.toLowerCase()}_${s.lastName.toLowerCase()}_${s.tcNo || ''}`;
+        if (!map.has(k)) {
+          map.set(k, {
+            id: s.id || k,
+            firstName: s.firstName,
+            lastName: s.lastName,
+            tcNo: s.tcNo,
+            classLabel: l.name
+          });
+        }
+      });
+    });
+    masterPool = Array.from(map.values());
+  }
+
+  setState({
+    session: {
+      role: data.role,
+      displayName: data.displayName,
+      institutionId: data.institutionId,
+      institutionSlug: data.institutionSlug,
+      institutionName: data.institutionName,
+      teacherPin: data.teacherPin,
+      teacherPinDate: data.teacherPinDate
+    },
+    roster: {
+      lists: data.lists || [],
+      masterPool: masterPool || []
+    },
+    history: {
+      records: data.history || [],
+      sessionDetailsCache: {}
+    }
+  });
 
   if (typeof document === 'undefined') return;
 
@@ -111,7 +151,7 @@ export async function bootstrap(): Promise<void> {
     appView?.classList.remove('hidden');
 
     // Check for restored active attendance session before defaulting to lists
-    const currentActive = getState().active;
+    const currentActive = getState().attendance.active;
     if (currentActive?.listId && currentActive?.students) {
       startAttendanceHeartbeat(currentActive.listId, context);
       router.navigate('attendance', { skipClearActive: true });
@@ -120,7 +160,7 @@ export async function bootstrap(): Promise<void> {
       router.navigate('lists');
     }
   } else {
-    renderCurrentTab(getState().currentTab, context);
+    renderCurrentTab(getState().navigation.currentTab, context);
   }
 }
 
@@ -128,22 +168,30 @@ export async function bootstrap(): Promise<void> {
  * Binds login form interactions (credentials, continue button, enter keys).
  */
 function setupAuthListeners(): void {
-  $('loginBtn')?.addEventListener('click', () => handleLogin(context));
-  $('continueTeacherBtn')?.addEventListener('click', () => handleContinueTeacher(context));
-  $('differentTeacherBtn')?.addEventListener('click', () => handleDifferentTeacher());
+  $('adminPasswordEyeBtn')?.addEventListener('click', () => revealPassword('adminPasswordInput'));
   $('passwordEyeBtn')?.addEventListener('click', () => revealPassword('loginPin'));
+  $('teacherPinEyeBtn')?.addEventListener('click', () => revealPassword('teacherPin'));
 
-  ['loginName', 'loginPin'].forEach((id) => {
+  ['teacherInstCode', 'teacherFullName', 'teacherTc', 'teacherPin', 'loginName', 'loginPin'].forEach((id) => {
     $(id)?.addEventListener('keydown', (e) => {
       if ((e as KeyboardEvent).key === 'Enter') {
-        $('loginBtn')?.click();
+        const btn = $('teacherSubmitBtn') || $('loginBtn');
+        btn?.click();
+      }
+    });
+  });
+
+  ['adminInstCode', 'adminPasswordInput'].forEach((id) => {
+    $(id)?.addEventListener('keydown', (e) => {
+      if ((e as KeyboardEvent).key === 'Enter') {
+        $('adminSubmitBtn')?.click();
       }
     });
   });
 
   const logoutBtn = $('logoutBtn');
   if (logoutBtn) {
-    logoutBtn.onclick = () => logout(context);
+    logoutBtn.addEventListener('click', () => logout(context));
   }
 
   renderLoginMode();
@@ -173,11 +221,15 @@ function setupGlobalWindowShims(): void {
     renderLists: () => renderCurrentTab('lists', context),
     renderHistory: () => renderCurrentTab('lists', context),
     cycleHistoryGroupingMode: () => {
-      context.setState({ historyGroupingMode: nextGroupingMode(getState().historyGroupingMode) });
+      context.setState({
+        history: { groupingMode: nextGroupingMode(getState().history.groupingMode) }
+      });
       renderCurrentTab('lists', context);
     },
     toggleArchiveView: () => {
-      context.setState({ showArchived: !getState().showArchived });
+      context.setState({
+        navigation: { showArchived: !getState().navigation.showArchived }
+      });
       renderCurrentTab('lists', context);
     },
     toggleHistoryGroup: (el: any, key: string) => {
@@ -196,8 +248,10 @@ function setupGlobalWindowShims(): void {
       const g = historyGroupCache[key];
       if (g) {
         const sec = await import('../features/history/pdf-class').then((m) => m.buildPdfClassSection(g.items, context));
-        if (sec && win.pdfMake) {
-          win.pdfMake.createPdf({ pageSize: 'A4', pageMargins: [24, 24, 24, 28], defaultStyle: { font: 'Roboto', fontSize: 8.5 }, content: sec.content }).download(`${sec.listName}-${sec.day}.pdf`);
+        if (sec) {
+          const pdfMake = await ensurePdfMake();
+          pdfMake.createPdf({ pageSize: 'A4', pageMargins: [24, 24, 24, 28], defaultStyle: { font: 'Roboto', fontSize: 8.5 }, content: sec.content }).download(`${sec.listName}-${sec.day}.pdf`);
+          toast('PDF dosyası indirildi.');
         }
       }
     },
@@ -207,7 +261,7 @@ function setupGlobalWindowShims(): void {
     downloadSingleAttendancePdf: (attId: string) => downloadSingleAttendancePdf(attId, context),
     downloadDayPdf: (day: string) => downloadDayPdf(day, context),
     downloadGroupRangePdf: (rangeKey: string) => {
-      const matching = getState().history.filter((h) => !h.archivedAt || getState().showArchived);
+      const matching = getState().history.records.filter((h) => !h.archivedAt || getState().navigation.showArchived);
       return downloadMasterRangePdf(matching, rangeKey, context);
     },
     downloadAllClassPdf: (listId: string) => downloadAllClassPdf(listId, context),
@@ -244,7 +298,7 @@ export function initApp(): void {
   registerServiceWorker();
 
   // If session already restored, render active view
-  const active = getState().active;
+  const active = getState().attendance.active;
   if (active?.listId && active?.students) {
     $('loginView')?.classList.add('hidden');
     $('appView')?.classList.remove('hidden');

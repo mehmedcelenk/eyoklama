@@ -18,14 +18,14 @@ export function draftStatus(
   entry: AttendanceEntry,
   state: AppState
 ): AttendanceStatus {
-  return state.historyDrafts[attendanceId]?.[entry.studentId || (entry as any).id] ?? entry.status;
+  return state.history.stagedDrafts[attendanceId]?.[entry.studentId || (entry as any).id] ?? entry.status;
 }
 
 /**
  * Checks whether attendance session has staged in-place edits.
  */
 export function hasHistoryDraft(attendanceId: string, state: AppState): boolean {
-  const draft = state.historyDrafts[attendanceId];
+  const draft = state.history.stagedDrafts[attendanceId];
   return Boolean(draft && Object.keys(draft).length > 0);
 }
 
@@ -41,9 +41,9 @@ export function toggleHistoryEdit(
   const group = (context as any)._historyGroupCache?.[key];
   if (!group) return;
 
-  const anyEditing = group.items.some((h: any) => state.historyEditModes[h.id]);
-  const newModes = { ...state.historyEditModes };
-  const newDrafts = { ...state.historyDrafts };
+  const anyEditing = group.items.some((h: any) => state.history.activeEditModes[h.id]);
+  const newModes = { ...state.history.activeEditModes };
+  const newDrafts = { ...state.history.stagedDrafts };
 
   if (anyEditing) {
     group.items.forEach((h: any) => {
@@ -56,7 +56,7 @@ export function toggleHistoryEdit(
     });
   }
 
-  context.setState({ historyEditModes: newModes, historyDrafts: newDrafts });
+  context.setState({ history: { activeEditModes: newModes, stagedDrafts: newDrafts } });
   renderBody(key);
 }
 
@@ -71,14 +71,14 @@ export function stageHistoryStatus(
   renderBody: (k: string) => void
 ): void {
   const state = context.getState();
-  const r = state.attendanceCache[attendanceId];
+  const r = state.history.sessionDetailsCache[attendanceId];
   const e = r?.entries.find((x) => x.studentId === entryId || (x as any).id === entryId);
   if (!e) return;
 
   const cur = draftStatus(attendanceId, e, state);
   let nxt: AttendanceStatus;
 
-  if (state.role === 'admin') {
+  if (state.session.role === 'admin') {
     nxt = cur === 'present' ? 'absent' : cur === 'absent' ? 'excused' : 'present';
   } else {
     if (cur === 'present') return;
@@ -86,7 +86,7 @@ export function stageHistoryStatus(
   }
 
   const sId = e.studentId || (e as any).id;
-  const newDrafts = { ...state.historyDrafts };
+  const newDrafts = { ...state.history.stagedDrafts };
   newDrafts[attendanceId] = { ...(newDrafts[attendanceId] || {}) };
 
   if (nxt === e.status) {
@@ -98,7 +98,7 @@ export function stageHistoryStatus(
     delete newDrafts[attendanceId];
   }
 
-  context.setState({ historyDrafts: newDrafts });
+  context.setState({ history: { stagedDrafts: newDrafts } });
   renderBody(key);
 }
 
@@ -116,31 +116,31 @@ export async function saveHistoryChanges(
   if (!group) return;
 
   const withDrafts = group.items.filter((h: any) => {
-    const draft = state.historyDrafts[h.id];
+    const draft = state.history.stagedDrafts[h.id];
     return draft && Object.keys(draft).length > 0;
   });
 
   if (!withDrafts.length) {
-    const newModes = { ...state.historyEditModes };
-    const newDrafts = { ...state.historyDrafts };
+    const newModes = { ...state.history.activeEditModes };
+    const newDrafts = { ...state.history.stagedDrafts };
     group.items.forEach((h: any) => {
       delete newModes[h.id];
       delete newDrafts[h.id];
     });
-    context.setState({ historyEditModes: newModes, historyDrafts: newDrafts });
+    context.setState({ history: { activeEditModes: newModes, stagedDrafts: newDrafts } });
     renderBody(key);
     return;
   }
 
   try {
-    const newUndoTokens = { ...state.historyUndoTokens };
-    const newDrafts = { ...state.historyDrafts };
-    const newModes = { ...state.historyEditModes };
-    const newCache = { ...state.attendanceCache };
+    const newUndoTokens = { ...state.history.undoTokens };
+    const newDrafts = { ...state.history.stagedDrafts };
+    const newModes = { ...state.history.activeEditModes };
+    const newCache = { ...state.history.sessionDetailsCache };
 
     for (const h of withDrafts) {
       const res = (await rpc('apply_attendance_changes', {
-        p_token: state.token,
+        p_token: state.session.token,
         p_attendance_id: h.id,
         p_changes: newDrafts[h.id] as any
       })) as { undoToken?: string };
@@ -154,10 +154,12 @@ export async function saveHistoryChanges(
     }
 
     context.setState({
-      historyUndoTokens: newUndoTokens,
-      historyDrafts: newDrafts,
-      historyEditModes: newModes,
-      attendanceCache: newCache
+      history: {
+        undoTokens: newUndoTokens,
+        stagedDrafts: newDrafts,
+        activeEditModes: newModes,
+        sessionDetailsCache: newCache
+      }
     });
 
     await context.refresh();
@@ -188,21 +190,21 @@ export function undoHistoryChange(
 
   const anyDraft = group.items.some((h: any) => hasHistoryDraft(h.id, state));
   if (anyDraft) {
-    const newDrafts = { ...state.historyDrafts };
-    const newModes = { ...state.historyEditModes };
+    const newDrafts = { ...state.history.stagedDrafts };
+    const newModes = { ...state.history.activeEditModes };
     group.items.forEach((h: any) => {
       delete newDrafts[h.id];
       delete newModes[h.id];
     });
-    context.setState({ historyDrafts: newDrafts, historyEditModes: newModes });
+    context.setState({ history: { stagedDrafts: newDrafts, activeEditModes: newModes } });
     renderBody(key);
     return;
   }
 
-  const h = group.items.find((it: any) => state.historyUndoTokens[it.id]);
+  const h = group.items.find((it: any) => state.history.undoTokens[it.id]);
   if (!h) return;
 
-  if (state.role === 'admin') {
+  if (state.session.role === 'admin') {
     const panel = $(`undoPanel-${key}`);
     if (!panel) return;
     panel.classList.toggle('hidden');
@@ -229,38 +231,40 @@ export async function confirmSavedUndo(
   const group = (context as any)._historyGroupCache?.[key];
   if (!group) return;
 
-  const h = group.items.find((it: any) => state.historyUndoTokens[it.id]);
+  const h = group.items.find((it: any) => state.history.undoTokens[it.id]);
   if (!h) return;
 
   const input = $(`undoPassword-${key}`) as HTMLInputElement | null;
-  const password = state.role === 'admin' ? input?.value || '' : null;
-  const undoToken = state.historyUndoTokens[h.id];
+  const password = state.session.role === 'admin' ? input?.value || '' : null;
+  const undoToken = state.history.undoTokens[h.id];
   if (!undoToken) return;
 
-  if (state.role === 'admin' && !password) {
+  if (state.session.role === 'admin' && !password) {
     toast('Üst yetkili parolasını yazın.');
     return;
   }
 
   try {
     await rpc('undo_attendance_change', {
-      p_token: state.token,
+      p_token: state.session.token,
       p_attendance_id: h.id,
       p_undo_token: undoToken,
       p_password: password
     });
 
-    const newCache = { ...state.attendanceCache };
-    const newDrafts = { ...state.historyDrafts };
-    const newUndoTokens = { ...state.historyUndoTokens };
+    const newCache = { ...state.history.sessionDetailsCache };
+    const newDrafts = { ...state.history.stagedDrafts };
+    const newUndoTokens = { ...state.history.undoTokens };
     delete newCache[h.id];
     delete newDrafts[h.id];
     delete newUndoTokens[h.id];
 
     context.setState({
-      attendanceCache: newCache,
-      historyDrafts: newDrafts,
-      historyUndoTokens: newUndoTokens
+      history: {
+        sessionDetailsCache: newCache,
+        stagedDrafts: newDrafts,
+        undoTokens: newUndoTokens
+      }
     });
 
     await context.refresh();
@@ -290,7 +294,7 @@ export async function archiveHistoryAttendance(key: string, context: FeatureCont
 
   try {
     await rpc('archive_attendance', {
-      p_token: state.token,
+      p_token: state.session.token,
       p_attendance_id: group.items[0].id
     });
     await context.refresh();

@@ -7,6 +7,7 @@
 export interface ValidatedStudentRow {
   firstName: string;
   lastName: string;
+  tcNo?: string;
 }
 
 const norm = (v: unknown): string => String(v ?? '').trim();
@@ -50,11 +51,7 @@ export function validateRows(raw: (string | unknown)[][]): ValidatedStudentRow[]
     throw new Error('Dosyada öğrenci bulunamadı.');
   }
 
-  if (rows.some((r) => r.length > 2)) {
-    throw new Error('Dosya reddedildi: 3. sütun bulundu.');
-  }
-
-  // Strip common header line if present (İsim/Soyisim, Ad/Soyad, etc.)
+  // If first row is a header (e.g. Ad / Soyad or İsim / Soyisim) or single title column, drop it
   const isHeaderRow = (r: string[]) => {
     if (r.length < 2) return false;
     const h0 = normHead(r[0]);
@@ -65,28 +62,52 @@ export function validateRows(raw: (string | unknown)[][]): ValidatedStudentRow[]
     );
   };
 
-  // If first row is a title/metadata (single column) and next has headers or data, handle gracefully
+  // Normalize and drop title lines (single cell)
   while (rows.length > 0 && rows[0] && rows[0].length === 1 && rows.length > 1) {
     rows = rows.slice(1);
   }
 
+  let hadHeader = false;
   if (rows.length > 0 && rows[0] && isHeaderRow(rows[0])) {
     rows = rows.slice(1);
+    hadHeader = true;
   }
 
-  if (!rows.length) {
+  if (hadHeader && !rows.length) {
     throw new Error('Başlık dışında öğrenci bulunamadı.');
   }
 
-  const badIndex = rows.findIndex((r) => r.length !== 2 || !r[0] || !r[1]);
-  if (badIndex !== -1) {
-    throw new Error(`${badIndex + 1}. öğrenci satırında İsim veya Soyisim eksik.`);
+  // Filter and extract columns from each row:
+  const studentRows: ValidatedStudentRow[] = [];
+  for (let idx = 0; idx < rows.length; idx++) {
+    const r = rows[idx]!;
+    if (r.length >= 2 && r[0] && r[1]) {
+      const tc = r[2] ? r[2].replace(/\D/g, '') : '';
+      const entry: ValidatedStudentRow = { firstName: r[0], lastName: r[1] };
+      if (tc && tc.length === 11) {
+        entry.tcNo = tc;
+      }
+      studentRows.push(entry);
+    } else if (r.length === 1 && r[0]) {
+      const parts = r[0].split(/\s+/).filter(Boolean);
+      if (parts.length >= 2) {
+        studentRows.push({
+          firstName: parts.slice(0, -1).join(' '),
+          lastName: parts[parts.length - 1]!
+        });
+      } else {
+        throw new Error(`${idx + 1}. öğrenci satırında İsim veya Soyisim eksik.`);
+      }
+    } else if (r.length >= 2 && (!r[0] || !r[1])) {
+      throw new Error(`${idx + 1}. öğrenci satırında İsim veya Soyisim eksik.`);
+    }
   }
 
-  return rows.map((r) => ({
-    firstName: r[0]!,
-    lastName: r[1]!
-  }));
+  if (!studentRows.length) {
+    throw new Error('Dosyada öğrenci (Ad ve Soyad) bulunamadı.');
+  }
+
+  return studentRows;
 }
 
 /**
@@ -101,7 +122,9 @@ export function parsePastedStudents(text: string): ValidatedStudentRow[] {
   for (const line of lines) {
     if (line.includes('\t')) {
       const parts = line.split('\t').map(norm).filter(Boolean);
-      if (parts.length >= 2 && parts[0]) {
+      if (parts.length >= 3 && parts[0] && parts[1]) {
+        rawRows.push([parts[0], parts[1], parts[2]!]);
+      } else if (parts.length >= 2 && parts[0]) {
         rawRows.push([parts[0], parts.slice(1).join(' ')]);
       } else if (parts.length === 1 && parts[0]) {
         const segs = parts[0].split(/\s+/).filter(Boolean);
@@ -112,7 +135,9 @@ export function parsePastedStudents(text: string): ValidatedStudentRow[] {
     } else if (line.includes(';') || line.includes(',')) {
       const delim = line.includes(';') ? ';' : ',';
       const parts = line.split(delim).map(norm).filter(Boolean);
-      if (parts.length >= 2 && parts[0]) {
+      if (parts.length >= 3 && parts[0] && parts[1]) {
+        rawRows.push([parts[0], parts[1], parts[2]!]);
+      } else if (parts.length >= 2 && parts[0]) {
         rawRows.push([parts[0], parts.slice(1).join(' ')]);
       }
     } else {

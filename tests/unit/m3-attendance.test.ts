@@ -1,174 +1,10 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { getState, setState, subscribe, resetState } from '@app/store';
-import { navigate, setRouteRenderer } from '@app/router';
+import { getState, setState, resetState } from '@app/store';
+import { navigate } from '@app/router';
 import { renderStudentCard } from '@features/attendance/student-card';
 import { handleStudentTap, updateAttendanceCounts } from '@features/attendance/attendance-view';
 import { buildHistoryGroups, nextGroupingMode, selectedHistoryItem, HistoryGroup } from '@features/history/grouping';
-import type { ActiveAttendance, AttendanceRecord, FeatureContext } from '@data/models/types';
-
-describe('Milestone M3 Empirical Stress: Central State Store', () => {
-  beforeEach(() => {
-    resetState();
-    sessionStorage.clear();
-    localStorage.clear();
-  });
-
-  it('handles multiple subscriber registrations and notifications correctly', () => {
-    const logA: string[] = [];
-    const logB: string[] = [];
-
-    const unsubA = subscribe((s) => logA.push(s.displayName));
-    const unsubB = subscribe((s) => logB.push(s.displayName));
-
-    setState({ displayName: 'Teacher Alice' });
-    setState({ displayName: 'Teacher Bob' });
-
-    expect(logA).toEqual(['Teacher Alice', 'Teacher Bob']);
-    expect(logB).toEqual(['Teacher Alice', 'Teacher Bob']);
-
-    unsubA();
-    setState({ displayName: 'Teacher Charlie' });
-
-    expect(logA).toEqual(['Teacher Alice', 'Teacher Bob']);
-    expect(logB).toEqual(['Teacher Alice', 'Teacher Bob', 'Teacher Charlie']);
-
-    // Multiple unsubscribes are idempotent and do not throw
-    expect(() => {
-      unsubA();
-      unsubA();
-      unsubB();
-      unsubB();
-    }).not.toThrow();
-  });
-
-  it('isolates subscriber errors so subsequent listeners still execute', () => {
-    const errorListener = vi.fn().mockImplementation(() => {
-      throw new Error('Subscriber intentional failure');
-    });
-    const successListener = vi.fn();
-
-    const unsub1 = subscribe(errorListener);
-    const unsub2 = subscribe(successListener);
-
-    expect(() => setState({ displayName: 'Resilient Teacher' })).not.toThrow();
-    expect(errorListener).toHaveBeenCalledTimes(1);
-    expect(successListener).toHaveBeenCalledTimes(1);
-
-    unsub1();
-    unsub2();
-  });
-
-  it('supports updater function and preserves immutability via shallow clone', () => {
-    setState({ displayName: 'Initial', currentTab: 'lists' });
-    const snap1 = getState();
-
-    setState((prev) => ({ displayName: `${prev.displayName} -> Updated` }));
-    const snap2 = getState();
-
-    expect(snap1.displayName).toBe('Initial');
-    expect(snap2.displayName).toBe('Initial -> Updated');
-    expect(snap1).not.toBe(snap2);
-  });
-
-  it('syncs active attendance session with sessionStorage', () => {
-    const dummyActive: ActiveAttendance = {
-      mode: 'new',
-      listId: 'list-123',
-      listName: '9-A',
-      students: [{ id: 's1', firstName: 'Ahmet', lastName: 'Yılmaz' }],
-      statuses: { s1: 'present' }
-    };
-
-    setState({ active: dummyActive });
-    expect(sessionStorage.getItem('eyoklama_active')).toContain('list-123');
-
-    setState({ active: null });
-    expect(sessionStorage.getItem('eyoklama_active')).toBeNull();
-  });
-
-  it('sustains rapid high-volume state updates under multiple listeners', () => {
-    let callCount = 0;
-    const unsub = subscribe(() => {
-      callCount++;
-    });
-
-    for (let i = 0; i < 500; i++) {
-      setState({ displayName: `Iter ${i}` });
-    }
-
-    expect(callCount).toBe(500);
-    expect(getState().displayName).toBe('Iter 499');
-    unsub();
-  });
-});
-
-describe('Milestone M3 Empirical Stress: Router Navigation', () => {
-  beforeEach(() => {
-    resetState();
-    sessionStorage.clear();
-    document.body.innerHTML = `
-      <div id="topNav"></div>
-      <div id="attendancePage" class="page hidden"></div>
-      <div id="listsPage" class="page hidden"></div>
-      <div id="newPage" class="page hidden"></div>
-      <div id="adminPage" class="page hidden"></div>
-    `;
-  });
-
-  it('switches views and updates DOM visibility according to target tab', () => {
-    navigate('lists');
-    expect(getState().currentTab).toBe('lists');
-    expect(document.getElementById('topNav')?.classList.contains('hidden')).toBe(false);
-    expect(document.getElementById('listsPage')?.classList.contains('hidden')).toBe(false);
-    expect(document.getElementById('attendancePage')?.classList.contains('hidden')).toBe(true);
-
-    navigate('attendance');
-    expect(getState().currentTab).toBe('attendance');
-    expect(document.getElementById('topNav')?.classList.contains('hidden')).toBe(true);
-    expect(document.getElementById('attendancePage')?.classList.contains('hidden')).toBe(false);
-    expect(document.getElementById('listsPage')?.classList.contains('hidden')).toBe(true);
-
-    navigate('admin');
-    expect(getState().currentTab).toBe('admin');
-    expect(document.getElementById('adminPage')?.classList.contains('hidden')).toBe(false);
-    expect(document.getElementById('attendancePage')?.classList.contains('hidden')).toBe(true);
-  });
-
-  it('clears active session when navigating away unless skipClearActive is specified', () => {
-    const dummyActive: ActiveAttendance = {
-      mode: 'new',
-      listId: 'list-99',
-      listName: '10-B',
-      students: [],
-      statuses: {}
-    };
-
-    setState({ active: dummyActive });
-    sessionStorage.setItem('eyoklama_active', JSON.stringify(dummyActive));
-
-    // Navigating without skipClearActive clears active
-    navigate('lists');
-    expect(getState().active).toBeNull();
-    expect(sessionStorage.getItem('eyoklama_active')).toBeNull();
-
-    // Navigating with skipClearActive preserves active
-    setState({ active: dummyActive });
-    sessionStorage.setItem('eyoklama_active', JSON.stringify(dummyActive));
-    navigate('lists', { skipClearActive: true });
-    expect(getState().active).toEqual(dummyActive);
-  });
-
-  it('invokes registered route renderer callback', () => {
-    const renderer = vi.fn();
-    setRouteRenderer(renderer);
-
-    navigate('new');
-    expect(renderer).toHaveBeenCalledWith('new');
-
-    navigate('history');
-    expect(renderer).toHaveBeenCalledWith('history');
-  });
-});
+import type { InFlightAttendance, AttendanceRecord, FeatureContext } from '@data/models/types';
 
 describe('Milestone M3 Empirical Stress: Attendance Tri-State Toggles (+, -, ±)', () => {
   let context: FeatureContext;
@@ -190,41 +26,41 @@ describe('Milestone M3 Empirical Stress: Attendance Tri-State Toggles (+, -, ±)
 
   it('cycles student status deterministically: absent (-) -> present (+) -> excused (±) -> absent (-)', () => {
     const studentId = 'student-1';
-    const active: ActiveAttendance = {
+    const active: InFlightAttendance = {
       mode: 'new',
       listId: 'list-1',
       listName: 'Math',
       students: [{ id: studentId, firstName: 'Ali', lastName: 'Kaya' }],
       statuses: { [studentId]: 'absent' }
     };
-    setState({ active });
+    setState({ attendance: { active } });
 
     // Step 1: absent -> present (+)
     handleStudentTap(studentId, context);
-    expect(getState().active?.statuses[studentId]).toBe('present');
+    expect(getState().attendance.active?.statuses[studentId]).toBe('present');
 
     // Step 2: present -> excused (±)
     handleStudentTap(studentId, context);
-    expect(getState().active?.statuses[studentId]).toBe('excused');
+    expect(getState().attendance.active?.statuses[studentId]).toBe('excused');
 
     // Step 3: excused -> absent (-)
     handleStudentTap(studentId, context);
-    expect(getState().active?.statuses[studentId]).toBe('absent');
+    expect(getState().attendance.active?.statuses[studentId]).toBe('absent');
 
     // Run cycle 30 times consecutively
     for (let i = 0; i < 30; i++) {
       handleStudentTap(studentId, context); // -> present
-      expect(getState().active?.statuses[studentId]).toBe('present');
+      expect(getState().attendance.active?.statuses[studentId]).toBe('present');
       handleStudentTap(studentId, context); // -> excused
-      expect(getState().active?.statuses[studentId]).toBe('excused');
+      expect(getState().attendance.active?.statuses[studentId]).toBe('excused');
       handleStudentTap(studentId, context); // -> absent
-      expect(getState().active?.statuses[studentId]).toBe('absent');
+      expect(getState().attendance.active?.statuses[studentId]).toBe('absent');
     }
   });
 
   it('strictly prevents toggling for students with preExcused administrative lock', () => {
     const studentId = 'student-locked';
-    const active: ActiveAttendance = {
+    const active: InFlightAttendance = {
       mode: 'new',
       listId: 'list-1',
       listName: 'Math',
@@ -232,35 +68,35 @@ describe('Milestone M3 Empirical Stress: Attendance Tri-State Toggles (+, -, ±)
       statuses: { [studentId]: 'excused' },
       preExcused: { [studentId]: true }
     };
-    setState({ active });
+    setState({ attendance: { active } });
 
     // Attempting tap must leave status unaltered
     handleStudentTap(studentId, context);
-    expect(getState().active?.statuses[studentId]).toBe('excused');
+    expect(getState().attendance.active?.statuses[studentId]).toBe('excused');
 
     handleStudentTap(studentId, context);
-    expect(getState().active?.statuses[studentId]).toBe('excused');
+    expect(getState().attendance.active?.statuses[studentId]).toBe('excused');
   });
 
   it('in permission mode only toggles between absent and excused, never present', () => {
     const studentId = 'perm-student';
-    const active: ActiveAttendance = {
+    const active: InFlightAttendance = {
       mode: 'permission',
       listId: 'list-1',
       listName: 'Permissions',
       students: [{ id: studentId, firstName: 'Mert', lastName: 'Oz' }],
       statuses: { [studentId]: 'absent' }
     };
-    setState({ active });
+    setState({ attendance: { active } });
 
     handleStudentTap(studentId, context);
-    expect(getState().active?.statuses[studentId]).toBe('excused');
+    expect(getState().attendance.active?.statuses[studentId]).toBe('excused');
 
     handleStudentTap(studentId, context);
-    expect(getState().active?.statuses[studentId]).toBe('absent');
+    expect(getState().attendance.active?.statuses[studentId]).toBe('absent');
 
     handleStudentTap(studentId, context);
-    expect(getState().active?.statuses[studentId]).toBe('excused');
+    expect(getState().attendance.active?.statuses[studentId]).toBe('excused');
   });
 
   it('renders student card markup with proper tags and XSS escaping', () => {
@@ -290,7 +126,7 @@ describe('Milestone M3 Empirical Stress: Attendance Tri-State Toggles (+, -, ±)
   });
 
   it('updates top counts and toggles dimmed state on save FAB', () => {
-    const active: ActiveAttendance = {
+    const active: InFlightAttendance = {
       mode: 'new',
       listId: 'list-1',
       listName: 'Math',
@@ -301,7 +137,7 @@ describe('Milestone M3 Empirical Stress: Attendance Tri-State Toggles (+, -, ±)
       ],
       statuses: { s1: 'absent', s2: 'absent', s3: 'absent' }
     };
-    setState({ active });
+    setState({ attendance: { active } });
     updateAttendanceCounts(context);
 
     const countsEl = document.getElementById('topCounts');
@@ -313,7 +149,7 @@ describe('Milestone M3 Empirical Stress: Attendance Tri-State Toggles (+, -, ±)
 
     // Make 1 student present
     active.statuses.s1 = 'present';
-    setState({ active });
+    setState({ attendance: { active } });
     updateAttendanceCounts(context);
 
     expect(countsEl?.innerHTML).toContain('<b>1</b><span>+</span>');

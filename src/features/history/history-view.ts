@@ -35,18 +35,18 @@ export function historyInfoHtml(h: AttendanceRecord, g: HistoryGroup): string {
  */
 export function buildHistorySectionHtml(context: FeatureContext): string {
   const state = context.getState();
-  const groups = buildHistoryGroups(state.history, state.historyGroupingMode, state.showArchived);
+  const groups = buildHistoryGroups(state.history.records, state.history.groupingMode, state.navigation.showArchived);
 
   // Clear and update module cache
   Object.keys(historyGroupCache).forEach((k) => delete historyGroupCache[k]);
   (context as any)._historyGroupCache = historyGroupCache;
 
   let lastGroupKey = '';
-  const modeEmoji = state.historyGroupingMode === 'day' ? '☀️' : state.historyGroupingMode === 'week' ? '📅' : '🌙';
+  const modeEmoji = state.history.groupingMode === 'day' ? '☀️' : state.history.groupingMode === 'week' ? '📅' : '🌙';
   const modeTitle =
-    state.historyGroupingMode === 'day'
+    state.history.groupingMode === 'day'
       ? 'Günlük Görünüm (Haftalık için tıklayın)'
-      : state.historyGroupingMode === 'week'
+      : state.history.groupingMode === 'week'
         ? 'Haftalık Görünüm (Aylık için tıklayın)'
         : 'Aylık Görünüm (Günlük için tıklayın)';
 
@@ -54,43 +54,46 @@ export function buildHistorySectionHtml(context: FeatureContext): string {
     .map((g, i) => {
       const key = `g${i}`;
       historyGroupCache[key] = g;
-      const sel = selectedHistoryItem(historyGroupCache, key, state.historyGroupIndex);
+      const sel = selectedHistoryItem(historyGroupCache, key, state.history.groupIndex);
       const h = sel?.item || g.items[0];
       if (!h) return '';
 
       let currentGroupKey = '';
       let currentGroupLabel = '';
-      let downloadAction = '';
       let downloadParam = '';
 
-      if (state.historyGroupingMode === 'day') {
+      if (state.history.groupingMode === 'day') {
         const day = dayKey(h.takenAt);
         currentGroupKey = day;
         currentGroupLabel = formatHistoryDay(day);
-        downloadAction = 'download-day-pdf';
         downloadParam = `data-day="${escapeHtml(day)}"`;
-      } else if (state.historyGroupingMode === 'week') {
+      } else if (state.history.groupingMode === 'week') {
         const w = getWeekDetails(h.takenAt);
         currentGroupKey = w.key;
         currentGroupLabel = w.label;
-        downloadAction = 'download-group-range-pdf';
         downloadParam = `data-range-key="${escapeHtml(w.key)}"`;
       } else {
         const m = getMonthDetails(h.takenAt);
         currentGroupKey = m.key;
         currentGroupLabel = m.label;
-        downloadAction = 'download-group-range-pdf';
         downloadParam = `data-range-key="${escapeHtml(m.key)}"`;
       }
 
       const divider =
         currentGroupKey !== lastGroupKey
-          ? `<div class="history-day">
+          ? `<div class="history-day" id="dayHeader-${escapeHtml(currentGroupKey)}">
         <div class="history-day-line"><span class="history-day-label">${escapeHtml(currentGroupLabel)}</span></div>
-        <button type="button" class="history-day-download" data-action="${downloadAction}" ${downloadParam}
-          aria-label="${escapeHtml(currentGroupLabel)} PDF indir" title="PDF indir">
-          <svg viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
-        </button>
+        <div class="history-day-export" style="display:flex;align-items:center;gap:4px">
+          <div id="exportMenu-${escapeHtml(currentGroupKey)}" class="export-format-pills hidden" style="display:inline-flex;gap:4px;align-items:center">
+            <button type="button" class="btn tiny" data-action="export-format" data-format="pdf" ${downloadParam} data-target="exportMenu-${escapeHtml(currentGroupKey)}" style="padding:2px 7px;font-size:0.72rem;min-height:26px">PDF</button>
+            <button type="button" class="btn tiny secondary" data-action="export-format" data-format="csv" ${downloadParam} data-target="exportMenu-${escapeHtml(currentGroupKey)}" style="padding:2px 7px;font-size:0.72rem;min-height:26px">CSV</button>
+            <button type="button" class="btn tiny secondary" data-action="export-format" data-format="word" ${downloadParam} data-target="exportMenu-${escapeHtml(currentGroupKey)}" style="padding:2px 7px;font-size:0.72rem;min-height:26px">Word</button>
+          </div>
+          <button type="button" class="history-day-download" id="exportBtn-${escapeHtml(currentGroupKey)}" data-action="toggle-export-menu" data-target="exportMenu-${escapeHtml(currentGroupKey)}"
+            aria-label="${escapeHtml(currentGroupLabel)} indir" title="İndir (PDF, CSV, Word)">
+            <svg viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+          </button>
+        </div>
       </div>`
           : '';
       lastGroupKey = currentGroupKey;
@@ -120,7 +123,7 @@ export function buildHistorySectionHtml(context: FeatureContext): string {
             ${modeEmoji}
           </button>
           <span data-action="toggle-archive" style="font-size:0.76rem;color:var(--muted);cursor:pointer;user-select:none">
-            ${state.showArchived ? 'Arşivi gizle' : 'Arşivi göster'}
+            ${state.navigation.showArchived ? 'Arşivi gizle' : 'Arşivi göster'}
           </span>
         </div>
       </div>
@@ -139,21 +142,21 @@ export async function loadHistoryGroup(key: string, context: FeatureContext): Pr
   if (!body) return;
 
   const state = context.getState();
-  const missing = g.items.filter((h) => !state.attendanceCache[h.id]);
+  const missing = g.items.filter((h) => !state.history.sessionDetailsCache[h.id]);
 
-  if (missing.length && state.token) {
+  if (missing.length && state.session.token) {
     body.innerHTML = `<div class="muted tiny">Yükleniyor…</div>`;
     try {
-      const cacheCopy = { ...state.attendanceCache };
+      const cacheCopy = { ...state.history.sessionDetailsCache };
       await Promise.all(
         missing.map(async (h) => {
           cacheCopy[h.id] = (await rpc('get_attendance', {
-            p_token: state.token,
+            p_token: state.session.token,
             p_attendance_id: h.id
           })) as AttendanceDetails;
         })
       );
-      context.setState({ attendanceCache: cacheCopy });
+      context.setState({ history: { sessionDetailsCache: cacheCopy } });
     } catch (e: unknown) {
       const err = e as { message?: string };
       body.innerHTML = `<div class="notice error">${escapeHtml(err.message || 'Yüklenemedi')}</div>`;
@@ -173,12 +176,12 @@ export function renderHistoryBody(key: string, context: FeatureContext): void {
   if (!body) return;
 
   const state = context.getState();
-  const editing = g.items.some((h) => Boolean(state.historyEditModes[h.id]));
+  const editing = g.items.some((h) => Boolean(state.history.activeEditModes[h.id]));
   const archived = Boolean(g.archived);
 
   const studentMap = new Map<string, { id: string; key: string; firstName: string; lastName: string }>();
   g.items.forEach((h) => {
-    const r = state.attendanceCache[h.id];
+    const r = state.history.sessionDetailsCache[h.id];
     if (r) {
       r.entries.forEach((e) => {
         const k = e.studentId || `${e.firstName}|${e.lastName}`;
@@ -210,14 +213,14 @@ export function renderHistoryBody(key: string, context: FeatureContext): void {
           <div class="history-grid-cols">
             ${g.items
               .map((h) => {
-                const r = state.attendanceCache[h.id];
+                const r = state.history.sessionDetailsCache[h.id];
                 const entry = r?.entries.find(
                   (e) => (e.studentId && e.studentId === s.id) || (e.firstName === s.firstName && e.lastName === s.lastName)
                 );
                 if (!entry) return `<span class="h-cell empty">·</span>`;
                 const st = draftStatus(h.id, entry, state);
                 const sym = st === 'present' ? '+' : st === 'excused' ? '±' : '-';
-                const canEdit = editing && !archived && (state.role === 'admin' || st !== 'present');
+                const canEdit = editing && !archived && (state.session.role === 'admin' || st !== 'present');
                 return canEdit
                   ? `<button type="button" class="h-cell btn-cell ${st}" data-action="stage-history-status"
                        data-attendance-id="${escapeHtml(h.id)}" data-entry-id="${escapeHtml(entry.studentId || (entry as any).id)}" data-group-key="${key}">${sym}</button>`
@@ -255,14 +258,14 @@ export function renderHistoryBody(key: string, context: FeatureContext): void {
               : ''
           }
           ${
-            state.role === 'admin' && !archived
+            state.session.role === 'admin' && !archived
               ? `<button type="button" class="history-tool archive" data-action="archive-history" data-group-key="${key}" aria-label="Arşivle" title="Arşivle">
               <svg viewBox="0 0 24 24"><path d="M3 5h18"/><path d="M5 5l1 15h12l1-15"/><path d="M9 9h6"/></svg>
             </button>`
               : ''
           }
           ${
-            !archived && g.items.some((h) => state.historyUndoTokens[h.id])
+            !archived && g.items.some((h) => state.history.undoTokens[h.id])
               ? `<button type="button" class="archive-toggle" data-action="undo-history-change" data-group-key="${key}">Geri al</button>`
               : ''
           }
@@ -297,7 +300,7 @@ export function renderHistoryBody(key: string, context: FeatureContext): void {
     </div>
 
     ${
-      state.role === 'admin' && !archived && g.items.some((h) => state.historyUndoTokens[h.id])
+      state.session.role === 'admin' && !archived && g.items.some((h) => state.history.undoTokens[h.id])
         ? `<div id="undoPanel-${key}" class="undo-confirm hidden">
       <div class="password-wrap">
         <input id="undoPassword-${key}" type="password" maxlength="64" autocomplete="current-password" placeholder="Üst yetkili parolası">
@@ -305,7 +308,7 @@ export function renderHistoryBody(key: string, context: FeatureContext): void {
           <svg viewBox="0 0 24 24"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="2.5"/></svg>
         </button>
       </div>
-      <button type="button" class="btn small" data-action="confirm-saved-undo" data-group-key="${key}">Onayla</button>
+      <button type="button" class="btn small" data-action="confirm-saved-undo" data-group-key="${key}" title="Onayla" aria-label="Onayla" style="min-width:34px;padding:0 8px;display:inline-flex;align-items:center;justify-content:center;background:#22c55e;color:#090909;border-color:#16a34a"><svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round"><path d="M5 12l4 4L19 6"/></svg></button>
     </div>`
         : ''
     }`;

@@ -4,6 +4,7 @@ export interface MockStudent {
   id: string;
   firstName: string;
   lastName: string;
+  tcNo?: string;
 }
 
 export interface MockClassList {
@@ -35,6 +36,17 @@ export interface MockHistoryItem {
   entries?: MockAttendanceEntry[];
 }
 
+export interface MockTeacherReg {
+  id: string;
+  institutionId: string;
+  tcNo: string;
+  fullName: string;
+  status: 'pending' | 'approved' | 'rejected';
+  deviceToken?: string;
+  approvedAt?: string | null;
+  createdAt: string;
+}
+
 export interface MockState {
   role: 'teacher' | 'admin' | null;
   displayName: string;
@@ -46,6 +58,8 @@ export interface MockState {
   activeLock: { listId: string; token: string; timestamp: number } | null;
   prePermissions: Record<string, boolean>;
   rateLimits: Record<string, { count: number; blockedUntil: number }>;
+  mockGrades?: Record<string, any[]>;
+  teacherApprovals?: MockTeacherReg[];
 }
 
 export function createInitialMockState(): MockState {
@@ -61,18 +75,18 @@ export function createInitialMockState(): MockState {
         id: 'list-9a',
         name: '9-A',
         students: [
-          { id: 's1', firstName: 'Ali', lastName: 'Yılmaz' },
-          { id: 's2', firstName: 'Ayşe', lastName: 'Demir' },
-          { id: 's3', firstName: 'Mehmet', lastName: 'Kaya' },
-          { id: 's4', firstName: 'Zeynep', lastName: 'Çelik' }
+          { id: 's1', firstName: 'Ali', lastName: 'Yılmaz', tcNo: '10000000146' },
+          { id: 's2', firstName: 'Ayşe', lastName: 'Demir', tcNo: '20000000140' },
+          { id: 's3', firstName: 'Mehmet', lastName: 'Kaya', tcNo: '30000000144' },
+          { id: 's4', firstName: 'Zeynep', lastName: 'Çelik', tcNo: '40000000148' }
         ]
       },
       {
         id: 'list-10b',
         name: '10-B',
         students: [
-          { id: 's5', firstName: 'Burak', lastName: 'Öztürk' },
-          { id: 's6', firstName: 'Fatma', lastName: 'Şahin' }
+          { id: 's5', firstName: 'Burak', lastName: 'Öztürk', tcNo: '50000000142' },
+          { id: 's6', firstName: 'Fatma', lastName: 'Şahin', tcNo: '60000000146' }
         ]
       }
     ],
@@ -210,6 +224,9 @@ export function handleRpcCall(state: MockState, name: string, params: Record<str
       const _deviceToken = p('device_token') || 'mock-device';
       void _deviceToken;
 
+      const instSlug = p('institution_slug') || 'default';
+      const instName = instSlug === 'default' ? '1. Kurum' : `${instSlug.toUpperCase()} Kurumu`;
+
       // Admin login branch
       if (pinVal === 'admin123' || nameVal.toLowerCase() === 'admin') {
         if (pinVal !== 'admin123') {
@@ -223,6 +240,8 @@ export function handleRpcCall(state: MockState, name: string, params: Record<str
             ok: true,
             role: 'admin',
             displayName: state.displayName,
+            institutionSlug: instSlug,
+            institutionName: instName,
             token: state.token,
             expiresAt: new Date(Date.now() + 86400000).toISOString()
           }
@@ -239,6 +258,8 @@ export function handleRpcCall(state: MockState, name: string, params: Record<str
               ok: true,
               role: 'teacher',
               displayName: state.displayName,
+              institutionSlug: instSlug,
+              institutionName: instName,
               token: state.token,
               expiresAt: new Date(Date.now() + 7 * 86400000).toISOString()
             }
@@ -258,6 +279,8 @@ export function handleRpcCall(state: MockState, name: string, params: Record<str
             ok: true,
             role: 'teacher',
             displayName: state.displayName,
+            institutionSlug: instSlug,
+            institutionName: instName,
             token: state.token,
             teacherWeekEndsAt: weekEndsAt,
             expiresAt: weekEndsAt
@@ -273,6 +296,8 @@ export function handleRpcCall(state: MockState, name: string, params: Record<str
         data: {
           role: state.role || 'teacher',
           displayName: state.displayName || 'Ahmet Hoca',
+          institutionSlug: 'default',
+          institutionName: '1. Kurum',
           lists: state.lists,
           history: state.history,
           teacherPin: state.teacherPin,
@@ -454,6 +479,205 @@ export function handleRpcCall(state: MockState, name: string, params: Record<str
           }
         }
       };
+    }
+
+    case 'get_student_report': {
+      const rawTc = String(p('tc') || '');
+      const tc = rawTc.replace(/\D/g, '');
+      let foundStudent: MockStudent | undefined;
+      let foundList: MockClassList | undefined;
+
+      for (const l of state.lists) {
+        const s = l.students.find((st) => st.tcNo === tc || st.id === tc);
+        if (s) {
+          foundStudent = s;
+          foundList = l;
+          break;
+        }
+      }
+
+      if (!foundStudent) {
+        return { data: { success: false, error: 'Bu T.C. numarasına ait öğrenci bulunamadı.' } };
+      }
+
+      const studentGrades = state.mockGrades?.[tc] || [
+        {
+          academicYear: '2024-2025',
+          term: 1,
+          exam: 1,
+          courseName: "Kur'an-ı Kerim",
+          grade: '95',
+          opinion: 'Ezberleri gayet başarılı.'
+        }
+      ];
+
+      return {
+        data: {
+          success: true,
+          student: {
+            firstName: foundStudent.firstName,
+            lastName: foundStudent.lastName,
+            className: foundList?.name || '9-A'
+          },
+          grades: studentGrades
+        }
+      };
+    }
+
+    case 'save_grades_batch': {
+      const entries = p('entries') || [];
+      const courseName = p('course_name') || 'Genel';
+      const year = p('academic_year') || '2024-2025';
+      const term = p('term') || 1;
+      const exam = p('exam') || 1;
+
+      if (!state.mockGrades) state.mockGrades = {};
+      for (const ent of entries) {
+        const tc = ent.tc;
+        if (!tc) continue;
+        if (!state.mockGrades[tc]) state.mockGrades[tc] = [];
+        const existingIdx = state.mockGrades[tc].findIndex(
+          (g: any) => g.courseName === courseName && g.academicYear === year && g.term === term && g.exam === exam
+        );
+        const newGrade = {
+          academicYear: year,
+          term,
+          exam,
+          courseName,
+          grade: ent.grade || '',
+          opinion: ent.opinion || ''
+        };
+        if (existingIdx >= 0) {
+          state.mockGrades[tc][existingIdx] = newGrade;
+        } else {
+          state.mockGrades[tc].push(newGrade);
+        }
+      }
+      return { data: { success: true } };
+    }
+
+    case 'get_class_grades': {
+      const courseName = p('course_name') || 'Genel';
+      const year = p('academic_year') || '2024-2025';
+      const term = p('term') || 1;
+      const exam = p('exam') || 1;
+      const result: Record<string, { grade: string; opinion: string }> = {};
+
+      const allGrades = state.mockGrades || {};
+      for (const tc of Object.keys(allGrades)) {
+        const g = (allGrades[tc] || []).find(
+          (item: any) => item.courseName === courseName && item.academicYear === year && item.term === term && item.exam === exam
+        );
+        if (g) {
+          result[tc] = { grade: g.grade, opinion: g.opinion };
+        }
+      }
+      return { data: result };
+    }
+
+    case 'request_teacher_access': {
+      const slug = String(p('institution_slug') || 'default').toLowerCase();
+      const tc = String(p('tc_no') || '').replace(/\D/g, '');
+      const fullName = String(p('full_name') || '').trim();
+      const deviceToken = String(p('device_token') || 'mock-device');
+
+      if (!state.teacherApprovals) state.teacherApprovals = [];
+      let reg = state.teacherApprovals.find((r) => r.tcNo === tc);
+
+      if (reg) {
+        if (reg.status === 'approved') {
+          state.role = 'teacher';
+          state.displayName = fullName || reg.fullName;
+          state.token = 'mock-teacher-token-' + Date.now();
+          return {
+            data: {
+              ok: true,
+              status: 'approved',
+              token: state.token,
+              role: 'teacher',
+              displayName: state.displayName,
+              institutionSlug: slug,
+              institutionName: slug === 'default' ? '1. Kurum' : `${slug.toUpperCase()} Kurumu`,
+              expiresAt: new Date(Date.now() + 86400000 * 30).toISOString()
+            }
+          };
+        }
+        if (reg.status === 'rejected') {
+          return { data: { ok: false, status: 'rejected', error: 'Giriş talebi reddedildi.' } };
+        }
+        return { data: { ok: false, status: 'pending', message: 'Onay bekleniyor.' } };
+      }
+
+      if (!fullName) {
+        return { data: { ok: false, status: 'rejected', error: 'İlk girişte ad ve soyad gereklidir.' } };
+      }
+
+      reg = {
+        id: 'reg-' + Date.now(),
+        institutionId: 'inst-1',
+        tcNo: tc,
+        fullName,
+        status: 'pending',
+        deviceToken,
+        createdAt: new Date().toISOString()
+      };
+      state.teacherApprovals.push(reg);
+      return { data: { ok: false, status: 'pending', message: 'Kayıt talebiniz iletildi.' } };
+    }
+
+    case 'check_teacher_approval': {
+      const slug = String(p('institution_slug') || 'default').toLowerCase();
+      const tc = String(p('tc_no') || '').replace(/\D/g, '');
+      const reg = (state.teacherApprovals || []).find((r) => r.tcNo === tc);
+      if (!reg) {
+        return { data: { approved: false, status: 'not_found' } };
+      }
+      if (reg.status === 'approved') {
+        state.role = 'teacher';
+        state.displayName = reg.fullName;
+        state.token = 'mock-teacher-token-' + Date.now();
+        return {
+          data: {
+            approved: true,
+            status: 'approved',
+            token: state.token,
+            role: 'teacher',
+            displayName: reg.fullName,
+            institutionSlug: slug,
+            institutionName: slug === 'default' ? '1. Kurum' : `${slug.toUpperCase()} Kurumu`,
+            expiresAt: new Date(Date.now() + 86400000 * 30).toISOString()
+          }
+        };
+      }
+      return { data: { approved: false, status: reg.status } };
+    }
+
+    case 'admin_get_teacher_approvals': {
+      const all = state.teacherApprovals || [];
+      return {
+        data: {
+          pending: all.filter((r) => r.status === 'pending'),
+          approved: all.filter((r) => r.status === 'approved')
+        }
+      };
+    }
+
+    case 'admin_decide_teacher': {
+      const regId = String(p('registration_id') || '');
+      const action = String(p('action') || '');
+      if (!state.teacherApprovals) state.teacherApprovals = [];
+      const reg = state.teacherApprovals.find((r) => r.id === regId);
+      if (reg) {
+        if (action === 'approve') {
+          reg.status = 'approved';
+          reg.approvedAt = new Date().toISOString();
+        } else if (action === 'reject') {
+          reg.status = 'rejected';
+        } else if (action === 'revoke' || action === 'delete') {
+          state.teacherApprovals = state.teacherApprovals.filter((r) => r.id !== regId);
+        }
+      }
+      return { data: { ok: true, action, id: regId } };
     }
 
     default:

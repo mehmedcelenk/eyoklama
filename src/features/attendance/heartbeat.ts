@@ -18,25 +18,25 @@ export function startAttendanceHeartbeat(listId: string, context: FeatureContext
 
   heartbeatTimer = setInterval(async () => {
     const state = context.getState();
-    if (!state.active || state.active.listId !== listId) {
+    if (!state.attendance.active || state.attendance.active.listId !== listId) {
       stopAttendanceHeartbeat();
       return;
     }
 
     try {
       await rpc('heartbeat_attendance', {
-        p_token: state.token,
+        p_token: state.session.token,
         p_list_id: listId
       });
     } catch {
       stopAttendanceHeartbeat();
       const curState = context.getState();
-      if (curState.active && curState.active.listId) {
+      if (curState.attendance.active && curState.attendance.active.listId) {
         try {
           await rpc('save_attendance', {
-            p_token: curState.token,
-            p_list_id: curState.active.listId,
-            p_statuses: curState.active.statuses
+            p_token: curState.session.token,
+            p_list_id: curState.attendance.active.listId,
+            p_statuses: curState.attendance.active.statuses
           });
         } catch {
           // ignore auto-save errors
@@ -46,7 +46,7 @@ export function startAttendanceHeartbeat(listId: string, context: FeatureContext
       if (typeof sessionStorage !== 'undefined') {
         sessionStorage.removeItem('eyoklama_active');
       }
-      context.setState({ active: null });
+      context.setState({ attendance: { active: null } });
       await context.refresh();
       toast('Oturum süresi doldu, yoklama kaydedilerek arşive eklendi.');
       context.navigate('lists');

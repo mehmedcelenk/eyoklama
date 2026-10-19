@@ -31,8 +31,7 @@ export async function setupApp(page: Page, options: SetupPageOptions = {}) {
   // Navigate to application
   await page.goto('/');
 
-  // If features from app.js are needed during transition, ensure module is active
-  await page.addScriptTag({ url: '/app.js', type: 'module' });
+  // await page.addScriptTag({ url: '/app.js', type: 'module' });
 
   // Wait for initial render of login or lists
   await page.waitForLoadState('domcontentloaded');

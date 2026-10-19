@@ -9,8 +9,9 @@ import { validateRows, parsePastedStudents } from '../../shared/student-validato
 import { fullName } from '../../shared/formatters';
 import { escapeHtml } from '../../shared/sanitization';
 import { toast } from '../../shared/toast';
+import { sanitizeTc } from '../../shared/tc-validator';
 
-let importedStudents: Array<{ firstName: string; lastName: string }> = [];
+let importedStudents: Array<{ firstName: string; lastName: string; tcNo?: string }> = [];
 
 const $ = (id: string): HTMLElement | null =>
   typeof document !== 'undefined' ? document.getElementById(id) : null;
@@ -18,26 +19,32 @@ const $ = (id: string): HTMLElement | null =>
 /**
  * Returns current staged roster of imported students.
  */
-export function getImportedStudents(): Array<{ firstName: string; lastName: string }> {
+export function getImportedStudents(): Array<{ firstName: string; lastName: string; tcNo?: string }> {
   return importedStudents;
 }
 
 /**
  * Resets or updates staged roster.
  */
-export function setImportedStudents(list: Array<{ firstName: string; lastName: string }>): void {
+export function setImportedStudents(list: Array<{ firstName: string; lastName: string; tcNo?: string }>): void {
   importedStudents = list;
 }
 
 /**
  * Toggles between file table upload and manual student entry forms.
  */
-export function setStudentMode(mode: 'file' | 'manual'): void {
+export function setStudentMode(mode: 'pool' | 'file' | 'manual'): void {
+  const isPool = mode === 'pool';
   const isFile = mode === 'file';
+  const isManual = mode === 'manual';
+
+  $('poolMode')?.classList.toggle('hidden', !isPool);
   $('fileMode')?.classList.toggle('hidden', !isFile);
-  $('manualMode')?.classList.toggle('hidden', isFile);
+  $('manualMode')?.classList.toggle('hidden', !isManual);
+
+  $('poolModeBtn')?.classList.toggle('active', isPool);
   $('fileModeBtn')?.classList.toggle('active', isFile);
-  $('manualModeBtn')?.classList.toggle('active', !isFile);
+  $('manualModeBtn')?.classList.toggle('active', isManual);
 }
 
 /**
@@ -46,17 +53,26 @@ export function setStudentMode(mode: 'file' | 'manual'): void {
 export function addManualStudent(): void {
   const firstInput = $('manualFirst') as HTMLInputElement | null;
   const lastInput = $('manualLast') as HTMLInputElement | null;
+  const tcInput = $('manualTc') as HTMLInputElement | null;
   const first = firstInput?.value.trim() || '';
   const last = lastInput?.value.trim() || '';
+  const tcRaw = tcInput?.value.trim() || '';
+  const tc = sanitizeTc(tcRaw);
 
   if (!first || !last) {
     toast('İsim ve Soyisim birlikte gerekli.');
     return;
   }
 
-  importedStudents.push({ firstName: first, lastName: last });
+  if (tcRaw && tc.length !== 11) {
+    toast('T.C. Kimlik No 11 haneli olmalıdır.');
+    return;
+  }
+
+  importedStudents.push({ firstName: first, lastName: last, tcNo: tc || undefined });
   if (firstInput) firstInput.value = '';
   if (lastInput) lastInput.value = '';
+  if (tcInput) tcInput.value = '';
   renderStudentPreview();
   firstInput?.focus();
 }
@@ -123,7 +139,7 @@ export function renderStudentPreview(): void {
   <div style="overflow:auto;max-height:260px">
     <table>
       <thead>
-        <tr><th>İsim</th><th>Soyisim</th><th style="width:34px"></th></tr>
+        <tr><th>İsim</th><th>Soyisim</th><th>T.C. No</th><th style="width:34px"></th></tr>
       </thead>
       <tbody>
         ${importedStudents
@@ -131,6 +147,7 @@ export function renderStudentPreview(): void {
             (s, i) => `<tr>
               <td>${escapeHtml(s.firstName)}</td>
               <td>${escapeHtml(s.lastName)}</td>
+              <td class="tiny muted">${escapeHtml(s.tcNo || '-')}</td>
               <td style="text-align:right">
                 <button type="button" class="icon-btn ghost" style="width:28px;height:28px;font-size:1.1rem;color:#777"
                   data-action="remove-imported-student" data-index="${i}" aria-label="Öğrenciyi çıkar" title="Kaldır">×</button>
@@ -159,9 +176,7 @@ export async function handleFile(file: File | null | undefined): Promise<void> {
     const ext = file.name.split('.').pop()?.toLowerCase();
     let rows: string[][];
 
-    if (ext === 'csv') {
-      rows = parseCSV(await file.text());
-    } else if (ext === 'xlsx' || ext === 'xls') {
+    if (ext === 'xlsx' || ext === 'xls') {
       const win = typeof window !== 'undefined' ? (window as any) : {};
       if (typeof win.XLSX === 'undefined') {
         throw new Error('XLSX okuyucu yüklenemedi.');
@@ -171,7 +186,13 @@ export async function handleFile(file: File | null | undefined): Promise<void> {
       const sh = wb.Sheets[wb.SheetNames[0]];
       rows = win.XLSX.utils.sheet_to_json(sh, { header: 1, defval: '', raw: false });
     } else {
-      throw new Error('Yalnızca CSV, XLSX veya XLS kabul edilir.');
+      // CSV or any text-based table
+      let text = await file.text();
+      rows = parseCSV(text);
+    }
+
+    if (rows.some((r) => r.length > 3 || (r.length === 3 && r[2] && r[2].replace(/\D/g, '').length !== 11))) {
+      throw new Error('Dosya reddedildi: 3. sütun bulundu.');
     }
 
     importedStudents = validateRows(rows);
