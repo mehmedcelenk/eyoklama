@@ -24,7 +24,7 @@ Whenever reading or mutating state in any task:
    - `attendance`: Active in-flight taking session (`active`), saving progress flag (`isSaving`).
    - `history`: Loaded history records, attendance cache per session, staged drafts, edit modes, undo tokens.
    - `roster`: Class lists (`lists`), school-wide master student pool (`masterPool`), active editing roster ID (`editingListId`), loading indicator (`isLoading`).
-   - `grades`: Academic year, term, exam, course name, active student score entries, submission status.
+   - `grades`: Academic year, term, exam, course name, active student score entries, submission status (Maintained in store and tests for backward compatibility, but UI interactions are deferred to v2.2).
 3. **Immutability & Slice-Level Shallow Merging:** 
    - State transitions are immutable.
    - `store.setState(updater)` automatically performs shallow-merging at the slice level, so features can update `{ session: { institutionSlug: 'bilfen' } }` or `{ roster: { masterPool: [...] } }` without manually re-spreading the rest of the slice.

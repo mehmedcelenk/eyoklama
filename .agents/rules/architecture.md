@@ -16,12 +16,12 @@ Before making ANY code changes:
 - **Hard Limit:** No source file (`.ts`, `.js`, `.css`) in `src/` or `tests/` may exceed **350 lines**.
 - **Proactive Decomposition (~280-300 lines):** Split modules *before* hitting 350 lines.
   - Decompose views into focused sub-modules:
-    - `auth/`: `auth-view.ts`, `teacher-auth.ts`, `rate-limit.ts`
+    - `auth/`: `auth-view.ts`, `session.ts`, `logout.ts`, `rate-limit.ts`, `teacher-auth.ts`
     - `lists/`: `lists-view.ts`, `import-roster.ts`, `pool-selector.ts`
-    - `settings/`: `settings-view.ts`, `admin-actions.ts`, `pool-management.ts`, `teacher-management.ts`
+    - `settings/`: `settings-view.ts`, `admin-actions.ts`, `pool-management.ts`, `teacher-management.ts`, `class-management.ts`, `class-drawer.ts`
     - `attendance/`: `attendance-view.ts`, `attendance-actions.ts`, `attendance-search.ts`, `student-card.ts`, `heartbeat.ts`
-    - `history/`: `history-view.ts`, `edit-drawer.ts`, `export-actions.ts`, `grouping.ts`, `pdf-*.ts`
-    - `grades/`: `grades-view.ts`, `parent-report-view.ts`
+    - `history/`: `history-view.ts`, `edit-drawer.ts`, `export-actions.ts`, `export-menu.ts`, `export-formats.ts`, `grouping.ts`, `pdf-*.ts`
+    - `grades/`: `grades-view.ts`, `parent-report-view.ts` (Code preserved, UI hidden in MVP)
   - Extract pure utilities to `src/shared/`.
 - **Enforcement:** Verified automatically by `scripts/check-architecture.mjs`. Bypassing or disabling line checks is strictly forbidden.
 
@@ -56,3 +56,17 @@ No architectural change or feature implementation is complete without:
 1. `npm run check:arch` (Line counts, layer flow, circular imports, inline events)
 2. `npm run check:types` (Strict TypeScript verification)
 3. `npm run test` (Unit test suite execution)
+
+## 5. Active Phase & Scope Boundary (MVP Phase)
+The application is currently strictly in the **MVP phase**:
+- **Active in MVP:**
+  - Hoca Girişi (Name + PIN with 7-day remembered continuation).
+  - Kurum Girişi (Admin Password via 3-parameter `app_login`).
+  - Class Management Drawer & Master Student Pool.
+  - 3-State Attendance (Present / Absent / Excused) with 45s heartbeat concurrency lock.
+  - Günün İzinlileri (Pre-permissions).
+  - Past Attendance Records (Day/Week/Month grouping, PDF/Excel/Word export).
+- **Deferred to v2 / v2.2 (Hidden in UI):**
+  - Veli Sorgu Portalı (`#parentQueryTabBtn`, `#parentQuerySection`) -> deferred to v2.
+  - Not & Kanaat / Karne (`#topGradesBtn`, `#gradesPage`) -> deferred to v2.2.
+  - Do NOT unhide or expose these in the UI during MVP tasks.
